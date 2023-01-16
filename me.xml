@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE student PUBLIC "-//Portland State University//DTD CS410J Grade Book//EN" "http://www.cs.pdx.edu/~whitlock/dtds/gradebook.dtd">
+<student enrolled-section="graduate">
+<id>leolu</id>
+<firstName>Leo</firstName>
+<lastName>Lu</lastName>
+<nickName>Leo</nickName>
+<email>leolu@pdx.edu</email>
+<major>Computer Science</major>
+<notes>
+<note>Leo "Leo" Lu would like to learn I'm looking to brush up my java skills and fill any gaps in knowledge I have. I'm aimming to ace this course!</note>
+<note>Leo "Leo" Lu has these comments: I get really anxious when coding, wwhich sucks since it's my major. I'm trying to overcome the fear with more practice. I'll also be asking a lot of stupid questions so I'd like to say beforehand that I really appreciate your patience and help professor!</note>
+</notes>
+</student>
