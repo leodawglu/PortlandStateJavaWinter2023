@@ -3,11 +3,15 @@ package edu.pdx.cs410J.leolu;
 import edu.pdx.cs410J.lang.Human;
 
 import java.util.ArrayList;
-                                                                                    
+import java.util.List;
+
 /**                                                                                 
  * This class is represents a <code>Student</code>.                                 
  */                                                                                 
-public class Student extends Human {                                                
+public class Student extends Human {
+  private ArrayList<String> classes;
+  private double gpa;
+  private String gender;
                                                                                     
   /**                                                                               
    * Creates a new <code>Student</code>                                             
@@ -24,6 +28,9 @@ public class Student extends Human {
    */                                                                               
   public Student(String name, ArrayList<String> classes, double gpa, String gender) {
     super(name);
+    this.classes = classes;
+    this.gpa = gpa;
+    this.gender = gender;
   }
 
   /**                                                                               
@@ -31,7 +38,8 @@ public class Student extends Human {
    */
   @Override
   public String says() {                                                            
-    throw new UnsupportedOperationException("Not implemented yet");
+    return "This class is too much work";
+    //throw new UnsupportedOperationException("Not implemented yet");
   }
                                                                                     
   /**                                                                               
@@ -39,8 +47,19 @@ public class Student extends Human {
    * <code>Student</code>.                                                          
    */                                                                               
   public String toString() {
-    throw new UnsupportedOperationException("Not implemented yet");
+    StringBuilder sb = new StringBuilder();
+    sb.append("Student Name: " + name +"\n" + "Gender: " + gender + "\n" + "GPA: "+gpa+"\n");
+    sb.append("Current classes:" +"\n");
+    for(String cls: classes){
+      sb.append("                "+cls+"\n");
+    }
+    return sb.toString();
+    //throw new UnsupportedOperationException("Not implemented yet");
   }
+
+  public double getGPA(){return gpa;}
+
+  public String getGender(){return gender;}
 
   /**
    * Main program that parses the command line, creates a
@@ -48,6 +67,13 @@ public class Student extends Human {
    * standard out by invoking its <code>toString</code> method.
    */
   public static void main(String[] args) {
-    System.err.println("Missing command line arguments");
+    ArrayList<String> cls = new ArrayList<>();
+    cls.add("CS563");
+    cls.add("CS510P");
+    cls.add("CS554");
+    Student chad = new Student("Chad",cls,3.5,"other");
+    System.out.println(chad.toString());
+    System.out.println(chad.says());
+    //System.err.println("Missing command line arguments");
   }
 }

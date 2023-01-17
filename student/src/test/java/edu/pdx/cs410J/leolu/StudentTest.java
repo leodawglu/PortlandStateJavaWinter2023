@@ -21,5 +21,14 @@ public class StudentTest
     var pat = new Student(name, new ArrayList<>(), 0.0, "Doesn't matter");
     assertThat(pat.getName(), equalTo(name));
   }
+  @Test
+  void studentDatIsDat(){
+    double gpa = 0.0;
+    String dName = "Dat",gender = "non-binary";
+    var dat = new Student(dName, new ArrayList<>(),gpa,gender);
+    assertThat(dat.getGender(),equalTo(gender));
+    assertThat(dat.getGPA(),equalTo(gpa));
+    assertThat(dat.getName(),equalTo(dName));
+  }
 
 }
