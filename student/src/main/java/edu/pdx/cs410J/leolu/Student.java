@@ -67,13 +67,15 @@ public class Student extends Human {
    * standard out by invoking its <code>toString</code> method.
    */
   public static void main(String[] args) {
-    ArrayList<String> cls = new ArrayList<>();
-    cls.add("CS563");
-    cls.add("CS510P");
-    cls.add("CS554");
-    Student chad = new Student("Chad",cls,3.5,"other");
-    System.out.println(chad.toString());
-    System.out.println(chad.says());
-    //System.err.println("Missing command line arguments");
+    if(args.length==0)System.err.println("Missing command line arguments");
+    else{
+      ArrayList<String> cls = new ArrayList<>();
+      cls.add("CS563");
+      cls.add("CS510P");
+      cls.add("CS554");
+      Student chad = new Student("Chad",cls,3.5,"other");
+      System.out.println(chad.toString());
+      System.out.println(chad.says());
+    }
   }
 }
