@@ -27,80 +27,80 @@ public class FlightTest {
   }
 
   @Test
-  void nullFlightNumberThrowsNullPointerException(){
+  void nullFlightNumberPrintsNullError(){
     Flight nulls = new Flight(null,"SEA","01/23/2023","23:40","PDX","01/23/2023", "23:40");
-    assertThat(nulls.getError(), equalTo("null input"));
+    assertThat(nulls.getError(), equalTo("Flight Number cannot be null."));
   }
 
   @Test
   void inputFlightNumberNotNumberThrowsNumberFormatException(){
     Flight notANumber = new Flight("NotANumber","SEA","01/23/2023", "23:40","PDX","01/23/2023", "23:40");
-    assertThat(notANumber.getError(),equalTo("Flight Number must be greater than 0!"));
+    assertThat(notANumber.getError(),containsString("Flight Number must be a positive integer"));
   }
 
   @Test
   void flightNumberMustBeGreaterThanZero(){
     Flight lessThanZero = new Flight("-26","SEA","01/23/2023", "23:40","PDX","01/23/2023", "23:40");
-    assertThat(lessThanZero.getError(),equalTo("Flight Number must be greater than 0!"));
+    assertThat(lessThanZero.getError(),containsString("Flight Number must be greater than zero"));
   }
 
   @Test
-  void nullDepartureAirportThrowsNullPointerException(){
+  void nullDepartureAirportPrintsNullError(){
     Flight nullAirport = new Flight("26",null,"01/23/2023", "23:40","PDX","01/23/2023", "23:40");
-    assertThat(nullAirport.getError(), equalTo("null input"));
+    assertThat(nullAirport.getError(), equalTo("Departure airport code cannot be null."));
   }
 
   @Test
-  void nullArrivalAirportThrowsNullPointerException(){
+  void nullArrivalAirportPrintsNullError(){
     Flight nullAirport = new Flight("26","TSA","01/23/2023", "23:40",null,"01/23/2023", "23:40");
-    assertThat(nullAirport.getError(), equalTo("null input"));
+    assertThat(nullAirport.getError(), equalTo("Arrival airport code cannot be null."));
   }
 
   @Test
-  void nullDepartureDateThrowsNullPointerException(){
+  void nullDepartureDatePrintsNullError(){
     Flight nullTime = new Flight("26","SEA",null,"23:40","SFO","01/23/2023", "23:40");
-    assertThat(nullTime.getError(), equalTo("null input"));
+    assertThat(nullTime.getError(), equalTo("Departure date cannot be null."));
   }
 
   @Test
-  void nullArrivalDateThrowsNullPointerException(){
+  void nullArrivalDatePrintsNullError(){
     Flight nullTime = new Flight("26","SEA","01/23/2023","23:40","SFO",null,"23:40");
-    assertThat(nullTime.getError(), equalTo("null input"));
+    assertThat(nullTime.getError(), equalTo("Arrival date cannot be null."));
   }
 
   @Test
-  void nullDepartureTimeThrowsNullPointerException(){
+  void nullDepartureTimePrintsNullError(){
     Flight nullTime = new Flight("26","SEA","01/23/2023",null,"SFO","01/23/2023", "23:40");
-    assertThat(nullTime.getError(), equalTo("null input"));
+    assertThat(nullTime.getError(), equalTo("Departure time cannot be null."));
   }
 
   @Test
-  void nullArrivalTimeThrowsNullPointerException(){
+  void nullArrivalTimePrintsNullError(){
     Flight nullTime = new Flight("26","SEA","01/23/2023","23:40","SFO","01/23/2023",null);
-    assertThat(nullTime.getError(), equalTo("null input"));
+    assertThat(nullTime.getError(), equalTo("Arrival time cannot be null."));
   }
   @Test
   void departureAirportMustBeLengthThree(){
     Flight code = new Flight("26","SLAP","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
-    assertThat(code.getError(), equalTo("Airport Code must be a 3-letter alphabetical code"));
+    assertThat(code.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void arrivalAirportMustBeLengthThree(){
     Flight airport = new Flight("26","SEA","01/23/2023", "23:40","KJFK","01/23/2023", "23:40");
-    assertThat(airport.getError(), equalTo("Airport Code must be a 3-letter alphabetical code"));
+    assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void departureAirportCodeMustBeAlphabetic(){
     Flight airport = new Flight("26","*9[","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
-    assertThat(airport.getError(), equalTo("Airport Code must be a 3-letter alphabetical code"));
+    assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void arrivalAirportCodeMustBeAlphabetic(){
     Flight airport = new Flight("26","SEA","01/23/2023", "23:40","*9[","01/23/2023", "23:40");
-    assertThat(airport.getError(), equalTo("Airport Code must be a 3-letter alphabetical code"));
+    assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test

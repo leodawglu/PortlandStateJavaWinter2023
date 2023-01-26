@@ -45,35 +45,15 @@ public class Flight extends AbstractFlight {
    *
    * */
   public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime) {
-    /*Validation of String Args to not be null*/
-    try{
-      validateNotNull(fN);
-      validateNotNull(dep);
-      validateNotNull(dDate);
-      validateNotNull(dTime);
-      validateNotNull(arr);
-      validateNotNull(aDate);
-      validateNotNull(aTime);
-      validateAirportCode(dep);
-      validateAirportCode(arr);
-      validateThenSetFlightNumber(fN);
-      this.dep = dep.toUpperCase();//forces airline code to be upper case
-      this.arr = arr.toUpperCase();//forces airline code to be upper case
-    }catch(NullPointerException e){
-      this.error = "null input";
-      System.err.println("null input, check -README for input instructions");
-    }catch(NumberFormatException e){
-      this.error = "Flight Number must be greater than 0!";
-      System.err.println("Flight Number must be greater than 0!");
-    }catch(IllegalArgumentException e) {
-      this.error = e.getMessage();
-      System.err.println(e.getMessage());
-    }
+    setDate(dDate,"Departure");
+    setTime(dTime,"Departure");
+    setDate(aDate, "Arrival");
+    setTime(aTime, "Arrival");
+    setAirportCode(dep,"Departure");
+    setAirportCode(arr, "Arrival");
+    setFlightNumber(fN);
 
-    /*Setting object variables to String args*/
-    this.depDate = dDate;
     this.depTime = dTime;
-    this.arrDate = aDate;
     this.arrTime = aTime;
   }
 
@@ -89,41 +69,110 @@ public class Flight extends AbstractFlight {
    * Ensures String can be parsed into an integer
    * Ensures that the integer is greater than zero
    * @param input - input flight number String from Constructor
-   * @throws IllegalArgumentException if number<=0
    * @throws NumberFormatException if String cannot be parsed to int
    * */
-  private void validateThenSetFlightNumber(String input){
-    int temp = Integer.parseInt(input);
-    if(temp<=0) throw new IllegalArgumentException("Flight Number must be greater than 0!");
+  private void setFlightNumber(String input){
+    if(input==null){
+      error = "Flight Number cannot be null.";
+      System.out.println(error);
+      return;
+    }
+    int temp = -1;
+    try{
+      temp = Integer.parseInt(input);
+    }catch(NumberFormatException e){
+      error = "Flight Number must be a positive integer: " +input;
+      System.out.println(error);
+      return;
+    }
+    if(temp<=0){
+      error = "Flight Number must be greater than zero: " +input;
+      System.out.println(error);
+    }
     this.flightNumber = temp;
   }
 
   /**
-   * Checks if object is null;
-   * @param object
-   * @throws NullPointerException() should object be null
-   * */
-  private static void validateNotNull(Object object){
-    if(object == null)throw new NullPointerException();
-  }
-  /**
    * Ensures input is only of length 3
    * Ensures input is alphabetical
    * @param input - airport code String from Constructor
-   * @throws IllegalArgumentException when invalid airport code is used
+   * @param type - Departure or Arrival
    * */
-  private void validateAirportCode(String input){
-    String exceptionMessage = "Airport Code must be a 3-letter alphabetical code";
-    if(input.length()!=3)throw new IllegalArgumentException(exceptionMessage);
-    if(!isAirportCodeAlphabetic(input)) throw new IllegalArgumentException(exceptionMessage);
+  private void setAirportCode(String input, String type){
+    if(input==null){
+      error = type +" airport code cannot be null.";
+      System.out.println(error);
+      return;
+    }
+    if(input.length()!=3||!isAirportCodeAlphabetic(input)){
+      error = type + " airport code must be a 3-letter alphabetical code: "+input;
+      System.out.println(error);
+    }
+    if(type.equals("Departure")) this.dep=input.toUpperCase();
+    if(type.equals("Arrival")) this.arr=input.toUpperCase();
   }
   /**
    * @param input - airport code String from Constructor
    * @return boolean true when airport code is alphabetic
    * */
-  public boolean isAirportCodeAlphabetic(String input)
+  private boolean isAirportCodeAlphabetic(String input)
   {
     return input.matches("^[a-zA-Z]*$");
+  }
+
+  /**
+   * Ensures date is not null and is of correct format
+   * mm/dd/yyyy - leading zeros are ignored
+   * */
+  private boolean isValidDate(String input){
+    return input.matches("^(?:(1[0-2]|0?[1-9])/(3[01]|[12][0-9]|0?[1-9])|↵\n" +
+            "(3[01]|[12][0-9]|0?[1-9])/(1[0-2]|0?[1-9]))/(?:[0-9]{2})?[0-9]{2}$");
+  }
+
+  /**
+   * Set Date only if valid
+   * @param input - date String from Constructor
+   * @param type - Departure or Arrival
+   * */
+  private void setDate(String input, String type){
+    if(input == null){
+      error = type + " date cannot be null.";
+      System.out.println(error);
+      return;
+    }
+    if(!isValidDate(input)){
+      error = type +" date format incorrect (mm/dd/yyyy): " +input;
+      System.out.println(error);
+    }
+    if(type.equals("Departure")) this.depDate=input;
+    if(type.equals("Arrival")) this.arrDate=input;
+  }
+
+  /**
+   * Ensures time is correct format
+   * hh:mm - leading zeros can be ignored
+   * */
+  private boolean isValidTime(String input){
+    return input.matches("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
+  }
+
+  /**
+   * Set Time only if valid
+   * @param input - Time String from Constructor
+   * @param type - Departure or Arrival
+   * */
+  private void setTime(String input, String type){
+    if(input == null){
+      error = type + " time cannot be null.";
+      System.out.println(error);
+      return;
+    }
+    if(!isValidTime(input)){
+      error = type + " time format incorrect (hh:mm): "+input;
+      System.out.println(error);
+    }
+    if(type.equals("Departure")) this.depTime=input;
+    if(type.equals("Arrival")) this.arrTime=input;
   }
   /**
    * @return String Departure Airport 3-letter code

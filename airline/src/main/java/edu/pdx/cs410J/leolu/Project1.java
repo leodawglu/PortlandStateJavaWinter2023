@@ -16,7 +16,8 @@ public class Project1 {
   Airline anAirline;
   int argCount=0,idx=0;
 
-
+  static final String welcome = "*------------*Welcome to the Airline Flight Management System*-----------*";
+  static final String end = "*----------------------------*End of Program*----------------------------*";
   @VisibleForTesting
   static boolean isValidDateAndTime(String dateAndTime) {
     return true;
@@ -40,8 +41,8 @@ public class Project1 {
    * arrive (3-letter alphabetical code of departure airport)
    * */
   public static void main(String[] args) {
-    if(args.length==0) System.err.println("Missing command line arguments. Try -README for more details");
-    System.out.println("*------------*Welcome to the Airline Flight Management System*-----------*");
+    if(args.length==0) System.out.println("No command line arguments. Try -README for more details");
+    System.out.println(welcome);
     Project1 ex = new Project1();
     argumentReader(args,ex);
     //If "-README" is called, print README.txt and exit
@@ -49,12 +50,18 @@ public class Project1 {
       printReadMeFile();
       return;
     }
-    //If not enough inputs, exit
-    if(ex.argCount<8){
-      System.err.println("Missing inputs for airline and flight. Review -README for more details on format.");
+
+    //If not enough or too many inputs, exit
+    if(ex.argCount>8){
+      System.out.println("Too many inputs for airline and flight. Review -README for more details on format.");
       return;
+    }else if(ex.argCount<8){
+      System.out.println("Missing inputs for airline and flight. Review -README for more details on format.");
+      return;
+    }else{
+      createAirlineAndFlight(args,ex);
     }
-    createAirlineAndFlight(args,ex);
+    System.out.println(end);
   }
 
   /**
@@ -66,8 +73,13 @@ public class Project1 {
             dAirport = args[ex.idx+2], dDate = args[ex.idx+3],dTime = args[ex.idx+4],
             aAirport = args[ex.idx+5], aDate=args[ex.idx+6], aTime = args[ex.idx+7];
     ex.anAirline = new Airline(airlineName);
-    ex.anAirline.addFlight(new Flight(flightNumber,dAirport,dDate,
-            dTime,aAirport,aDate,aTime));
+    Flight fl = new Flight(flightNumber,dAirport,dDate,
+            dTime,aAirport,aDate,aTime);
+    if(!ex.anAirline.getError().equals("")||!fl.getError().equals("")){
+      System.err.println("*------------*Please review input errors above and try again*------------*");
+      return;
+    }
+    ex.anAirline.addFlight(fl);
     //If "-print" is called, prints Airline and Flight information to console
     if(ex.printFlight){
       System.out.println(airlineName + " " +flightNumber);

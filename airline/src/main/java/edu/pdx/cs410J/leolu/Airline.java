@@ -32,12 +32,7 @@ public class Airline extends AbstractAirline<Flight> {
    * @param name Airline Name
    * */
   public Airline(String name){
-    try{
-      validateAirlineName(name);
-    }catch(NullPointerException e) {
-      error = e.getMessage();
-      System.err.println(e);
-    }
+    validateAirlineName(name);
     this.name = name;
     flights = new ArrayList<Flight>();
   }
@@ -49,13 +44,8 @@ public class Airline extends AbstractAirline<Flight> {
    * @param flights ArrayList of flights of Flight class {@link Flight}
    * */
   public Airline(String name, ArrayList<Flight> flights){
-    try{
-      validateAirlineName(name);
-      validateFlightList(flights);
-    }catch(Exception e) {
-      error = e.getMessage();
-      System.err.println(e.getMessage());
-    }
+    validateAirlineName(name);
+    validateFlightList(flights);
 
     this.name = name;
     this.flights = flights;
@@ -81,7 +71,7 @@ public class Airline extends AbstractAirline<Flight> {
       if(flight == null) throw new NullPointerException("Cannot add a null flight!");
     }catch(Exception e) {
       error = e.getMessage();
-      System.err.println(e.getMessage());
+      System.out.println(e.getMessage());
     }
     this.flights.add(flight);
   }
@@ -96,13 +86,18 @@ public class Airline extends AbstractAirline<Flight> {
 
   /**
    * Validates an ArrayList of flights
-   * @throws NullPointerException when the ArrayList is null or any of the flights are null
    * */
-
-  private static void validateFlightList(ArrayList<Flight> flights){
-    if(flights == null)throw new NullPointerException("Flight list is null");
+  private void validateFlightList(ArrayList<Flight> flights){
+    if(flights == null){
+      error = "Flight list is null";
+      System.out.println(error);
+      return;
+    }
     for(Flight f: flights){
-      if(f==null) throw new NullPointerException("Null flight found in flights list");
+      if(f==null){
+        error = "Null flight found in flights list";
+        System.out.println(error);
+      }
     }
   }
 
@@ -110,14 +105,16 @@ public class Airline extends AbstractAirline<Flight> {
    * Validates input String
    * Exits program if airline name is not valid
    * */
-
   private void validateAirlineName(String name){
     if(name == null || name.length()==0){
       error = "Airline name cannot be empty";
-      System.err.println(error);
+      System.out.println(error);
     }
   }
 
+  /**
+   * Returns error messaged store for unit tests
+   * */
   public String getError(){
     return error;
   }

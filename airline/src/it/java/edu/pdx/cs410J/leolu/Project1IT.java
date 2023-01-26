@@ -23,13 +23,25 @@ class Project1IT extends InvokeMainTestCase {
     @Test
     void testNoCommandLineArguments(){
         MainMethodResult result = invokeMain();
-        assertThat(result.getTextWrittenToStandardError(), containsString("Missing command line arguments"));
+        assertThat(result.getTextWrittenToStandardOut(), containsString("No command line arguments"));
     }
 
     @Test
     void notEnoughCommandLineArguments(){
         MainMethodResult result = invokeMain("\"-print\", \"Java Airlines\", \"12345\", \"SEA\", \"05/19/2023 11:53\", \"LAX\"");
-        assertThat(result.getTextWrittenToStandardError(),containsString("Missing inputs"));
+        assertThat(result.getTextWrittenToStandardOut(),containsString("Missing inputs"));
+    }
+
+    @Test
+    void tooManyCommandLineArguments(){
+        MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "LAX", "SEA" ,"05/19/2023", "11:53", "LAX", "SEA", "05/19/2023", "11:53", "LAX"});
+        assertThat(result.getTextWrittenToStandardOut(),containsString("Too many inputs"));
+    }
+
+    @Test
+    void invalidDestinationAirportWillNotPrintFlightInformation(){
+        MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
+        assertThat(result.getTextWrittenToStandardError(),containsString("errors"));
     }
 
 }
