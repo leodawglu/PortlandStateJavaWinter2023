@@ -47,12 +47,12 @@ class Project1Test {
 
   @Test
   void sampleTestPrintInput(){
-    Project1.main(new String[] {"-print", "Java Airlines", "12345", "SEA", "05/19/2023 11:53", "LAX", "05/21/2023 17:33"});
+    Project1.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
   }
 
   @Test
   void sampleREADMETestInput(){
-    Project1.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023 11:53", "SEA", "05/21/2023 17:33"});
+    Project1.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
   }
 
 

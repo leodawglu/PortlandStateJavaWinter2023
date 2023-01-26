@@ -14,8 +14,10 @@ public class Flight extends AbstractFlight {
   private int flightNumber;
   private String dep; //Departure Airport 3-letter Code
   private String arr; //Arrival Airport 3-letter Code
-  private String depDateTime;
-  private String arrDateTime;
+  private String depDate;
+  private String depTime;
+  private String arrDate;
+  private String arrTime;
   private String error = "";
 
 
@@ -34,20 +36,24 @@ public class Flight extends AbstractFlight {
    * Creates a new <code>Flight</code>
    * @param fN Flight Number
    * @param dep Departure Airport 3-letter code
-   * @param depDT Flight departure Datetime
+   * @param dDate Flight departure Date
+   * @param dTime Flight departure Time
    * @param arr Arrival Airport 3-letter code
-   * @param arrDT Flight arrival Datetime
+   * @param aDate Flight arrival Date
+   * @param aTime Flight arrival Time
    *
    *
    * */
-  public Flight(String fN, String dep, String depDT, String arr, String arrDT) {
+  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime) {
     /*Validation of String Args to not be null*/
     try{
       validateNotNull(fN);
       validateNotNull(dep);
-      validateNotNull(depDT);
+      validateNotNull(dDate);
+      validateNotNull(dTime);
       validateNotNull(arr);
-      validateNotNull(arrDT);
+      validateNotNull(aDate);
+      validateNotNull(aTime);
       validateAirportCode(dep);
       validateAirportCode(arr);
       validateThenSetFlightNumber(fN);
@@ -65,8 +71,10 @@ public class Flight extends AbstractFlight {
     }
 
     /*Setting object variables to String args*/
-    this.depDateTime = depDT;
-    this.arrDateTime = arrDT;
+    this.depDate = dDate;
+    this.depTime = dTime;
+    this.arrDate = aDate;
+    this.arrTime = aTime;
   }
 
   /**
@@ -117,23 +125,16 @@ public class Flight extends AbstractFlight {
   {
     return input.matches("^[a-zA-Z]*$");
   }
-
-  @Override
-  public String getSource() {
-    //return depDateTime;
-    throw new UnsupportedOperationException("This method is not implemented yet");
-  }
   /**
    * @return String Departure Airport 3-letter code
    **/
   @Override
-  public String getDepartureString() {
+  public String getSource() {
     return dep;
+    //
   }
-
   @Override
-  public String getDestination() {
-    //return arrDateTime;
+  public String getDepartureString() {
     throw new UnsupportedOperationException("This method is not implemented yet");
   }
 
@@ -141,8 +142,13 @@ public class Flight extends AbstractFlight {
    * @return String Arrival Airport 3-letter code
    **/
   @Override
-  public String getArrivalString() {
+  public String getDestination() {
     return arr;
+  }
+
+  @Override
+  public String getArrivalString() {
+    throw new UnsupportedOperationException("This method is not implemented yet");
   }
 
   public String getError(){

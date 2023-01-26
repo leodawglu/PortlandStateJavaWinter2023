@@ -27,10 +27,9 @@ class Project1IT extends InvokeMainTestCase {
     }
 
     @Test
-    void notEnoughCommandLIneArguments(){
+    void notEnoughCommandLineArguments(){
         MainMethodResult result = invokeMain("\"-print\", \"Java Airlines\", \"12345\", \"SEA\", \"05/19/2023 11:53\", \"LAX\"");
-        assertThat(result.getTextWrittenToStandardError(),containsString("Not enough arguments."));
+        assertThat(result.getTextWrittenToStandardError(),containsString("Missing inputs"));
     }
-
 
 }

@@ -41,27 +41,42 @@ public class Project1 {
    * */
   public static void main(String[] args) {
     if(args.length==0) System.err.println("Missing command line arguments. Try -README for more details");
+    System.out.println("*------------*Welcome to the Airline Flight Management System*-----------*");
     Project1 ex = new Project1();
-
     argumentReader(args,ex);
     //If "-README" is called, print README.txt and exit
     if(ex.readMe){
       printReadMeFile();
       return;
     }
-    if(ex.argCount<6){
-      System.err.println("Not enough arguments. Try -README for more details");
+    //If not enough inputs, exit
+    if(ex.argCount<8){
+      System.err.println("Missing inputs for airline and flight. Review -README for more details on format.");
       return;
     }
-    //creates airline
-    ex.anAirline = new Airline(args[ex.idx]);
-    //creates flight
-    ex.anAirline.addFlight(new Flight(args[ex.idx+1],args[ex.idx+2],args[ex.idx+3],args[ex.idx+4],args[ex.idx+5]));
-    //If "-print" is called, prints Airline and Flight to console
+    createAirlineAndFlight(args,ex);
+  }
+
+  /**
+   * Creates Airline, then adds flight to airline
+   * Prints airline and flight information if -print is called
+   * */
+  private static void createAirlineAndFlight(String[] args, Project1 ex){
+    String airlineName = args[ex.idx], flightNumber = args[ex.idx+1],
+            dAirport = args[ex.idx+2], dDate = args[ex.idx+3],dTime = args[ex.idx+4],
+            aAirport = args[ex.idx+5], aDate=args[ex.idx+6], aTime = args[ex.idx+7];
+    ex.anAirline = new Airline(airlineName);
+    ex.anAirline.addFlight(new Flight(flightNumber,dAirport,dDate,
+            dTime,aAirport,aDate,aTime));
+    //If "-print" is called, prints Airline and Flight information to console
     if(ex.printFlight){
-      for(int i=ex.idx; i<args.length; i++){
-        System.out.print(args[i]+ " ");
-      }
+      System.out.println(airlineName + " " +flightNumber);
+      System.out.println("Departing From: " + dAirport);
+      System.out.println("Departure Date: " + dDate);
+      System.out.println("Departure Time: " + dTime);
+      System.out.println("Bound For     : " + aAirport);
+      System.out.println("Arrival Date  : " + aDate);
+      System.out.println("Arrival Time  : " + aTime);
     }
   }
 
@@ -92,7 +107,7 @@ public class Project1 {
   private static void printReadMeFile(){
     InputStream readme = Project1.class.getResourceAsStream("README.txt");
     Scanner scanner = new Scanner(readme);
-    String line ="";
+    String line;
     while(scanner.hasNextLine()){
       line = scanner.nextLine();
       System.out.println(line);

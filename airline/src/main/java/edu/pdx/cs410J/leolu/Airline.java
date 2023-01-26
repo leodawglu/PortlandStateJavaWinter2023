@@ -52,7 +52,7 @@ public class Airline extends AbstractAirline<Flight> {
     try{
       validateAirlineName(name);
       validateFlightList(flights);
-    }catch(NullPointerException e) {
+    }catch(Exception e) {
       error = e.getMessage();
       System.err.println(e.getMessage());
     }
@@ -79,9 +79,9 @@ public class Airline extends AbstractAirline<Flight> {
   public void addFlight(Flight flight) {
     try{
       if(flight == null) throw new NullPointerException("Cannot add a null flight!");
-    }catch(NullPointerException e){
+    }catch(Exception e) {
       error = e.getMessage();
-      System.err.print(e.getMessage());
+      System.err.println(e.getMessage());
     }
     this.flights.add(flight);
   }
@@ -99,7 +99,7 @@ public class Airline extends AbstractAirline<Flight> {
    * @throws NullPointerException when the ArrayList is null or any of the flights are null
    * */
 
-  private static void validateFlightList(ArrayList<Flight> flights) throws NullPointerException{
+  private static void validateFlightList(ArrayList<Flight> flights){
     if(flights == null)throw new NullPointerException("Flight list is null");
     for(Flight f: flights){
       if(f==null) throw new NullPointerException("Null flight found in flights list");
@@ -108,12 +108,14 @@ public class Airline extends AbstractAirline<Flight> {
 
   /**
    * Validates input String
-   * @throws NullPointerException when the String is null or length is 0
+   * Exits program if airline name is not valid
    * */
 
-  private static void validateAirlineName(String name) throws NullPointerException{
-    if(name == null) throw new NullPointerException("Airline name cannot be null");
-    if(name.length()==0) throw new NullPointerException("Airline name cannot be empty!");
+  private void validateAirlineName(String name){
+    if(name == null || name.length()==0){
+      error = "Airline name cannot be empty";
+      System.err.println(error);
+    }
   }
 
   public String getError(){
