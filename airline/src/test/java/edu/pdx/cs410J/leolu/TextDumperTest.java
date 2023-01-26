@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class TextDumperTest {
 
   @Test
-  void airlineNameIsDumpedInTextFormat() {
+  void airlineNameIsDumpedInTextFormat(){
     String airlineName = "Test Airline";
     Airline airline = new Airline(airlineName);
 

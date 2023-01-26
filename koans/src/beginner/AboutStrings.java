@@ -12,7 +12,7 @@ public class AboutStrings {
 
     @Koan
     public void implicitStrings() {
-        assertEquals("just a plain ole string".getClass(), __);
+        assertEquals("just a plain ole string".getClass(), "The String Class".getClass());
     }
 
     @Koan
@@ -21,37 +21,37 @@ public class AboutStrings {
         // practice - generally it is redundant, and done repetitively can be slow
         String string = new String();
         String empty = "";
-        assertEquals(string.equals(empty), __);
+        assertEquals(string.equals(empty), true);
     }
 
     @Koan
     public void newStringIsRedundant() {
         String stringInstance = "zero";
         String stringReference = new String(stringInstance);
-        assertEquals(stringInstance.equals(stringReference), __);
+        assertEquals(stringInstance.equals(stringReference), true);
     }
 
     @Koan
     public void newStringIsNotIdentical() {
         String stringInstance = "zero";
         String stringReference = new String(stringInstance);
-        assertEquals(stringInstance == stringReference, __);
+        assertEquals(stringInstance == stringReference, false);
     }
 
     @Koan
     public void stringIsEmpty() {
-        assertEquals("".isEmpty(), __);
-        assertEquals("one".isEmpty(), __);
-        assertEquals(new String().isEmpty(), __);
-        assertEquals(new String("").isEmpty(), __);
-        assertEquals(new String("one").isEmpty(), __);
+        assertEquals("".isEmpty(), true);
+        assertEquals("one".isEmpty(), false);
+        assertEquals(new String().isEmpty(), true);
+        assertEquals(new String("").isEmpty(), true);
+        assertEquals(new String("one").isEmpty(), false);
     }
 
     @Koan
     public void stringLength() {
-        assertEquals("".length(), __);
-        assertEquals("one".length(), __);
-        assertEquals("the number is one".length(), __);
+        assertEquals("".length(), 0);
+        assertEquals("one".length(), 3);
+        assertEquals("the number is one".length(), 17);
     }
 
     @Koan

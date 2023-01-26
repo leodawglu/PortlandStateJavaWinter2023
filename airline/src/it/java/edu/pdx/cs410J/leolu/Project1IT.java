@@ -17,14 +17,20 @@ class Project1IT extends InvokeMainTestCase {
     private MainMethodResult invokeMain(String... args) {
         return invokeMain( Project1.class, args );
     }
+    /**
+     * Tests that invoking the main method with no arguments issues an error
+     */
+    @Test
+    void testNoCommandLineArguments(){
+        MainMethodResult result = invokeMain();
+        assertThat(result.getTextWrittenToStandardError(), containsString("Missing command line arguments"));
+    }
 
-  /**
-   * Tests that invoking the main method with no arguments issues an error
-   */
-  @Test
-  void testNoCommandLineArguments() {
-    MainMethodResult result = invokeMain();
-    assertThat(result.getTextWrittenToStandardError(), containsString("Missing command line arguments"));
-  }
+    @Test
+    void notEnoughCommandLIneArguments(){
+        MainMethodResult result = invokeMain("\"-print\", \"Java Airlines\", \"12345\", \"SEA\", \"05/19/2023 11:53\", \"LAX\"");
+        assertThat(result.getTextWrittenToStandardError(),containsString("Not enough arguments."));
+    }
+
 
 }
