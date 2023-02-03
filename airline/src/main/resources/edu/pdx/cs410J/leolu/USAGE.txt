@@ -1,0 +1,28 @@
+|*****************************----USAGE-----*****************************|
+
+Usage: java -jar target/airline-2023.0.0.jar [options] <args>
+args are (in this order):
+airline          The name of the airline
+flightNumber     The flight number (Positive Numbers only)
+src              Three-letter code of departure airport (Alphabets Only)
+depart           Departure date and time (mm/dd/yyyy hh:mm format only) 
+dest             Three-letter code of departure airport (Alphabets Only)
+arrive           Arrival date and time (mm/dd/yyyy hh:mm format only)  
+
+Options:
+	-textFile file   Where to read/write the airline info
+	-print           Prints a description of the new flight
+	-README          Prints a README for this project and exits
+
+
+Note that multi-word arguments must be delimited with double quotes. 
+For Example, airline: "Hello Airways"  
+
+Examples:
+
+-textFile someRandomFile.txt -print "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
+-textFile someRandomFile.txt "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
+-print "EVA Air" 25 SEA 1/26/2023 10:10 TPE 1/27/2023 15:30
+-README
+
+|****************************--END OF USAGE--****************************|

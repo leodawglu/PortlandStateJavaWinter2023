@@ -53,8 +53,8 @@ public class Flight extends AbstractFlight {
     setAirportCode(arr, "Arrival");
     setFlightNumber(fN);
 
-    this.depTime = dTime;
-    this.arrTime = aTime;
+    //this.depTime = dTime;
+    //this.arrTime = aTime;
   }
 
   /**
@@ -71,7 +71,7 @@ public class Flight extends AbstractFlight {
    * @param input - input flight number String from Constructor
    * @throws NumberFormatException if String cannot be parsed to int
    * */
-  private void setFlightNumber(String input){
+  public void setFlightNumber(String input){
     if(input==null){
       error = "Flight Number cannot be null.";
       System.out.println(error);
@@ -98,7 +98,7 @@ public class Flight extends AbstractFlight {
    * @param input - airport code String from Constructor
    * @param type - Departure or Arrival
    * */
-  private void setAirportCode(String input, String type){
+  public void setAirportCode(String input, String type){
     if(input==null){
       error = type +" airport code cannot be null.";
       System.out.println(error);
@@ -134,7 +134,7 @@ public class Flight extends AbstractFlight {
    * @param input - date String from Constructor
    * @param type - Departure or Arrival
    * */
-  private void setDate(String input, String type){
+  public void setDate(String input, String type){
     if(input == null){
       error = type + " date cannot be null.";
       System.out.println(error);
@@ -161,7 +161,7 @@ public class Flight extends AbstractFlight {
    * @param input - Time String from Constructor
    * @param type - Departure or Arrival
    * */
-  private void setTime(String input, String type){
+  public void setTime(String input, String type){
     if(input == null){
       error = type + " time cannot be null.";
       System.out.println(error);

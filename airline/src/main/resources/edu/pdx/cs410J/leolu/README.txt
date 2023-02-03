@@ -1,9 +1,8 @@
 |*****************************--README.txt--*****************************|
-|*************************--Project1 | Airline--*************************|
-| Project1 is a simple command line application that creates an airline  |
+|*************************--Project2 | Airline--*************************|
+| Project2 is a simple command line application that creates an airline  |
 | and a flight with a user argument.                                     |
 |                                                                        |
-|*****************************----USAGE-----*****************************|
 |                                                                        |
 | To print the README.txt file, type "-README" at the beginning of       |
 | argument and press enter. Note that when "-README" is included,        |
