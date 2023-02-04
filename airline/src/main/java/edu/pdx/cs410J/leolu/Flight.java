@@ -183,43 +183,68 @@ public class Flight extends AbstractFlight {
       if(input == null || input.length()==0)
         throw new NullPointerException(" time cannot be null.");
       if(!isValidTime(input))
-        throw new IllegalArgumentException(" time format incorrect (hh:mm): ");
+        throw new IllegalArgumentException(" time format incorrect (hh:mm): " +input);
       if(type.equals("Departure")) this.depTime=input;
       if(type.equals("Arrival")) this.arrTime=input;
     }catch(NullPointerException e){
       error = type + e.getMessage();
       System.out.println(error);
     }catch(IllegalArgumentException e){
-      error = type + e.getMessage() +input;
+      error = type + e.getMessage();
       System.out.println(error);
     }
   }
+
   /**
    * @return String Departure Airport 3-letter code
-   **/
+   * */
   @Override
   public String getSource() {
     return dep;
-    //
-  }
-  @Override
-  public String getDepartureString() {
-    throw new UnsupportedOperationException("This method is not implemented yet");
   }
 
   /**
+   * @return String Departure Date and Time
+   * */
+  @Override
+  public String getDepartureString() {
+    return depDate +" "+depTime;
+  }
+  /**
+   * @return String Departure Date
+   * */
+  public String getDepDate(){return depDate;}
+
+  /**
+   * @return String Departure Time
+   * */
+  public String getDepTime(){return depTime;}
+
+  /**
    * @return String Arrival Airport 3-letter code
-   **/
+   * */
   @Override
   public String getDestination() {
     return arr;
   }
 
+  /**
+   * @return String Arrival Date and Time
+   * */
   @Override
   public String getArrivalString() {
-    throw new UnsupportedOperationException("This method is not implemented yet");
+    return arrDate + " " + arrTime;
   }
 
+  /**
+   * @return String Arrival Date
+   * */
+  public String getArrDate(){return arrDate;}
+
+  /**
+   * @return String Arrival Time
+   * */
+  public String getArrTime(){return arrTime;}
   public String getError(){
     return error;
   }

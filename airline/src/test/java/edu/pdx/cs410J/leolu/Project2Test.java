@@ -42,17 +42,17 @@ class Project2Test {
       assertThat(readme, not(nullValue()));
       BufferedReader reader = new BufferedReader(new InputStreamReader(readme));
       String line = reader.readLine();
-      assertThat(line, containsString("README"));
+      assertThat(line, containsString("Project2"));
     }
   }
 
   @Test
-  void sampleTestPrintInput(){
+  void sampleTestPrintInput() throws IOException {
     Project2.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
   }
 
   @Test
-  void sampleREADMETestInput(){
+  void sampleREADMETestInput() throws IOException {
     Project2.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
   }
 

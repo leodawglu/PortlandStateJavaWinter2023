@@ -7,15 +7,18 @@
 package edu.pdx.cs410J.leolu;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.InputStream;
+import edu.pdx.cs410J.ParserException;
+
+import java.io.*;
 import java.util.Scanner;
 
 public class Project2 {
 
     boolean printFlight = false, readMe = false, tooMany=false;
     Airline anAirline;
-    String fileName = "";
-    int argCount=0,idx=0, file = 0;
+    Flight aFlight;
+    String filePath = "";
+    int argCount=0,idx=0, fStatus = 0;
     static final int min=8; // total number of airline and flight argument strings
     static final String readMeFile="README.txt";
     static final String usageFile="USAGE.txt";
@@ -46,7 +49,7 @@ public class Project2 {
      * dest (3-letter alphabetical code of arrival airport)
      * arrive (3-letter alphabetical code of departure airport)
      * */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println(welcome);
         printFile(usageFile);
         if(args.length==0){
@@ -54,9 +57,26 @@ public class Project2 {
             return;
         }
         Project2 ex = new Project2();
-        if(!newArgumentReader(args,ex))return;//If error found in args, exit
+        /*
+        try to read arguments from user
+        if any error is found, exit program
+        */
+        if(!newArgumentReader(args,ex))return;
         if(ex.readMe) return; //If "-README" is called, exit
-        newCreateAirlineAndFlight(args,ex); //try to create airline and flight
+
+        /*
+        try to create airline and flight
+        if anything fails, exit program
+        */
+        if(!newCreateAirlineAndFlight(args,ex)) return;
+        /*
+        try to read txt file
+        if anything fails, exit program
+        */
+        if(ex.fStatus==-1){
+            if(!txtFile(ex.filePath, ex.anAirline))return;
+        }
+        if(ex.printFlight) printFlight(ex);
         System.out.println(end);
     }
 
@@ -69,13 +89,13 @@ public class Project2 {
      * */
     private static boolean newArgumentReader(String[] args, Project2 curr){
         for(String arg: args){
-            if(arg.contains("-")){
+            if(arg.startsWith("-")){
                 if(!optionChecker(arg,curr)) return false;
             }
-            else if(curr.file == 1){// set fileName
+            else if(curr.fStatus == 1){// set fileName
                 /* NO REQUIREMENT FOR THE SUFFIX/EXTENSION OF FILE NAME*/
-                curr.fileName=arg;
-                curr.file = -1; //fileName is set
+                curr.filePath =arg;
+                curr.fStatus = -1; //fileName is set
                 curr.idx+=1;
             }
             else if(curr.argCount>=curr.min){
@@ -88,6 +108,67 @@ public class Project2 {
         }
         return true;
     }
+
+    /**
+     * Uses Try-Catch to process file path provided by user
+     * 3 Cases:
+     *   Create New File
+     *   Open Existing File that is blank
+     *   Open Existing File with Airline and Contents
+     * Case 1 and 2
+     * If txt file is empty or does not exist, a new file is created,
+     * then TextDumper is called to add Project2 Airline info.
+     * Case 3
+     * Read existing file using TextParser
+     * Check if airline info in file is formatted correctly
+     * Check if airline names of file and Project2 user arg matches
+     *
+     * @param path File path provided by user
+     * @param airline Takes Project2 airline
+     * @return true if all processes are successful
+     * @return false should any process fail
+     * */
+    public static boolean txtFile(String path, Airline airline) throws IOException {
+        File file = new File(path);
+        try{
+            if(file.length() == 0){ // If file is empty or does not exist
+                file.createNewFile();
+                FileWriter fw = new FileWriter(file);
+                TextDumper dumper = new TextDumper(fw);
+                dumper.dump(airline);
+
+            }else{ // file has contents
+                InputStream resource = new FileInputStream(path);
+                TextParser parser = new TextParser(new InputStreamReader(resource));
+                Airline fAirline = parser.parse();
+                if(fAirline==null)return false; //error occurred during parsing, exit program
+                // When airline names do not match, throw error and exit.
+                if(!fAirline.getName().equalsIgnoreCase(airline.getName())){
+                    throw new IllegalArgumentException("Input airline name \"" + airline.getName() +
+                            "\" does not match \"" + fAirline.getName() +"\" airline in file.");
+                }
+                //When file and String arg airline names match, add new flight to airline
+                for(Flight fl: airline.getFlights())fAirline.addFlight(fl);
+                FileWriter fw = new FileWriter(file);
+                TextDumper dumper = new TextDumper(fw);
+                dumper.dump(fAirline);
+            }
+        }catch(IOException e){
+            System.out.println("An error occurred while create the file.");
+            return false;
+        }catch (ParserException e) {
+            System.out.println("Runtime Error");
+            return false;
+            //throw new RuntimeException(e);
+        }catch(IllegalArgumentException e){
+            System.err.println(e.getMessage());
+            System.err.println("Please make sure that airline name matches in both" +
+                    " the file and the input string.");
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Creates Airline with airlineName
      * Creates an empty Flight
@@ -95,13 +176,18 @@ public class Project2 {
      * If any flight arg is incorrect, error is printed
      * If there is any missing arg, error of missing detail is printed
      * Prints airline and flight information when -print is called and all information is correct
+     * @return true if airline and flight creation is successful
+     * @return false if any process fails
+     * @param args User String args entered
+     * @param curr Project 2 Instance
      * */
 
-    private static void newCreateAirlineAndFlight(String[] args, Project2 curr){
+    private static boolean newCreateAirlineAndFlight(String[] args, Project2 curr) throws IOException {
+        String airlineName = args[curr.idx];
+        //if(curr.file==-1)txtFile(curr.filePath); //If file path is set, explore it
+        curr.anAirline = new Airline(airlineName);
         Flight fl = new Flight();//empty flight constructor
         try{
-            String airlineName = args[curr.idx];
-            curr.anAirline = new Airline(airlineName);
             String flightNumber = args[curr.idx+1];
             fl.setFlightNumber(flightNumber);
             String dAirport = args[curr.idx+2];
@@ -119,19 +205,10 @@ public class Project2 {
 
             if(!curr.anAirline.getError().equals("")||!fl.getError().equals("")){
                 System.err.println("*------------*Please review input errors above and try again*------------*");
-                return;
+                return false;
             }
             curr.anAirline.addFlight(fl);
-            if(curr.printFlight){ //Prints Airline and Flight information when -print is called
-                System.out.println("*--------------------------*Airline and Flights*-------------------------*");
-                System.out.println(airlineName + " " +flightNumber);
-                System.out.println("Departing From: " + dAirport);
-                System.out.println("Departure Date: " + dDate);
-                System.out.println("Departure Time: " + dTime);
-                System.out.println("Bound For     : " + aAirport);
-                System.out.println("Arrival Date  : " + aDate);
-                System.out.println("Arrival Time  : " + aTime);
-            }
+            curr.aFlight = fl;
 
         }catch(ArrayIndexOutOfBoundsException e){
             System.out.println("The following arguments are missing: ");
@@ -144,13 +221,17 @@ public class Project2 {
             if(curr.argCount<7) System.out.println("Arrival Date");
             if(curr.argCount<8) System.out.println("Arrival Time");
             System.out.println("Please review usage and try again.");
+            return false;
         }
+        return true;
     }
 
 
     /**
      * Used to check if option invoked with '-' character is valid
      * When invalid, false is returned to propagate return up into argumentReader
+     * @param opt the candidate -option String invoked by user to be validated
+     * @param curr Project 2 instance
      * */
     private static boolean optionChecker(String opt, Project2 curr){
         if(opt.equalsIgnoreCase("-README")){
@@ -158,7 +239,7 @@ public class Project2 {
             printFile(readMeFile);
             return true;
         }
-        else if(curr.file==1){
+        else if(curr.fStatus ==1){
             System.err.println("The -textFile option should be followed by a file name. \n" +
                     "Instead another option was invoked: " + opt +
                     "\nPlease review usage and try again.");
@@ -170,12 +251,12 @@ public class Project2 {
             return true;
         }
         else if(opt.equalsIgnoreCase("-textFile")){
-            if(curr.file==-1){//text file already set
+            if(curr.fStatus ==-1){//text file already set
                 System.err.println("The -textFile option can only be called once. \n" +
                         "Please review usage and try again.");
                 return false;
             }
-            curr.file = 1;
+            curr.fStatus = 1;
             curr.idx+=1;
             return true;
         }
@@ -187,6 +268,7 @@ public class Project2 {
 
     /**
      * Prints README.txt file to console when -README is present in command-line arguments
+     * @param fileName takes any valid file path
      * */
     private static void printFile(String fileName){
         InputStream file = Project2.class.getResourceAsStream(fileName);
@@ -200,13 +282,19 @@ public class Project2 {
     }
 
     /**
-     * 3 Possibilities:
-     * Create New File
-     * Open Existing File that is blank
-     * Open Existing File with Airline and Contents
-     *
+     * Prints flight information entered by user should -print option be called
+     * @param curr Project2 Instance
      * */
-    private static void txtFile(String path){
-
+    private static void printFlight(Project2 curr){
+        Flight fl = curr.aFlight;
+        System.out.println("*--------------------------*Airline and Flights*-------------------------*");
+        System.out.println(curr.anAirline.getName() + " " +fl.getNumber());
+        System.out.println("Departing From: " + fl.getSource());
+        System.out.println("Departure Date: " + fl.getDepDate());
+        System.out.println("Departure Time: " + fl.getDepTime());
+        System.out.println("Bound For     : " + fl.getDestination());
+        System.out.println("Arrival Date  : " + fl.getArrDate());
+        System.out.println("Arrival Time  : " + fl.getArrTime());
     }
+
 }

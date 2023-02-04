@@ -1,7 +1,13 @@
 package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.InvokeMainTestCase;
+import edu.pdx.cs410J.ParserException;
 import org.junit.jupiter.api.Test;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,7 +56,7 @@ class Project2IT extends InvokeMainTestCase {
         assertThat(result.getTextWrittenToStandardError(),containsString("can only be called once"));
     }
     @Test
-    void consequtiveTextFileOptionPrintsCanOnlyCallOnceError(){
+    void consecutiveTextFileOptionPrintsCanOnlyCallOnceError(){
         MainMethodResult result = invokeMain(new String[]{"-textFile", "-textFile","someFile", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
         assertThat(result.getTextWrittenToStandardError(),containsString("followed by a file name"));
     }
@@ -66,5 +72,13 @@ class Project2IT extends InvokeMainTestCase {
         MainMethodResult result = invokeMain(new String[]{"-bleh", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
         assertThat(result.getTextWrittenToStandardError(),containsString("not a valid option"));
     }
+
+    @Test
+    void textFileAirlineNameDoesNotMatchArgs() throws FileNotFoundException, ParserException {
+        String filePath = getClass().getResource("evaair.txt").getPath();
+        MainMethodResult result = invokeMain(new String[]{"-print", "-textFile", filePath,"EVAV Air", "25", "TPE", "05/19/2023", "23:40", "SEA", "05/20/2023", "18:10"});
+        assertThat(result.getTextWrittenToStandardError(),containsString("does not match"));
+    }
+
 
 }
