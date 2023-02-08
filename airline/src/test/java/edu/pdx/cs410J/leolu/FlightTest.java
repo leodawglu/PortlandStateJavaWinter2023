@@ -20,11 +20,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class FlightTest {
 
+  /*
   @Test
   void forProject1ItIsOkayIfGetDepartureTimeReturnsNull() {
     Flight flight = new Flight();
     assertThat(flight.getDeparture(), is(nullValue()));
-  }
+  }*/
 
   @Test
   void nullFlightNumberPrintsNullError(){
@@ -113,6 +114,23 @@ public class FlightTest {
   void arrivalAirportCodeCanBeRetrieved(){
     Flight airport = new Flight("26","SEA","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
     assertThat(airport.getDestination(), equalTo("JFK"));
+  }
+
+  @Test
+  void notRealDepartureAirportCodeThrowsErrorMessage(){
+    Flight airport = new Flight("26","SXA","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    assertThat(airport.getError(), containsString("airport code is not a real airport code:"));
+  }
+
+  @Test
+  void notRealArrivalAirportCodeThrowsErrorMessage(){
+    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","JFX","01/23/2023", "23:40");
+    assertThat(airport.getError(), containsString("airport code is not a real airport code:"));
+  }
+
+  @Test
+  void compareFlightsByAirport(){
+
   }
 
 }

@@ -1,5 +1,5 @@
 /**
- * The main {@code Project2} class for the CS410J Airline Project
+ * The main {@code Project3} class for the CS410J Airline Project
  * @author edited by Leo Lu
  * PSU CS510 Advanced Java Winter 2023
  *
@@ -12,14 +12,15 @@ import edu.pdx.cs410J.ParserException;
 import java.io.*;
 import java.util.Scanner;
 
-public class Project2 {
+public class Project3 {
 
-    boolean printFlight = false, readMe = false, tooMany=false;
+    boolean printFlight = false, readMe = false, tooMany=false, twelveHr=false;
     Airline anAirline;
     Flight aFlight;
     String filePath = "";
     int argCount=0,idx=0, fStatus = 0;
     static final int min=8; // total number of airline and flight argument strings
+    static final int min12hr=9; // total number of airline and flight argument strings in 12hr AM/PM time format
     static final String readMeFile="README.txt";
     static final String usageFile="USAGE.txt";
 
@@ -56,7 +57,7 @@ public class Project2 {
             System.out.println("No command line arguments. Try -README for more details");
             return;
         }
-        Project2 ex = new Project2();
+        Project3 ex = new Project3();
         /*
         try to read arguments from user
         if any error is found, exit program
@@ -87,7 +88,7 @@ public class Project2 {
      * Prints error if too many arguments are entered
      * Counts number of args
      * */
-    private static boolean newArgumentReader(String[] args, Project2 curr){
+    private static boolean newArgumentReader(String[] args, Project3 curr){
         for(String arg: args){
             if(arg.startsWith("-")){
                 if(!optionChecker(arg,curr)) return false;
@@ -98,7 +99,8 @@ public class Project2 {
                 curr.fStatus = -1; //fileName is set
                 curr.idx+=1;
             }
-            else if(curr.argCount>=curr.min){
+            //STOPPING POINT
+            else if((!curr.twelveHr && curr.argCount>=curr.min)||(curr.twelveHr && curr.argCount>=curr.min12hr)){
                 System.out.println(arg + " is an extraneous argument. \n" +
                         "Please review usage and try again.");
                 curr.tooMany=true; // use this to print usage
@@ -182,7 +184,7 @@ public class Project2 {
      * @param curr Project 2 Instance
      * */
 
-    private static boolean newCreateAirlineAndFlight(String[] args, Project2 curr) throws IOException {
+    private static boolean newCreateAirlineAndFlight(String[] args, Project3 curr) throws IOException {
         String airlineName = args[curr.idx];
         //if(curr.file==-1)txtFile(curr.filePath); //If file path is set, explore it
         curr.anAirline = new Airline(airlineName);
@@ -202,7 +204,10 @@ public class Project2 {
             fl.setDate(aDate,"Arrival");
             String aTime = args[curr.idx+7];
             fl.setTime(aTime,"Arrival");
-
+            if(curr.twelveHr){
+                String meridiem = args[curr.idx+8];
+                //set am/pm
+            }
             if(!curr.anAirline.getError().equals("")||!fl.getError().equals("")){
                 System.err.println("*------------*Please review input errors above and try again*------------*");
                 return false;
@@ -233,7 +238,7 @@ public class Project2 {
      * @param opt the candidate -option String invoked by user to be validated
      * @param curr Project 2 instance
      * */
-    private static boolean optionChecker(String opt, Project2 curr){
+    private static boolean optionChecker(String opt, Project3 curr){
         if(opt.equalsIgnoreCase("-README")){
             curr.readMe=true;
             printFile(readMeFile);
@@ -271,7 +276,7 @@ public class Project2 {
      * @param fileName takes any valid file path
      * */
     private static void printFile(String fileName){
-        InputStream file = Project2.class.getResourceAsStream(fileName);
+        InputStream file = Project3.class.getResourceAsStream(fileName);
         Scanner scanner = new Scanner(file);
         String line;
         while(scanner.hasNextLine()){
@@ -285,7 +290,7 @@ public class Project2 {
      * Prints flight information entered by user should -print option be called
      * @param curr Project2 Instance
      * */
-    private static void printFlight(Project2 curr){
+    private static void printFlight(Project3 curr){
         Flight fl = curr.aFlight;
         System.out.println("*--------------------------*Airline and Flights*-------------------------*");
         System.out.println(curr.anAirline.getName() + " " +fl.getNumber());

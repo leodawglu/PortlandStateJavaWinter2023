@@ -1,5 +1,5 @@
 /**
- * The {@code Project2Test} class contains unit tests for the {@link edu.pdx.cs410J.leolu.Project2} class
+ * The {@code Project2Test} class contains unit tests for the {@link edu.pdx.cs410J.leolu.Project3} class
  *
  *
  * @author Leo Lu
@@ -8,7 +8,6 @@
  * */
 package edu.pdx.cs410J.leolu;
 
-import edu.pdx.cs410J.InvokeMainTestCase;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -32,12 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * So class can be tested independently
  *
  */
-class Project2Test {
+class Project3Test {
 
   @Test
   void readmeCanBeReadAsResource() throws IOException {
     try (
-      InputStream readme = Project2.class.getResourceAsStream("README.txt")
+      InputStream readme = Project3.class.getResourceAsStream("README.txt")
     ) {
       assertThat(readme, not(nullValue()));
       BufferedReader reader = new BufferedReader(new InputStreamReader(readme));
@@ -48,12 +47,12 @@ class Project2Test {
 
   @Test
   void sampleTestPrintInput() throws IOException {
-    Project2.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
+    Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
   }
 
   @Test
   void sampleREADMETestInput() throws IOException {
-    Project2.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
+    Project3.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
   }
 
 }

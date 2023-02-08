@@ -8,10 +8,13 @@
 package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.AbstractFlight;
+import edu.pdx.cs410J.AirportNames;
+import java.util.Date;
 
 
-public class Flight extends AbstractFlight {
+public class Flight extends AbstractFlight implements Comparable {
   private int flightNumber;
+  private boolean twelveHrFormat = true;
   private String dep; //Departure Airport 3-letter Code
   private String arr; //Arrival Airport 3-letter Code
   private String depDate;
@@ -96,6 +99,7 @@ public class Flight extends AbstractFlight {
   /**
    * Ensures input is only of length 3
    * Ensures input is alphabetical
+   * Ensures input toUpperCase()
    * @param input - airport code String from Constructor
    * @param type - Departure or Arrival
    * @throws  NullPointerException if input is null or of length 0
@@ -105,10 +109,12 @@ public class Flight extends AbstractFlight {
     try{
       if(input==null||input.length()==0)
         throw new NullPointerException(" airport code cannot be null.");
-
+      input = input.toUpperCase();//case insensitive
       if(input.length()!=3||!isAirportCodeAlphabetic(input))
         throw new IllegalArgumentException(" airport code must be a 3-letter alphabetical code: ");
-
+      if(!isRealAirportCode(input)){
+        throw new IllegalArgumentException(" airport code is not a real airport code: ");
+      }
       if(type.equals("Departure")) this.dep=input.toUpperCase();
       if(type.equals("Arrival")) this.arr=input.toUpperCase();
     }catch(NullPointerException e){
@@ -126,6 +132,16 @@ public class Flight extends AbstractFlight {
   private boolean isAirportCodeAlphabetic(String input)
   {
     return input.matches("^[a-zA-Z]*$");
+  }
+
+  /**
+   * @param input - airport code String to be checked if real
+   * @return boolean true when airport code is from a real airport
+   * Utilizes {@code AirportNames.getNamesMap()}
+   * */
+  private boolean isRealAirportCode(String input){
+    return AirportNames.getNamesMap().containsKey(input);
+    //return true;
   }
 
   /**
@@ -215,6 +231,11 @@ public class Flight extends AbstractFlight {
    * */
   public String getDepDate(){return depDate;}
 
+  @Override
+  public Date getDeparture(){
+    //TO DO
+    return new Date();
+  }
   /**
    * @return String Departure Time
    * */
@@ -241,11 +262,23 @@ public class Flight extends AbstractFlight {
    * */
   public String getArrDate(){return arrDate;}
 
+  @Override
+  public Date getArrival(){
+    //TO DO!
+    return new Date();
+  }
+
   /**
    * @return String Arrival Time
    * */
   public String getArrTime(){return arrTime;}
   public String getError(){
     return error;
+  }
+
+  @Override
+  public int compareTo(Object o) {
+    //TO DO
+    return 0;
   }
 }
