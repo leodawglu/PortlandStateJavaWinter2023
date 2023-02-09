@@ -29,43 +29,43 @@ public class FlightTest {
 
   @Test
   void nullFlightNumberPrintsNullError(){
-    Flight nulls = new Flight(null,"SEA","01/23/2023","23:40","PDX","01/23/2023", "23:40");
+    Flight nulls = new Flight(null,"SEA","01/23/2023","22:40","PDX","01/23/2023", "23:40");
     assertThat(nulls.getError(), equalTo("Flight Number cannot be null."));
   }
 
   @Test
   void inputFlightNumberNotNumberThrowsNumberFormatException(){
-    Flight notANumber = new Flight("NotANumber","SEA","01/23/2023", "23:40","PDX","01/23/2023", "23:40");
+    Flight notANumber = new Flight("NotANumber","SEA","01/23/2023", "22:40","PDX","01/23/2023", "23:40");
     assertThat(notANumber.getError(),containsString("Flight Number must be a positive integer"));
   }
 
   @Test
   void flightNumberMustBeGreaterThanZero(){
-    Flight lessThanZero = new Flight("-26","SEA","01/23/2023", "23:40","PDX","01/23/2023", "23:40");
+    Flight lessThanZero = new Flight("-26","SEA","01/23/2023", "22:40","PDX","01/23/2023", "23:40");
     assertThat(lessThanZero.getError(),containsString("Flight Number must be greater than zero"));
   }
 
   @Test
   void nullDepartureAirportPrintsNullError(){
-    Flight nullAirport = new Flight("26",null,"01/23/2023", "23:40","PDX","01/23/2023", "23:40");
+    Flight nullAirport = new Flight("26",null,"01/23/2023", "22:40","PDX","01/23/2023", "23:40");
     assertThat(nullAirport.getError(), equalTo("Departure airport code cannot be null."));
   }
 
   @Test
   void nullArrivalAirportPrintsNullError(){
-    Flight nullAirport = new Flight("26","TSA","01/23/2023", "23:40",null,"01/23/2023", "23:40");
+    Flight nullAirport = new Flight("26","TSA","01/23/2023", "22:40",null,"01/23/2023", "23:40");
     assertThat(nullAirport.getError(), equalTo("Arrival airport code cannot be null."));
   }
 
   @Test
   void nullDepartureDatePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA",null,"23:40","SFO","01/23/2023", "23:40");
-    assertThat(nullTime.getError(), equalTo("Departure date cannot be null."));
+    Flight nullTime = new Flight("26","SEA",null,"22:40","SFO","01/23/2023", "23:40");
+    assertThat(nullTime.getError(), containsString("Departure date cannot be null."));
   }
 
   @Test
   void nullArrivalDatePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA","01/23/2023","23:40","SFO",null,"23:40");
+    Flight nullTime = new Flight("26","SEA","01/23/2023","22:40","SFO",null,"23:40");
     assertThat(nullTime.getError(), equalTo("Arrival date cannot be null."));
   }
 
@@ -82,49 +82,49 @@ public class FlightTest {
   }
   @Test
   void departureAirportMustBeLengthThree(){
-    Flight code = new Flight("26","SLAP","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    Flight code = new Flight("26","SLAP","01/23/2023", "22:40","JFK","01/23/2023", "23:40");
     assertThat(code.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void arrivalAirportMustBeLengthThree(){
-    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","KJFK","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SEA","01/23/2023", "22:40","KJFK","01/23/2023", "23:40");
     assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void departureAirportCodeMustBeAlphabetic(){
-    Flight airport = new Flight("26","*9[","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    Flight airport = new Flight("26","*9[","01/23/2023", "22:40","JFK","01/23/2023", "23:40");
     assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void arrivalAirportCodeMustBeAlphabetic(){
-    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","*9[","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SEA","01/23/2023", "22:40","*9[","01/23/2023", "23:40");
     assertThat(airport.getError(), containsString("airport code must be a 3-letter alphabetical code"));
   }
 
   @Test
   void departureAirportCodeCanBeRetrieved(){
-    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SEA","01/23/2023", "20:40","JFK","01/23/2023", "23:40");
     assertThat(airport.getSource(), equalTo("SEA"));
   }
 
   @Test
   void arrivalAirportCodeCanBeRetrieved(){
-    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SEA","01/23/2023", "20:40","JFK","01/23/2023", "23:40");
     assertThat(airport.getDestination(), equalTo("JFK"));
   }
 
   @Test
   void notRealDepartureAirportCodeThrowsErrorMessage(){
-    Flight airport = new Flight("26","SXA","01/23/2023", "23:40","JFK","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SXA","01/23/2023", "20:40","JFK","01/23/2023", "23:40");
     assertThat(airport.getError(), containsString("airport code is not a real airport code:"));
   }
 
   @Test
   void notRealArrivalAirportCodeThrowsErrorMessage(){
-    Flight airport = new Flight("26","SEA","01/23/2023", "23:40","JFX","01/23/2023", "23:40");
+    Flight airport = new Flight("26","SEA","01/23/2023", "20:40","JFX","01/23/2023", "23:40");
     assertThat(airport.getError(), containsString("airport code is not a real airport code:"));
   }
 
@@ -228,4 +228,25 @@ public class FlightTest {
     assertThat(seattle.compareTo(seattle2), equalTo(1));
   }
 
+  @Test
+  void flightArrivalEarlierThanDepartureThrowsError() {
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea", "Departure");
+    seattle.setDateTime12HrFormat("2/8/2023", "4:40 AM", "Departure");
+    seattle.setAirportCode("sfo", "Arrival");
+    seattle.setDateTime12HrFormat("2/8/2023", "2:40 AM", "Arrival");
+    seattle.setFlightDuration();
+    assertThat(seattle.getError(),containsString("cannot be earlier than"));
+  }
+
+  @Test
+  void flightDuration120minutes() {
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea", "Departure");
+    seattle.setDateTime12HrFormat("2/8/2023", "2:40 AM", "Departure");
+    seattle.setAirportCode("sfo", "Arrival");
+    seattle.setDateTime12HrFormat("2/8/2023", "4:40 AM", "Arrival");
+    seattle.setFlightDuration();
+    assertThat(seattle.getFlightDuration(),equalTo(120));
+  }
 }

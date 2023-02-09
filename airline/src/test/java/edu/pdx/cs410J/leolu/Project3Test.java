@@ -64,17 +64,23 @@ class Project3Test {
     Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "3:40","pm", "SEA", "05/19/2023", "8:40","AM"});
   }
 
+  //https://stackoverflow.com/questions/12781273/what-are-the-date-formats-available-in-simpledateformat-class
   @Test
   void dateFormatter(){
-    String input = "1/8/2023 3:17 aM";
+    String input = "1/8/2023 1:07 aM";
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m a");
+    SimpleDateFormat formatter3 = new SimpleDateFormat("MM/dd/yyyy HH:mm");
     DateFormat formatter2 = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
     try {
       Date date = formatter.parse(input);
       System.out.println(date);
       System.out.println(formatter2.format(date)); //  getArrivalString and getDepartureString
+
+      System.out.println(formatter3.format(date));
+      System.out.println(date.getTime());
     } catch (ParseException e) {
       System.out.println("Failed to parse date and time: " + e.getMessage());
     }
+
   }
 }

@@ -190,7 +190,7 @@ public class Project3 {
         curr.anAirline = new Airline(airlineName);
         Flight fl = new Flight();//empty flight constructor
         try{
-            if(curr.min12hr==2)fl.set12hr();//set flight to 12hr format;
+            if(curr.min12hr==2)fl.set12hrTrue();//set flight to 12hr format;
             String flightNumber = args[curr.idx+1];
             String dAirport = args[curr.idx+2];
             /*Departure Date & Time*/
@@ -209,13 +209,17 @@ public class Project3 {
             fl.setAirportCode(aAirport,"Arrival");
 
             if(curr.min12hr==2){
-
+                fl.setDateTime12HrFormat(dDate, dTime, "Departure");
+                fl.setDateTime12HrFormat(aDate, aTime, "Arrival");
             }else{
                 fl.setDate(dDate,"Departure");
                 fl.setTime(dTime,"Departure");
                 fl.setDate(aDate,"Arrival");
                 fl.setTime(aTime,"Arrival");
+                fl.formatDatetime("Departure");
+                fl.formatDatetime("Arrival");
             }
+            fl.setFlightDuration();
 
 
             if(!curr.anAirline.getError().equals("")||!fl.getError().equals("")){
