@@ -14,6 +14,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,4 +59,22 @@ class Project3Test {
     Project3.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
   }
 
+  @Test
+  void sample12hrTestPrintInput() throws IOException {
+    Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "3:40","pm", "SEA", "05/19/2023", "8:40","AM"});
+  }
+
+  @Test
+  void dateFormatter(){
+    String input = "1/8/2023 3:17 aM";
+    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m a");
+    DateFormat formatter2 = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+    try {
+      Date date = formatter.parse(input);
+      System.out.println(date);
+      System.out.println(formatter2.format(date)); //  getArrivalString and getDepartureString
+    } catch (ParseException e) {
+      System.out.println("Failed to parse date and time: " + e.getMessage());
+    }
+  }
 }

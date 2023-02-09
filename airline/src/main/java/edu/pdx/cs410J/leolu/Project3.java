@@ -14,13 +14,13 @@ import java.util.Scanner;
 
 public class Project3 {
 
-    boolean printFlight = false, readMe = false, tooMany=false, twelveHr=false;
+    boolean printFlight = false, readMe = false, tooMany=false;
     Airline anAirline;
     Flight aFlight;
     String filePath = "";
     int argCount=0,idx=0, fStatus = 0;
     static final int min=8; // total number of airline and flight argument strings
-    static final int min12hr=9; // total number of airline and flight argument strings in 12hr AM/PM time format
+    int min12hr=2; //arg index adjustment for 12hr format inputs
     static final String readMeFile="README.txt";
     static final String usageFile="USAGE.txt";
 
@@ -100,7 +100,7 @@ public class Project3 {
                 curr.idx+=1;
             }
             //STOPPING POINT
-            else if((!curr.twelveHr && curr.argCount>=curr.min)||(curr.twelveHr && curr.argCount>=curr.min12hr)){
+            else if(curr.argCount>=(curr.min+curr.min12hr)){
                 System.out.println(arg + " is an extraneous argument. \n" +
                         "Please review usage and try again.");
                 curr.tooMany=true; // use this to print usage
@@ -190,24 +190,34 @@ public class Project3 {
         curr.anAirline = new Airline(airlineName);
         Flight fl = new Flight();//empty flight constructor
         try{
+            if(curr.min12hr==2)fl.set12hr();//set flight to 12hr format;
             String flightNumber = args[curr.idx+1];
-            fl.setFlightNumber(flightNumber);
             String dAirport = args[curr.idx+2];
-            fl.setAirportCode(dAirport,"Departure");
+            /*Departure Date & Time*/
             String dDate = args[curr.idx+3];
-            fl.setDate(dDate,"Departure");
             String dTime = args[curr.idx+4];
-            fl.setTime(dTime,"Departure");
-            String aAirport = args[curr.idx+5];
+            if(curr.min12hr==2) dTime += " "+args[curr.idx+5];
+
+            String aAirport = args[curr.idx+5+ curr.min12hr/2];
+            /*Arrival Date & Time*/
+            String aDate = args[curr.idx+6+ curr.min12hr/2];
+            String aTime = args[curr.idx+7+ curr.min12hr/2];
+            if(curr.min12hr==2) aTime += " "+args[curr.idx+9];
+
+            fl.setFlightNumber(flightNumber);
+            fl.setAirportCode(dAirport,"Departure");
             fl.setAirportCode(aAirport,"Arrival");
-            String aDate = args[curr.idx+6];
-            fl.setDate(aDate,"Arrival");
-            String aTime = args[curr.idx+7];
-            fl.setTime(aTime,"Arrival");
-            if(curr.twelveHr){
-                String meridiem = args[curr.idx+8];
-                //set am/pm
+
+            if(curr.min12hr==2){
+
+            }else{
+                fl.setDate(dDate,"Departure");
+                fl.setTime(dTime,"Departure");
+                fl.setDate(aDate,"Arrival");
+                fl.setTime(aTime,"Arrival");
             }
+
+
             if(!curr.anAirline.getError().equals("")||!fl.getError().equals("")){
                 System.err.println("*------------*Please review input errors above and try again*------------*");
                 return false;
@@ -222,9 +232,18 @@ public class Project3 {
             if(curr.argCount<3) System.out.println("Departure Airport Code");
             if(curr.argCount<4) System.out.println("Departure Date");
             if(curr.argCount<5) System.out.println("Departure Time");
-            if(curr.argCount<6) System.out.println("Arrival Airport Code");
-            if(curr.argCount<7) System.out.println("Arrival Date");
-            if(curr.argCount<8) System.out.println("Arrival Time");
+            if(curr.min12hr==2){
+                if(curr.argCount<6) System.out.println("Departure Time AM/PM");
+                if(curr.argCount<7) System.out.println("Arrival Airport Code");
+                if(curr.argCount<8) System.out.println("Arrival Date");
+                if(curr.argCount<9) System.out.println("Arrival Time");
+                if(curr.argCount<10) System.out.println("Arrival Time AM/PM");
+
+            }else{
+                if(curr.argCount<6) System.out.println("Arrival Airport Code");
+                if(curr.argCount<7) System.out.println("Arrival Date");
+                if(curr.argCount<8) System.out.println("Arrival Time");
+            }
             System.out.println("Please review usage and try again.");
             return false;
         }

@@ -129,8 +129,103 @@ public class FlightTest {
   }
 
   @Test
-  void compareFlightsByAirport(){
+  void invalid12hrPMTimePMFormatThrowsErrorMessage(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("01/23/2023","23:40 PM","Departure");
+    assertThat(twelve.getError(), containsString("time format incorrect"));
+  }
 
+  @Test
+  void invalid12hrAMTimePMFormatThrowsErrorMessage(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("01/23/2023","13:40 AM","Departure");
+    assertThat(twelve.getError(), containsString("time format incorrect"));
+  }
+
+  @Test
+  void invalid12hrXMTimePMFormatThrowsErrorMessage(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("01/23/2023","12:40 XM","Departure");
+    assertThat(twelve.getError(), containsString("time incorrect"));
+  }
+
+  @Test
+  void invalid24hrFormatThrowsErrorMessage(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("01/23/2023","23:40","Departure");
+    assertThat(twelve.getError(), containsString("time incorrect or missing"));
+  }
+
+  @Test
+  void invalidTimeFormatThrowsErrorMessage(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("01/23/2023","123:40 AM","Departure");
+    assertThat(twelve.getError(), containsString("time format incorrect"));
+  }
+
+  @Test
+  void getDepString(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("02/08/2023","3:40 AM","Departure");
+    assertThat(twelve.getDepartureString(), equalTo("2/8/23, 3:40 AM"));
+  }
+
+  @Test
+  void getArrString(){
+    Flight twelve = new Flight();
+    twelve.setDateTime12HrFormat("2/8/2023","3:40 AM","Arrival");
+    assertThat(twelve.getArrivalString(), equalTo("2/8/23, 3:40 AM"));
+  }
+
+  @Test
+  void compareFlightsByAirportBiggerToSmaller(){
+    Flight taipei = new Flight();
+    taipei.setAirportCode("tpe","Departure");
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea","Departure");
+    assertThat(taipei.compareTo(seattle), equalTo(1));
+  }
+
+  @Test
+  void compareFlightsByAirportSmallerToBigger(){
+    Flight taipei = new Flight();
+    taipei.setAirportCode("tpe","Departure");
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea","Departure");
+    assertThat(seattle.compareTo(taipei), equalTo(-1));
+  }
+
+  @Test
+  void compareFlightsBySameDateTime(){
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea","Departure");
+    seattle.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    Flight seattle2 = new Flight();
+    seattle2.setAirportCode("sea","Departure");
+    seattle2.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    assertThat(seattle.compareTo(seattle2), equalTo(0));
+  }
+
+  @Test
+  void compareFlightsByDateTimeEarlierToLater(){
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea","Departure");
+    seattle.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    Flight seattle2 = new Flight();
+    seattle2.setAirportCode("sea","Departure");
+    seattle2.setDateTime12HrFormat("2/8/2023","3:45 AM","Departure");
+    assertThat(seattle.compareTo(seattle2), equalTo(-1));
+  }
+
+  @Test
+  void compareFlightsByDateTimeLaterToEarlier(){
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea","Departure");
+    seattle.setDateTime12HrFormat("2/8/2023","4:40 AM","Departure");
+    Flight seattle2 = new Flight();
+    seattle2.setAirportCode("sea","Departure");
+    seattle2.setDateTime12HrFormat("2/8/2023","3:45 AM","Departure");
+    assertThat(seattle.compareTo(seattle2), equalTo(1));
   }
 
 }

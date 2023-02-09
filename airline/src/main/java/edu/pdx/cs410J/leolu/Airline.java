@@ -17,6 +17,7 @@ package edu.pdx.cs410J.leolu;
 import edu.pdx.cs410J.AbstractAirline;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class Airline extends AbstractAirline<Flight> {
@@ -80,6 +81,7 @@ public class Airline extends AbstractAirline<Flight> {
    * */
   @Override
   public Collection<Flight> getFlights() {
+    Collections.sort(flights);
     return flights;
   }
 

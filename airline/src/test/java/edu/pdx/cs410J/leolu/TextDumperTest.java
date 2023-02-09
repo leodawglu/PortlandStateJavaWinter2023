@@ -60,7 +60,7 @@ public class TextDumperTest {
   void canParseAirlineFlightWrittenByTextDumper(@TempDir File tempDir) throws IOException, ParserException {
     String airlineName = "Test Airline";
     Airline airline = new Airline(airlineName);
-    Flight fl = new Flight("25", "SEA", "1/26/2023", "0:10", "TPE", "1/27/2023" ,"5:30");
+    Flight fl = new Flight("25", "SEA", "1/26/2023", "23:10", "TPE", "1/27/2023" ,"5:30");
     airline.addFlight(fl);
     File textFile = new File(tempDir, "airline.txt");
     TextDumper dumper = new TextDumper(new FileWriter(textFile));
