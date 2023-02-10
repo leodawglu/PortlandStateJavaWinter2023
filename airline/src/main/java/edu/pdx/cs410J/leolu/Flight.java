@@ -16,6 +16,10 @@ import java.util.Date;
 
 
 public class Flight extends AbstractFlight implements Comparable<Flight> {
+  private final SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:mm a");
+  private final SimpleDateFormat formatter24 = new SimpleDateFormat("MM/dd/yyyy h:mm");
+  private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+  private final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
   private int flightNumber;
   private int flightDuration;
   private boolean twelveHrFormat = false;
@@ -238,7 +242,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
   public void setDateTime12HrFormat(String date, String time, String type){
     time = time.toUpperCase();
     StringBuilder input = new StringBuilder(date + " " + time);
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m a");
     try {
       if(!isValidDate(date))
         throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): " + date);
@@ -248,8 +251,16 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
         throw new IllegalArgumentException(" time format incorrect (12hr - hh:mm AM/PM): " +time);
 
       Date d = formatter.parse(input.toString());
-      if(type.equals("Departure")) this.departureDate=d;
-      if(type.equals("Arrival")) this.arrivalDate=d;
+      if(type.equals("Departure")){
+        this.departureDate=d;
+        this.depDate = dateFormat.format(d);
+        this.depTime = timeFormat.format(d);
+      }
+      if(type.equals("Arrival")){
+        this.arrivalDate=d;
+        this.arrDate = date;
+        this.arrTime = time;
+      }
     }catch (ParseException e) {
       error = "Failed to parse " + type + " date and time: " + input.toString();
       System.out.println(error);
@@ -265,12 +276,11 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
    * @param type Departure or Arrival datetime
    * */
   public void formatDatetime(String type){
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m");
     StringBuilder dateTime;
     if(type.equals("Departure")) dateTime = new StringBuilder(this.getDepDate() + " " + this.getDepTime());
     else dateTime = new StringBuilder(this.getArrDate() + " " + this.getArrTime());
     try {
-      Date d = formatter.parse(dateTime.toString());
+      Date d = formatter24.parse(dateTime.toString());
       if(type.equals("Departure")) this.departureDate=d;
       if(type.equals("Arrival")) this.arrivalDate=d;
     } catch (ParseException e) {
@@ -373,7 +383,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
   }
 
   public void setFlightDuration(){
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m a");
     try{
       if(!departureBeforeArrival()) throw new IllegalArgumentException();
       flightDuration = (int)((getArrival().getTime()-getDeparture().getTime())/(1000*60));

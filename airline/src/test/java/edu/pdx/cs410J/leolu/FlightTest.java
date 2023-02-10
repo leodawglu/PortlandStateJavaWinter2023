@@ -20,13 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class FlightTest {
 
-  /*
-  @Test
-  void forProject1ItIsOkayIfGetDepartureTimeReturnsNull() {
-    Flight flight = new Flight();
-    assertThat(flight.getDeparture(), is(nullValue()));
-  }*/
-
   @Test
   void nullFlightNumberPrintsNullError(){
     Flight nulls = new Flight(null,"SEA","01/23/2023","22:40","PDX","01/23/2023", "23:40");

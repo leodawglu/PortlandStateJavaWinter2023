@@ -20,7 +20,7 @@ public class Project3 {
     String filePath = "";
     int argCount=0,idx=0, fStatus = 0;
     static final int min=8; // total number of airline and flight argument strings
-    int min12hr=2; //arg index adjustment for 12hr format inputs
+    static int min12hr=2; //arg index adjustment for 12hr format inputs: 0 for 24hr, 2 for 12hr format
     static final String readMeFile="README.txt";
     static final String usageFile="USAGE.txt";
 
@@ -161,7 +161,6 @@ public class Project3 {
         }catch (ParserException e) {
             System.out.println("Runtime Error");
             return false;
-            //throw new RuntimeException(e);
         }catch(IllegalArgumentException e){
             System.err.println(e.getMessage());
             System.err.println("Please make sure that airline name matches in both" +
@@ -186,39 +185,68 @@ public class Project3 {
 
     private static boolean newCreateAirlineAndFlight(String[] args, Project3 curr) throws IOException {
         String airlineName = args[curr.idx];
-        //if(curr.file==-1)txtFile(curr.filePath); //If file path is set, explore it
         curr.anAirline = new Airline(airlineName);
         Flight fl = new Flight();//empty flight constructor
         try{
-            if(curr.min12hr==2)fl.set12hrTrue();//set flight to 12hr format;
             String flightNumber = args[curr.idx+1];
             String dAirport = args[curr.idx+2];
             /*Departure Date & Time*/
             String dDate = args[curr.idx+3];
             String dTime = args[curr.idx+4];
-            if(curr.min12hr==2) dTime += " "+args[curr.idx+5];
 
-            String aAirport = args[curr.idx+5+ curr.min12hr/2];
+            String aAirport = args[curr.idx+5];
             /*Arrival Date & Time*/
-            String aDate = args[curr.idx+6+ curr.min12hr/2];
-            String aTime = args[curr.idx+7+ curr.min12hr/2];
-            if(curr.min12hr==2) aTime += " "+args[curr.idx+9];
+            String aDate = args[curr.idx+6];
+            String aTime = args[curr.idx+7];
 
             fl.setFlightNumber(flightNumber);
             fl.setAirportCode(dAirport,"Departure");
             fl.setAirportCode(aAirport,"Arrival");
+            fl.setDate(dDate,"Departure");
+            fl.setTime(dTime,"Departure");
+            fl.setDate(aDate,"Arrival");
+            fl.setTime(aTime,"Arrival");
+            fl.formatDatetime("Departure");
+            fl.formatDatetime("Arrival");
+            fl.setFlightDuration();
 
-            if(curr.min12hr==2){
-                fl.setDateTime12HrFormat(dDate, dTime, "Departure");
-                fl.setDateTime12HrFormat(aDate, aTime, "Arrival");
-            }else{
-                fl.setDate(dDate,"Departure");
-                fl.setTime(dTime,"Departure");
-                fl.setDate(aDate,"Arrival");
-                fl.setTime(aTime,"Arrival");
-                fl.formatDatetime("Departure");
-                fl.formatDatetime("Arrival");
+            if(!curr.anAirline.getError().equals("")||!fl.getError().equals("")){
+                System.err.println("*------------*Please review input errors above and try again*------------*");
+                return false;
             }
+            curr.anAirline.addFlight(fl);
+            curr.aFlight = fl;
+
+        }catch(ArrayIndexOutOfBoundsException e){
+            missingArgsPrintln(curr.argCount);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean newCreateAirlineFlight(String[] args,Project3 curr){
+        String airlineName = args[curr.idx];
+        curr.anAirline = new Airline(airlineName);
+        Flight fl = new Flight();//empty flight constructor
+        try{
+            String flightNumber = args[curr.idx+1];
+            String dAirport = args[curr.idx+2];
+            /*Departure Date & Time*/
+            String dDate = args[curr.idx+3];
+            String dTime = args[curr.idx+4];
+            dTime += " "+args[curr.idx+5];
+
+            String aAirport = args[curr.idx+6];
+            /*Arrival Date & Time*/
+            String aDate = args[curr.idx+7];
+            String aTime = args[curr.idx+8];
+            aTime += " "+args[curr.idx+9];
+
+            fl.setFlightNumber(flightNumber);
+            fl.setAirportCode(dAirport,"Departure");
+            fl.setAirportCode(aAirport,"Arrival");
+            fl.setDateTime12HrFormat(dDate, dTime, "Departure");
+            fl.setDateTime12HrFormat(aDate, aTime, "Arrival");
             fl.setFlightDuration();
 
 
@@ -230,30 +258,26 @@ public class Project3 {
             curr.aFlight = fl;
 
         }catch(ArrayIndexOutOfBoundsException e){
-            System.out.println("The following arguments are missing: ");
-            if(curr.argCount<1) System.out.println("Airline Name");
-            if(curr.argCount<2) System.out.println("Flight Number");
-            if(curr.argCount<3) System.out.println("Departure Airport Code");
-            if(curr.argCount<4) System.out.println("Departure Date");
-            if(curr.argCount<5) System.out.println("Departure Time");
-            if(curr.min12hr==2){
-                if(curr.argCount<6) System.out.println("Departure Time AM/PM");
-                if(curr.argCount<7) System.out.println("Arrival Airport Code");
-                if(curr.argCount<8) System.out.println("Arrival Date");
-                if(curr.argCount<9) System.out.println("Arrival Time");
-                if(curr.argCount<10) System.out.println("Arrival Time AM/PM");
-
-            }else{
-                if(curr.argCount<6) System.out.println("Arrival Airport Code");
-                if(curr.argCount<7) System.out.println("Arrival Date");
-                if(curr.argCount<8) System.out.println("Arrival Time");
-            }
-            System.out.println("Please review usage and try again.");
+            missingArgsPrintln(curr.argCount);
             return false;
         }
         return true;
     }
 
+    public static void missingArgsPrintln(int count){
+        System.out.println("The following arguments are missing: ");
+        if(count<1) System.out.println("Airline Name");
+        if(count<2) System.out.println("Flight Number");
+        if(count<3) System.out.println("Departure Airport Code");
+        if(count<4) System.out.println("Departure Date");
+        if(count<5) System.out.println("Departure Time");
+        if(min12hr!=0 && count<6) System.out.println("Departure Time AM/PM");
+        if(count<6+min12hr/2) System.out.println("Arrival Airport Code");
+        if(count<7+min12hr/2) System.out.println("Arrival Date");
+        if(count<8+min12hr/2) System.out.println("Arrival Time");
+        if(min12hr!=0 &&count<10) System.out.println("Arrival Time AM/PM");
+        System.out.println("Please review usage and try again.");
+    }
 
     /**
      * Used to check if option invoked with '-' character is valid
@@ -323,6 +347,11 @@ public class Project3 {
         System.out.println("Bound For     : " + fl.getDestination());
         System.out.println("Arrival Date  : " + fl.getArrDate());
         System.out.println("Arrival Time  : " + fl.getArrTime());
+    }
+
+    public static void toggleMin12hr(){
+        if(min12hr==2)min12hr=0;
+        else min12hr=2;
     }
 
 }

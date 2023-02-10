@@ -8,12 +8,10 @@
  * */
 package edu.pdx.cs410J.leolu;
 
+import edu.pdx.cs410J.InvokeMainTestCase;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -81,6 +79,87 @@ class Project3Test {
     } catch (ParseException e) {
       System.out.println("Failed to parse date and time: " + e.getMessage());
     }
+  }
 
+  @Test
+  void testPrintFlightToStdOut() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
+    Project3 proj = new Project3();
+    proj.main(new String[]{"-print", "EVA Air", "12345", "SEA", "05/19/2023", "11:03","am", "LAX" ,"05/19/2023", "11:53","pm"});
+    String output = baos.toString();
+    assertThat(output,containsString("EVA Air 12345\n" +
+            "Departing From: SEA\n" +
+            "Departure Date: 05/19/2023\n" +
+            "Departure Time: 11:03 AM\n" +
+            "Bound For     : LAX\n" +
+            "Arrival Date  : 05/19/2023\n" +
+            "Arrival Time  : 11:53 PM"));
+    System.setOut(System.out);
+  }
+
+  @Test
+  void txtFile() throws IOException{
+    String filePath = getClass().getResource("valid-airline.txt").getPath();
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.main(new String[]{"EVA Air", "12345", "SEA", "05/19/2023", "11:03","am", "LAX" ,"05/19/2023", "11:53","pm"});
+    proj.txtFile(filePath,proj.anAirline);
+    String output = baos.toString();
+    assertThat(output,containsString("EVA Air 12345\n" +
+            "Departing From: SEA\n" +
+            "Departure Date: 05/19/2023\n" +
+            "Departure Time: 11:03 AM\n" +
+            "Bound For     : LAX\n" +
+            "Arrival Date  : 05/19/2023\n" +
+            "Arrival Time  : 11:53 PM"));
+    System.setErr(System.err);
+  }
+
+  @Test
+  void toggleMin12hrChangeDefaultValueFrom2To0(){
+    Project3 proj = new Project3();
+    proj.toggleMin12hr();
+    assertThat(proj.min12hr,equalTo(0));
+  }
+
+  @Test
+  void missingArgsPrintlnShallPrint24Hr(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
+    Project3 proj = new Project3();
+    proj.missingArgsPrintln(0);
+    String output = baos.toString();
+    assertThat(output,containsString("Arrival Time AM/PM"));
+    System.setOut(System.out);
+  }
+
+  @Test
+  void noMissingArgsPrintlnShallPrintNothing(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
+    Project3 proj = new Project3();
+    proj.missingArgsPrintln(10);
+    String output = baos.toString();
+    assertThat(output,equalTo("The following arguments are missing: \nPlease review usage and try again.\n"));
+    System.setOut(System.out);
+  }
+  @Test
+  void missingArgsPrintlnShallPrintsOnly24hrMsg(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
+    Project3 proj = new Project3();
+    proj.toggleMin12hr();
+    proj.missingArgsPrintln(0);
+    String output = baos.toString();
+    assertThat(output,containsString("Arrival Time"));
+    System.setOut(System.out);
   }
 }

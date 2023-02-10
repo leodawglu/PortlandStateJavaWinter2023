@@ -40,13 +40,13 @@ class Project3IT extends InvokeMainTestCase {
         MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "LAX", "SEA" ,"05/19/2023", "11:53", "LAX", "SEA", "05/19/2023", "11:53", "LAX"});
         assertThat(result.getTextWrittenToStandardOut(),containsString("is an extraneous argument"));
     }
-/*
+
     @Test
     void invalidDestinationAirportWillNotPrintFlightInformation(){
-        MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
+        MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53","am", "L1X" ,"05/19/2023", "11:53","pm"});
         assertThat(result.getTextWrittenToStandardError(),containsString("errors"));
     }
-*/
+
     @Test
     void textFileOptionAlreadyCalled(){
         MainMethodResult result = invokeMain(new String[]{"-print", "-textFile","someFile", "-textFile", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
@@ -69,13 +69,13 @@ class Project3IT extends InvokeMainTestCase {
         MainMethodResult result = invokeMain(new String[]{"-bleh", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53", "L1X" ,"05/19/2023", "11:53"});
         assertThat(result.getTextWrittenToStandardError(),containsString("not a valid option"));
     }
-/*
+
     @Test
     void textFileAirlineNameDoesNotMatchArgs() throws FileNotFoundException, ParserException {
         String filePath = getClass().getResource("evaair.txt").getPath();
-        MainMethodResult result = invokeMain(new String[]{"-print", "-textFile", filePath,"EVAV Air", "25", "TPE", "05/19/2023", "23:40", "SEA", "05/20/2023", "18:10"});
+        MainMethodResult result = invokeMain(new String[]{"-print", "-textFile", filePath,"EVAV Air", "25", "TPE", "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"});
         assertThat(result.getTextWrittenToStandardError(),containsString("does not match"));
     }
 
-*/
+
 }
