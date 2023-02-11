@@ -17,6 +17,7 @@ public class Project3 {
     Airline anAirline;
     Flight aFlight;
     String filePath = "", pFilePath = "";
+    File pFile = null;
     int argCount=0,idx=0, fStatus = 0, pStatus = 0;
     //pStatus: 0 - not called, 1 - called but no file/std out, -1 - file specified, -2 - to std out
     static final int min=8; // total number of airline and flight argument strings
@@ -26,6 +27,10 @@ public class Project3 {
 
     static final String welcome = "*------------------------------------------------------------------------*\n" +
             "*------------*Welcome to the Airline Flight Management System*-----------*\n" +
+            "*------------------------------------------------------------------------*";
+    static final String pretty =
+            "*------------------------------------------------------------------------*\n" +
+            "^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Pretty Printing~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n" +
             "*------------------------------------------------------------------------*";
     static final String end = "*----------------------------*End of Program*----------------------------*";
 
@@ -79,29 +84,39 @@ public class Project3 {
             if(!txtFile(ex.filePath, ex.anAirline))return;
         }
         if(ex.pStatus==-2 || ex.pStatus==-1){
-            if(!prettyPrint(ex.fStatus, ex))return;
+            if(!prettyPrint(ex.pStatus, ex))return;
         }
         if(ex.printFlight) printFlight(ex);
         System.out.println(end);
     }
 
+    /**
+     * Pretty prints the airline
+     * Statuses: 0 - not invoked | 1 - invoked | -1 - file path provided | -2 - Print to Standard Out
+     * @param curr Project3 instance
+     * @param status pStatus
+     * */
     public static boolean prettyPrint(int status, Project3 curr){
         Writer out = null;
         try{
             if(status == -1){
-                out = new PrintWriter(System.out);
-            }else if(status== -2){
                 File file = new File(curr.pFilePath);
+                curr.pFile = file;
                 if(file.length() == 0){
                     out = new FileWriter(file);
+                }else{
+                    out = new FileWriter(file,true);
                 }
-                PrettyPrinter dumper = new PrettyPrinter(out);
-                dumper.dump(curr.anAirline);
+            }else if(status== -2){
+                out = new PrintWriter(System.out);
             }else{
                 System.err.println("Incorrect Status code!");
+                return false;
             }
+            PrettyPrinter dumper = new PrettyPrinter(out);
+            dumper.dump(curr.anAirline);
         }catch(IOException e){
-            System.out.println("An error occurred while create the file.");
+            System.err.println("Bad file path: "+curr.pFilePath);
             return false;
         }
         return true;
@@ -168,7 +183,6 @@ public class Project3 {
                 FileWriter fw = new FileWriter(file);
                 TextDumper dumper = new TextDumper(fw);
                 dumper.dump(airline);
-
             }else{ // file has contents
                 InputStream resource = new FileInputStream(path);
                 TextParser parser = new TextParser(new InputStreamReader(resource));
@@ -182,10 +196,10 @@ public class Project3 {
                             "\" does not match \"" + fAirline.getName() +"\" airline in file.");
                 }
                 //When file and String arg airline names match, add new flight to airline
-                for(Flight fl: airline.getFlights())fAirline.addFlight(fl);
+                for(Flight fl: fAirline.getFlights())airline.addFlight(fl);
                 FileWriter fw = new FileWriter(file);
                 TextDumper dumper = new TextDumper(fw);
-                dumper.dump(fAirline);
+                dumper.dump(airline);
             }
         }catch(IOException e){
             System.out.println("An error occurred while create the file.");
@@ -364,6 +378,13 @@ public class Project3 {
     public void toggleMin12hr(){
         if(min12hr==2)min12hr=0;
         else min12hr=2;
+    }
+
+    /**
+     * @return pFile
+     * */
+    public File getpFile(){
+        return pFile;
     }
 
 }

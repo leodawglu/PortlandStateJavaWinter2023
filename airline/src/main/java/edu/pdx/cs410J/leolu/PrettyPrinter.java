@@ -1,6 +1,11 @@
+/**
+ * The {code PrettyPrinter} class
+ * @author Leo Lu
+ * PSU CS510 Advanced Java Winter 2023
+ *
+ * */
 package edu.pdx.cs410J.leolu;
 
-import edu.pdx.cs410J.AbstractAirline;
 import edu.pdx.cs410J.AirlineDumper;
 
 import java.io.Writer;
@@ -13,11 +18,15 @@ public class PrettyPrinter implements AirlineDumper<Airline> {
         this.writer = writer;
     }
 
+    /**
+     * @param airline Accepts an airline object and pretty prints the airline and its flights into file
+     * */
     @Override
     public void dump(Airline airline) {
         try (PrintWriter pw = new PrintWriter(this.writer))
         {
-            pw.println("*--------------------*"+airline.getName()+"*-------------------*");
+            pw.println("*---------------------------------------------------------*");
+            pw.println("Airline       : "+airline.getName());
             for(Flight fl: airline.getFlights()){
                 pw.println("*---------------------------------------------------------*");
                 pw.println("Flight Number : " +fl.getNumber());
@@ -27,6 +36,7 @@ public class PrettyPrinter implements AirlineDumper<Airline> {
                 pw.println("Bound For     : " + fl.getDestination());
                 pw.println("Arrival Date  : " + fl.getArrDate());
                 pw.println("Arrival Time  : " + fl.getArrTime());
+                pw.println("Duration      : " + fl.getFlightDuration()/60 + "hrs " + fl.getFlightDuration()%60 + "mins");
             }
             pw.println("*---------------------------END---------------------------*");
             pw.flush();

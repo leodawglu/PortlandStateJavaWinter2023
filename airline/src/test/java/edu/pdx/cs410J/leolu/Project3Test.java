@@ -10,6 +10,7 @@ package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.InvokeMainTestCase;
 import edu.pdx.cs410J.ParserException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -64,26 +65,6 @@ class Project3Test {
   void sample12hrTestPrintInput() throws IOException {
     Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "3:40","pm", "SEA", "05/19/2023", "8:40","AM"});
   }
-
-  //https://stackoverflow.com/questions/12781273/what-are-the-date-formats-available-in-simpledateformat-class
-  /*
-  @Test
-  void dateFormatter(){
-    String input = "1/8/2023 1:07 aM";
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:mm a");
-    SimpleDateFormat formatter3 = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-    DateFormat formatter2 = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-    try {
-      Date date = formatter.parse(input);
-      System.out.println(date);
-      System.out.println(formatter2.format(date)); //  getArrivalString and getDepartureString
-
-      System.out.println(formatter3.format(date));
-      System.out.println(date.getTime());
-    } catch (ParseException e) {
-      System.out.println("Failed to parse date and time: " + e.getMessage());
-    }
-  }*/
 
   @Test
   void testPrintFlightToStdOut() throws IOException {
@@ -178,6 +159,126 @@ class Project3Test {
     String output = baos.toString();
     assertThat(output,containsString("should be followed by a file name"));
     System.setErr(System.err);
+  }
+
+  @Test
+  void prettyPrintMethodInvokedWithWrongStatus(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.prettyPrint(3,proj);
+    String output = baos.toString();
+    assertThat(output,containsString("Incorrect Status code!"));
+    System.setErr(System.err);
+  }
+/*
+  @Test
+  void prettyPrintMethodInvokedWithBadFilePathThrowsIOException(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.pFilePath="petty.txt";
+    proj.anAirline = new Airline("Test");
+    proj.prettyPrint(-2,proj);
+    String output = baos.toString();
+    assertThat(output,containsString("Bad file path:"));
+    System.setErr(System.err);
+  }*/
+
+  @Test
+  void prettyPrintMethodPrintToStdOut() throws IOException {
+    String[] args = new String[]{"-pretty", "-","EVA Air", "25", "TPE",
+            "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+
+    String output = baos.toString();
+    assertThat(output,containsString("Flight Number : 25\n" +
+            "Departing From: TPE\n" +
+            "Departure Date: 05/19/2023\n" +
+            "Departure Time: 12:40 AM\n" +
+            "Bound For     : SEA\n" +
+            "Arrival Date  : 05/20/2023\n" +
+            "Arrival Time  : 12:10 PM\n" +
+            "Duration      : 35hrs 30mins"));
+    System.setOut(System.out);
+  }
+
+  @Test
+  void prettyPrintMethodPrintToFile() throws IOException {
+    String path=getClass().getResource("prettywriting.txt").getPath();
+    String[] args = new String[]{"-pretty",path,"-print","EVA Air", "25", "TPE",
+            "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
+
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+    //File file = proj.getpFile();
+    /*
+    BufferedReader reader = new BufferedReader(new FileReader(proj.getpFile()));
+    String contents="";
+    String line;
+    while ((line = reader.readLine()) != null) {
+      contents += line;
+      contents += "\n";
+    }
+    reader.close();
+    assertThat(contents,containsString("Flight Number : 25\n" +
+            "Departing From: TPE\n" +
+            "Departure Date: 05/19/2023\n" +
+            "Departure Time: 12:40 AM\n" +
+            "Bound For     : SEA\n" +
+            "Arrival Date  : 05/20/2023\n" +
+            "Arrival Time  : 12:10 PM\n" +
+            "Duration      : 35hrs 30mins"));*/
+  }
+  @Test
+  void prettyPrintPrintToFile(@TempDir File tempDir) throws IOException{
+    File file = new File(tempDir, "test.txt");
+    FileWriter writer = new FileWriter(file);
+    PrettyPrinter printer = new PrettyPrinter(writer);
+    Flight fl = new Flight("25", "TPE",
+            "05/19/2023", "12:40 am", "SEA", "05/20/2023", "12:10 pm");
+    Airline air = new Airline("EVA Air");
+    air.addFlight(fl);
+    printer.dump(air);
+    BufferedReader reader = new BufferedReader(new FileReader(file));
+    String contents="";
+    for(String line : reader.lines().toArray(String[]::new)){
+      contents += line;
+      contents += "\n";
+    }
+    reader.close();
+    assertThat(contents, containsString(air.getName()));
+    assertThat(contents, containsString("Flight Number : "));
+    assertThat(contents, containsString("Duration      : "));
+
+  }
+
+  @Test
+  void prettyPrintAnAirlineToStdOut() throws IOException {
+    //String path=getClass().getResource("prettywriting.txt").getPath();
+    String airpath=getClass().getResource("evaair.txt").getPath();
+    String[] args = new String[]{"-textFile",airpath,"-pretty","-","-print","EVA Air", "52", "TPE",
+            "05/19/2023", "12:20","am", "IAH", "05/19/2023", "2:00","pm"};
+
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+  }
+
+  @Test
+  void prettyPrintAnAirlineToFile() throws IOException {
+    String path=getClass().getResource("prettywriting.txt").getPath();
+    String airpath=getClass().getResource("evaair.txt").getPath();
+    String[] args = new String[]{"-textFile",airpath,"-pretty",path,"-print","EVA Air", "52", "TPE",
+            "05/19/2023", "12:20","am", "IAH", "05/19/2023", "2:00","pm"};
+
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
   }
 
 }

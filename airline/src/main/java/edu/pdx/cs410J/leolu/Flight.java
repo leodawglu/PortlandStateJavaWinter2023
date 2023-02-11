@@ -66,7 +66,21 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     setAirportCode(arr, "Arrival");
     if(error.isEmpty())setFlightDuration();
   }
-
+  /**
+   * Constructs a new instance of <code>Flight</code>
+   * with a given flight number, departure airport code, arrival airport code,
+   * departure datetime, and arrival datetime
+   * Flight Constructor that accepts flight details as arguments
+   * Creates a new <code>Flight</code>
+   * @param fN Flight Number
+   * @param dep Departure Airport 3-letter code
+   * @param dDate Flight departure Date
+   * @param dTime Flight departure Time
+   * @param arr Arrival Airport 3-letter code
+   * @param aDate Flight arrival Date
+   * @param aTime Flight arrival Time
+   * @param format if True, change time format to 24 hr (12 hr is default)
+   * */
   public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime, boolean format){
     if(format)toggle12HrFormat();
     setDateTime(dDate,dTime,"Departure");
@@ -172,13 +186,17 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
   }
 
   /**
-   * Ensures time is correct format
-   * hh:mm - leading zeros can be ignored
+   * Ensures time is correct 24 hr format
+   * H:mm - leading zeros can be ignored
    * */
   private boolean isValidTime(String input){
     return input.matches("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
   }
 
+  /**
+   * Ensures time is correct 12 hr format
+   * h:mm - leading zeros can be ignored
+   * */
   private boolean isValid12HrMeridiem(String input){
     return input.matches("((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))");
   }
@@ -354,6 +372,9 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     return this.getDeparture().getTime()<this.getArrival().getTime();
   }
 
+  /**
+   * Sets flight duration in minutes
+   * */
   public void setFlightDuration(){
     try{
       if(!departureBeforeArrival()) throw new IllegalArgumentException();
@@ -366,6 +387,9 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     }
   }
 
+  /**
+   * @return int flight duration in minutes
+   * */
   public int getFlightDuration(){
     return flightDuration;
   }
