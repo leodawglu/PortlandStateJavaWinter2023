@@ -3,9 +3,7 @@ package edu.pdx.cs410J.leolu;
 import edu.pdx.cs410J.ParserException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -90,12 +88,21 @@ public class TextParserTest {
     assertThat(parser.getError(),isEmptyString());
   }
   @Test
-  void printFlights() throws IOException, ParserException {
+  void printFlightsShowFlightsAreSortedAlphabetically() throws IOException, ParserException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setOut(ps);
     InputStream resource = getClass().getResourceAsStream("valid-airline.txt");
     assertThat(resource, notNullValue());
     TextParser parser = new TextParser(new InputStreamReader(resource));
     Airline air = parser.parse();
     for(Flight f: air.getFlights())System.out.println(f.toString());
+    String output = baos.toString();
+    assertThat(output,equalTo("Flight 25 departs SEA at 1/26/23, 12:10 AM arrives TPE at 3/2/23, 5:30 AM\n" +
+            "Flight 52 departs SEA at 1/26/23, 12:50 AM arrives SFO at 3/2/23, 6:10 AM\n" +
+            "Flight 12 departs SFO at 1/26/23, 12:10 AM arrives TPE at 3/2/23, 5:30 AM\n" +
+            "Flight 26 departs TPE at 1/26/23, 11:10 PM arrives SEA at 3/2/23, 6:30 AM\n"));
+    System.setOut(System.out);
   }
 
 

@@ -44,7 +44,7 @@ class Project3IT extends InvokeMainTestCase {
     @Test
     void invalidDestinationAirportWillNotPrintFlightInformation(){
         MainMethodResult result = invokeMain(new String[]{"-print", "Java Airlines", "12345", "SEA", "05/19/2023", "11:53","am", "L1X" ,"05/19/2023", "11:53","pm"});
-        assertThat(result.getTextWrittenToStandardError(),containsString("errors"));
+        assertThat(result.getTextWrittenToStandardOut(),containsString("must be a 3-letter alphabetical code"));
     }
 
     @Test
@@ -70,9 +70,11 @@ class Project3IT extends InvokeMainTestCase {
         assertThat(result.getTextWrittenToStandardError(),containsString("not a valid option"));
     }
 
+
     @Test
     void textFileAirlineNameDoesNotMatchArgs() throws FileNotFoundException, ParserException {
         String filePath = getClass().getResource("evaair.txt").getPath();
+
         MainMethodResult result = invokeMain(new String[]{"-print", "-textFile", filePath,"EVAV Air", "25", "TPE", "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"});
         assertThat(result.getTextWrittenToStandardError(),containsString("does not match"));
     }

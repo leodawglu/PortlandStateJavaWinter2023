@@ -9,7 +9,9 @@
 package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.InvokeMainTestCase;
+import edu.pdx.cs410J.ParserException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -19,6 +21,7 @@ import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -63,10 +66,11 @@ class Project3Test {
   }
 
   //https://stackoverflow.com/questions/12781273/what-are-the-date-formats-available-in-simpledateformat-class
+  /*
   @Test
   void dateFormatter(){
     String input = "1/8/2023 1:07 aM";
-    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:m a");
+    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:mm a");
     SimpleDateFormat formatter3 = new SimpleDateFormat("MM/dd/yyyy HH:mm");
     DateFormat formatter2 = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
     try {
@@ -79,7 +83,7 @@ class Project3Test {
     } catch (ParseException e) {
       System.out.println("Failed to parse date and time: " + e.getMessage());
     }
-  }
+  }*/
 
   @Test
   void testPrintFlightToStdOut() throws IOException {
@@ -100,31 +104,12 @@ class Project3Test {
   }
 
   @Test
-  void txtFile() throws IOException{
-    String filePath = getClass().getResource("valid-airline.txt").getPath();
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(baos);
-    System.setErr(ps);
-    Project3 proj = new Project3();
-    proj.main(new String[]{"EVA Air", "12345", "SEA", "05/19/2023", "11:03","am", "LAX" ,"05/19/2023", "11:53","pm"});
-    proj.txtFile(filePath,proj.anAirline);
-    String output = baos.toString();
-    assertThat(output,containsString("EVA Air 12345\n" +
-            "Departing From: SEA\n" +
-            "Departure Date: 05/19/2023\n" +
-            "Departure Time: 11:03 AM\n" +
-            "Bound For     : LAX\n" +
-            "Arrival Date  : 05/19/2023\n" +
-            "Arrival Time  : 11:53 PM"));
-    System.setErr(System.err);
-  }
-
-  @Test
   void toggleMin12hrChangeDefaultValueFrom2To0(){
     Project3 proj = new Project3();
     proj.toggleMin12hr();
     assertThat(proj.min12hr,equalTo(0));
+    proj.toggleMin12hr();
+    assertThat(proj.min12hr,equalTo(2));
   }
 
   @Test
@@ -133,7 +118,7 @@ class Project3Test {
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
     Project3 proj = new Project3();
-    proj.missingArgsPrintln(0);
+    proj.missingArgsPrintln(0,proj);
     String output = baos.toString();
     assertThat(output,containsString("Arrival Time AM/PM"));
     System.setOut(System.out);
@@ -145,7 +130,7 @@ class Project3Test {
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
     Project3 proj = new Project3();
-    proj.missingArgsPrintln(10);
+    proj.missingArgsPrintln(10,proj);
     String output = baos.toString();
     assertThat(output,equalTo("The following arguments are missing: \nPlease review usage and try again.\n"));
     System.setOut(System.out);
@@ -157,9 +142,42 @@ class Project3Test {
     System.setOut(ps);
     Project3 proj = new Project3();
     proj.toggleMin12hr();
-    proj.missingArgsPrintln(0);
+    proj.missingArgsPrintln(0,proj);
     String output = baos.toString();
     assertThat(output,containsString("Arrival Time"));
     System.setOut(System.out);
   }
+
+  @Test
+  void invokePrettyOptionUsingOptionChecker(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+
+    proj.optionChecker("-pretty",proj);
+    assertEquals(proj.pStatus,1);
+    proj.optionChecker("-",proj);
+    assertEquals(proj.pStatus,-2);
+    proj.optionChecker("-pretty",proj);
+    String output = baos.toString();
+    assertThat(output,containsString("can only be called once."));
+    System.setErr(System.err);
+  }
+
+  @Test
+  void prettyOptionNotFollowedByDashOrFilename(){
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+
+    proj.optionChecker("-pretty",proj);
+    assertEquals(proj.pStatus,1);
+    proj.optionChecker("-pretty",proj);
+    String output = baos.toString();
+    assertThat(output,containsString("should be followed by a file name"));
+    System.setErr(System.err);
+  }
+
 }

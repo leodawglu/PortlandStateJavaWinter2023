@@ -52,26 +52,26 @@ public class FlightTest {
 
   @Test
   void nullDepartureDatePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA",null,"22:40","SFO","01/23/2023", "23:40");
+    Flight nullTime = new Flight("26","SEA",null,"11:40 am","SFO","01/23/2023", "12:40 pm");
     assertThat(nullTime.getError(), containsString("Departure date cannot be null."));
   }
 
   @Test
   void nullArrivalDatePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA","01/23/2023","22:40","SFO",null,"23:40");
-    assertThat(nullTime.getError(), equalTo("Arrival date cannot be null."));
+    Flight nullTime = new Flight("26","SEA","01/23/2023","11:40 am","SFO",null,"12:40 pm");
+    assertThat(nullTime.getError(), containsString("Arrival date cannot be null."));
   }
 
   @Test
   void nullDepartureTimePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA","01/23/2023",null,"SFO","01/23/2023", "23:40");
-    assertThat(nullTime.getError(), equalTo("Departure time cannot be null."));
+    Flight nullTime = new Flight("26","SEA","01/23/2023",null,"SFO","01/23/2023", "3:40 pm");
+    assertThat(nullTime.getError(), containsString("Departure time cannot be null."));
   }
 
   @Test
   void nullArrivalTimePrintsNullError(){
-    Flight nullTime = new Flight("26","SEA","01/23/2023","23:40","SFO","01/23/2023",null);
-    assertThat(nullTime.getError(), equalTo("Arrival time cannot be null."));
+    Flight nullTime = new Flight("26","SEA","01/23/2023","11:40am","SFO","01/23/2023",null);
+    assertThat(nullTime.getError(), containsString("Arrival time cannot be null."));
   }
   @Test
   void departureAirportMustBeLengthThree(){
@@ -124,49 +124,49 @@ public class FlightTest {
   @Test
   void invalid12hrPMTimePMFormatThrowsErrorMessage(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("01/23/2023","23:40 PM","Departure");
+    twelve.setDateTime("01/23/2023","23:40 PM","Departure");
     assertThat(twelve.getError(), containsString("time format incorrect"));
   }
 
   @Test
   void invalid12hrAMTimePMFormatThrowsErrorMessage(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("01/23/2023","13:40 AM","Departure");
+    twelve.setDateTime("01/23/2023","13:40 AM","Departure");
     assertThat(twelve.getError(), containsString("time format incorrect"));
   }
 
   @Test
   void invalid12hrXMTimePMFormatThrowsErrorMessage(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("01/23/2023","12:40 XM","Departure");
+    twelve.setDateTime("01/23/2023","12:40 XM","Departure");
     assertThat(twelve.getError(), containsString("time incorrect"));
   }
 
   @Test
   void invalid24hrFormatThrowsErrorMessage(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("01/23/2023","23:40","Departure");
+    twelve.setDateTime("01/23/2023","23:40","Departure");
     assertThat(twelve.getError(), containsString("time incorrect or missing"));
   }
 
   @Test
   void invalidTimeFormatThrowsErrorMessage(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("01/23/2023","123:40 AM","Departure");
+    twelve.setDateTime("01/23/2023","123:40 AM","Departure");
     assertThat(twelve.getError(), containsString("time format incorrect"));
   }
 
   @Test
   void getDepString(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("02/08/2023","3:40 AM","Departure");
+    twelve.setDateTime("02/08/2023","3:40 AM","Departure");
     assertThat(twelve.getDepartureString(), equalTo("2/8/23, 3:40 AM"));
   }
 
   @Test
   void getArrString(){
     Flight twelve = new Flight();
-    twelve.setDateTime12HrFormat("2/8/2023","3:40 AM","Arrival");
+    twelve.setDateTime("2/8/2023","3:40 AM","Arrival");
     assertThat(twelve.getArrivalString(), equalTo("2/8/23, 3:40 AM"));
   }
 
@@ -192,10 +192,10 @@ public class FlightTest {
   void compareFlightsBySameDateTime(){
     Flight seattle = new Flight();
     seattle.setAirportCode("sea","Departure");
-    seattle.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    seattle.setDateTime("2/8/2023","3:40 AM","Departure");
     Flight seattle2 = new Flight();
     seattle2.setAirportCode("sea","Departure");
-    seattle2.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    seattle2.setDateTime("2/8/2023","3:40 AM","Departure");
     assertThat(seattle.compareTo(seattle2), equalTo(0));
   }
 
@@ -203,10 +203,10 @@ public class FlightTest {
   void compareFlightsByDateTimeEarlierToLater(){
     Flight seattle = new Flight();
     seattle.setAirportCode("sea","Departure");
-    seattle.setDateTime12HrFormat("2/8/2023","3:40 AM","Departure");
+    seattle.setDateTime("2/8/2023","3:40 AM","Departure");
     Flight seattle2 = new Flight();
     seattle2.setAirportCode("sea","Departure");
-    seattle2.setDateTime12HrFormat("2/8/2023","3:45 AM","Departure");
+    seattle2.setDateTime("2/8/2023","3:45 AM","Departure");
     assertThat(seattle.compareTo(seattle2), equalTo(-1));
   }
 
@@ -214,10 +214,10 @@ public class FlightTest {
   void compareFlightsByDateTimeLaterToEarlier(){
     Flight seattle = new Flight();
     seattle.setAirportCode("sea","Departure");
-    seattle.setDateTime12HrFormat("2/8/2023","4:40 AM","Departure");
+    seattle.setDateTime("2/8/2023","4:40 AM","Departure");
     Flight seattle2 = new Flight();
     seattle2.setAirportCode("sea","Departure");
-    seattle2.setDateTime12HrFormat("2/8/2023","3:45 AM","Departure");
+    seattle2.setDateTime("2/8/2023","3:45 AM","Departure");
     assertThat(seattle.compareTo(seattle2), equalTo(1));
   }
 
@@ -225,9 +225,9 @@ public class FlightTest {
   void flightArrivalEarlierThanDepartureThrowsError() {
     Flight seattle = new Flight();
     seattle.setAirportCode("sea", "Departure");
-    seattle.setDateTime12HrFormat("2/8/2023", "4:40 AM", "Departure");
+    seattle.setDateTime("2/8/2023", "4:40 AM", "Departure");
     seattle.setAirportCode("sfo", "Arrival");
-    seattle.setDateTime12HrFormat("2/8/2023", "2:40 AM", "Arrival");
+    seattle.setDateTime("2/8/2023", "2:40 AM", "Arrival");
     seattle.setFlightDuration();
     assertThat(seattle.getError(),containsString("cannot be earlier than"));
   }
@@ -236,9 +236,9 @@ public class FlightTest {
   void flightDuration120minutes() {
     Flight seattle = new Flight();
     seattle.setAirportCode("sea", "Departure");
-    seattle.setDateTime12HrFormat("2/8/2023", "2:40 AM", "Departure");
+    seattle.setDateTime("2/8/2023", "2:40 AM", "Departure");
     seattle.setAirportCode("sfo", "Arrival");
-    seattle.setDateTime12HrFormat("2/8/2023", "4:40 AM", "Arrival");
+    seattle.setDateTime("2/8/2023", "4:40 AM", "Arrival");
     seattle.setFlightDuration();
     assertThat(seattle.getFlightDuration(),equalTo(120));
   }

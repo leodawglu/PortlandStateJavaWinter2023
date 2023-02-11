@@ -77,7 +77,7 @@ public class TextParser implements AirlineParser<Airline> {
           if(s.length<7) err.append("Arrival Time\n");
           throw new IllegalArgumentException(err.toString());
         }
-        Flight fl = new Flight(s[0],s[1],s[2],s[3],s[4],s[5],s[6]);
+        Flight fl = new Flight(s[0],s[1],s[2],s[3],s[4],s[5],s[6],true);
         this.airline.addFlight(fl);
         if(fl.getError().length()!=0){
           System.out.println("Flight information in line " + lineNumber +

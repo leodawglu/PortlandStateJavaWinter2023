@@ -17,12 +17,13 @@ import java.util.Date;
 
 public class Flight extends AbstractFlight implements Comparable<Flight> {
   private final SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:mm a");
-  private final SimpleDateFormat formatter24 = new SimpleDateFormat("MM/dd/yyyy h:mm");
+  private final SimpleDateFormat formatter24 = new SimpleDateFormat("MM/dd/yyyy H:mm");
   private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
   private final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+  private final SimpleDateFormat timeFormat24 = new SimpleDateFormat("H:mm");
   private int flightNumber;
   private int flightDuration;
-  private boolean twelveHrFormat = false;
+  private boolean twelveHrFormat = true;
   private String dep; //Departure Airport 3-letter Code
   private String arr; //Arrival Airport 3-letter Code
   private String depDate;
@@ -56,21 +57,24 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
    * @param aDate Flight arrival Date
    * @param aTime Flight arrival Time
    *
-   *
    * */
-  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime) {
-    setDate(dDate,"Departure");
-    setTime(dTime,"Departure");
-    setDate(aDate, "Arrival");
-    setTime(aTime, "Arrival");
+  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime){
+    setDateTime(dDate,dTime,"Departure");
+    setDateTime(aDate,aTime,"Arrival");
+    setFlightNumber(fN);
     setAirportCode(dep,"Departure");
     setAirportCode(arr, "Arrival");
+    if(error.isEmpty())setFlightDuration();
+  }
+
+  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime, boolean format){
+    if(format)toggle12HrFormat();
+    setDateTime(dDate,dTime,"Departure");
+    setDateTime(aDate,aTime,"Arrival");
     setFlightNumber(fN);
-    if(error.isEmpty()){
-      formatDatetime("Departure");
-      formatDatetime("Arrival");
-      setFlightDuration();
-    }
+    setAirportCode(dep,"Departure");
+    setAirportCode(arr, "Arrival");
+    if(error.isEmpty())setFlightDuration();
   }
 
   /**
@@ -168,31 +172,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
   }
 
   /**
-   * Set Date only if valid
-   * @param input - date String from Constructor
-   * @param type - Departure or Arrival
-   * @throws NullPointerException if input String is null or of length 0
-   * @throws IllegalArgumentException if provided date format is not mm/dd/yyyy
-   * */
-
-  public void setDate(String input, String type){
-    try{
-      if(input == null || input.length()==0)
-        throw new NullPointerException(" date cannot be null.");
-      if(!isValidDate(input))
-        throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): ");
-      if(type.equals("Departure")) this.depDate=input;
-      if(type.equals("Arrival")) this.arrDate=input;
-    }catch(NullPointerException e){
-      error = type + e.getMessage();
-      System.out.println(error);
-    }catch(IllegalArgumentException e){
-      error = type + e.getMessage() +input;
-      System.out.println(error);
-    }
-  }
-
-  /**
    * Ensures time is correct format
    * hh:mm - leading zeros can be ignored
    * */
@@ -200,94 +179,67 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     return input.matches("^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
   }
 
-  /**
-   * Set Time only if valid
-   * @param input - Time String from Constructor
-   * @param type - Departure or Arrival
-   * @throws NullPointerException if input String is null or of length 0
-   * @throws IllegalArgumentException if provided time format is not hh:mm
-   * */
-
-  public void setTime(String input, String type){
-    try{
-      if(input == null || input.length()==0)
-        throw new NullPointerException(" time cannot be null.");
-      if(!isValidTime(input))
-        throw new IllegalArgumentException(" time format incorrect (hh:mm): " +input);
-      if(type.equals("Departure")) this.depTime=input;
-      if(type.equals("Arrival")) this.arrTime=input;
-    }catch(NullPointerException e){
-      error = type + e.getMessage();
-      System.out.println(error);
-    }catch(IllegalArgumentException e){
-      error = type + e.getMessage();
-      System.out.println(error);
-    }
-  }
-
   private boolean isValid12HrMeridiem(String input){
     return input.matches("((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))");
   }
 
-  public void set12hrTrue(){
-    this.twelveHrFormat=true;
+  public void toggle12HrFormat(){
+    if(this.twelveHrFormat)twelveHrFormat=false;
+    else twelveHrFormat= true;
   }
 
   /**
    * Sets Departure and Arrival Date objects
    * @param type Departure or Arrival types
    * @param date String args from user input
-   * @param time STring args from user input
+   * @param time String args from user input
    * */
-  public void setDateTime12HrFormat(String date, String time, String type){
-    time = time.toUpperCase();
-    StringBuilder input = new StringBuilder(date + " " + time);
+  public void setDateTime(String date, String time, String type) {
     try {
-      if(!isValidDate(date))
-        throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): " + date);
-      if(!time.endsWith("AM") && !time.endsWith("PM"))
-        throw new IllegalArgumentException(" time incorrect or missing meridiem AM or PM only!");
-      if(!isValid12HrMeridiem(time))
-        throw new IllegalArgumentException(" time format incorrect (12hr - hh:mm AM/PM): " +time);
+      if (date == null || date.length() == 0)
+        throw new NullPointerException(" date cannot be null.");
+      if (time == null || time.length() == 0)
+        throw new NullPointerException(" time cannot be null.");
 
-      Date d = formatter.parse(input.toString());
-      if(type.equals("Departure")){
-        this.departureDate=d;
+      if (!isValidDate(date))
+        throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): " + date);
+      time = time.toUpperCase();
+      if (twelveHrFormat) {
+        if (!time.endsWith("AM") && !time.endsWith("PM"))
+          throw new IllegalArgumentException(" time incorrect or missing meridiem AM or PM only!");
+        if (!isValid12HrMeridiem(time))
+          throw new IllegalArgumentException(" time format incorrect (12hr - hh:mm AM/PM): " + time);
+      } else {
+        if (!isValidTime(time))
+          throw new IllegalArgumentException(" time format incorrect (hh:mm): " + time);
+      }
+      if (date == null || date.length() == 0 || time == null || time.length() == 0) return;
+
+      String dateTime = date + " " + time;
+      Date d;
+      if (twelveHrFormat) d = formatter.parse(dateTime);
+      else d = formatter24.parse(dateTime);
+
+      if (type.equals("Departure")) {
+        this.departureDate = d;
         this.depDate = dateFormat.format(d);
-        this.depTime = timeFormat.format(d);
       }
-      if(type.equals("Arrival")){
-        this.arrivalDate=d;
-        this.arrDate = date;
-        this.arrTime = time;
+      if (type.equals("Arrival")) {
+        this.arrivalDate = d;
+        this.arrDate = dateFormat.format(d);
       }
-    }catch (ParseException e) {
-      error = "Failed to parse " + type + " date and time: " + input.toString();
+    } catch (NullPointerException e) {
+      error = type + e.getMessage();
       System.out.println(error);
-    }catch(IllegalArgumentException e){
+    } catch (ParseException e) {
+      error = "Failed to parse " + type + " date " + date + " and time " + time;
+      System.out.println(error);
+    } catch (IllegalArgumentException e) {
       error = type + e.getMessage();
       System.out.println(error);
     }
   }
 
-  /**
-   * Used to format a Date class object to assign to departureDate/arrivalDate objects
-   * Date time format is 24hrs
-   * @param type Departure or Arrival datetime
-   * */
-  public void formatDatetime(String type){
-    StringBuilder dateTime;
-    if(type.equals("Departure")) dateTime = new StringBuilder(this.getDepDate() + " " + this.getDepTime());
-    else dateTime = new StringBuilder(this.getArrDate() + " " + this.getArrTime());
-    try {
-      Date d = formatter24.parse(dateTime.toString());
-      if(type.equals("Departure")) this.departureDate=d;
-      if(type.equals("Arrival")) this.arrivalDate=d;
-    } catch (ParseException e) {
-      error = "Failed to parse date and time: " + dateTime.toString();
-      System.out.println(error);
-    }
-  }
   /**
    * @return String Departure Date and Time
    * */
@@ -297,11 +249,11 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     return formatter2.format(getDeparture());
   }
 
+  /**
+   * @return Date object for Departure datetime
+   * */
   @Override
   public Date getDeparture(){
-    if(departureDate==null){
-      formatDatetime("Departure");
-    }
     return departureDate;
   }
   /**
@@ -319,9 +271,33 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
 
 
   /**
-   * @return String Departure Time
+   * @return String Departure Time in 12-hr am/pm format
    * */
-  public String getDepTime(){return depTime;}
+  public String getDepTime(){
+    if(this.depTime==null)this.depTime = timeFormat.format(departureDate);
+    return depTime;
+  }
+
+  /**
+   * @return String Departure Time in 24-hr am/pm format
+   * */
+  public String getDepTime24(){
+    return timeFormat24.format(departureDate);
+  }
+
+  /**
+   * @return String Arrival Time in 12-hr format
+   * */
+  public String getArrTime(){
+    if(this.arrTime==null)this.arrTime = timeFormat.format(arrivalDate);
+    return arrTime;
+  }
+  /**
+   * @return String Arrival Time in 24-hr format
+   * */
+  public String getArrTime24(){
+    return timeFormat24.format(arrivalDate);
+  }
 
   /**
    * @return String Arrival Airport 3-letter code
@@ -345,18 +321,14 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
    * */
   public String getArrDate(){return arrDate;}
 
+  /**
+   * @return Date object Arrival datetime
+   * */
   @Override
   public Date getArrival(){
-    if(arrivalDate==null){
-      formatDatetime("Arrival");
-    }
     return arrivalDate;
   }
 
-  /**
-   * @return String Arrival Time
-   * */
-  public String getArrTime(){return arrTime;}
   public String getError(){
     return error;
   }
