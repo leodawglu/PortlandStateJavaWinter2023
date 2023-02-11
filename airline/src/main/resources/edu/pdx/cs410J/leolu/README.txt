@@ -1,4 +1,4 @@
-#Project2
+# Airline Project3
 Is an Airline Flight Management System - A Java Command Line Program
 
 A simple command line program that creates an airline and a flight with a user argument. It can also read/write the airline and flight to a text file.
@@ -26,11 +26,13 @@ args are (in this order):
 airline          The name of the airline
 flightNumber     The flight number (Positive Numbers only)
 src              Three-letter code of departure airport (Alphabets Only)
-depart           Departure date and time (mm/dd/yyyy hh:mm format only) 
+depart           Departure date and time (mm/dd/yyyy hh:mm am/pm 12hr format only)
 dest             Three-letter code of departure airport (Alphabets Only)
-arrive           Arrival date and time (mm/dd/yyyy hh:mm format only)  
+arrive           Arrival date and time (mm/dd/yyyy hh:mm am/pm 12hr format only)
 
 Options:
+    -pretty file     Pretty print the airline’s flights to
+                     a text file or standard out (file -)
 	-textFile file   Where to read/write the airline info
 	-print           Prints a description of the new flight
 	-README          Prints a README for this project and exits
@@ -41,9 +43,10 @@ For Example, airline: "Hello Airways"
 
 Examples:
 
--textFile someRandomFile.txt -print "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
--textFile someRandomFile.txt "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
--print "EVA Air" 25 SEA 1/26/2023 10:10 TPE 1/27/2023 15:30
+-textFile someRandomFile.txt -print "EVA Air" 25 SEA 1/26/2023 0:10 am TPE 1/27/2023 5:30 pm
+-textFile someRandomFile.txt "EVA Air" 25 SEA 1/26/2023 0:10 am TPE 1/27/2023 5:30 pm
+-print "EVA Air" 25 SEA 1/26/2023 10:10 am TPE 1/27/2023 5:30 pm
+-print -textFile someFile.txt -pretty - "EVA Air" 52 TPE 1/26/2023 12:10 am IAH 1/26/2023 12:40 pm
 -README
 
 ## Built With

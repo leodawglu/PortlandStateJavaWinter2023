@@ -5,24 +5,26 @@ args are (in this order):
 airline          The name of the airline
 flightNumber     The flight number (Positive Numbers only)
 src              Three-letter code of departure airport (Alphabets Only)
-depart           Departure date and time (mm/dd/yyyy hh:mm format only) 
+depart           Departure date and time (mm/dd/yyyy hh:mm am/pm 12hr format only)
 dest             Three-letter code of departure airport (Alphabets Only)
-arrive           Arrival date and time (mm/dd/yyyy hh:mm format only)  
+arrive           Arrival date and time (mm/dd/yyyy hh:mm am/pm 12hr format only)
 
 Options:
+    -pretty file     Pretty print the airline’s flights to
+                     a text file or standard out (file -)
 	-textFile file   Where to read/write the airline info
 	-print           Prints a description of the new flight
 	-README          Prints a README for this project and exits
 
-
+Note that time must be specified in 12-hr format HH:MM AM/PM e.g.: 11:30 am
 Note that multi-word arguments must be delimited with double quotes. 
 For Example, airline: "Hello Airways"  
 
 Examples:
 
--textFile someRandomFile.txt -print "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
--textFile someRandomFile.txt "EVA Air" 25 SEA 1/26/2023 0:10 TPE 1/27/2023 5:30
--print "EVA Air" 25 SEA 1/26/2023 10:10 TPE 1/27/2023 15:30
+-textFile someRandomFile.txt -print "EVA Air" 25 SEA 1/26/2023 0:10 am TPE 1/27/2023 5:30 pm
+-textFile someRandomFile.txt "EVA Air" 25 SEA 1/26/2023 0:10 am TPE 1/27/2023 5:30 pm
+-print "EVA Air" 25 SEA 1/26/2023 10:10 am TPE 1/27/2023 5:30 pm
 -README
 
 |****************************--END OF USAGE--****************************|

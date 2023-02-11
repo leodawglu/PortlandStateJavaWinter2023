@@ -29,9 +29,9 @@ public class Project3 {
             "*------------*Welcome to the Airline Flight Management System*-----------*\n" +
             "*------------------------------------------------------------------------*";
     static final String pretty =
-            "*------------------------------------------------------------------------*\n" +
-            "^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Pretty Printing~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n" +
-            "*------------------------------------------------------------------------*";
+            "*---------------------------------------------------------*\n" +
+            "^~~~~~~~~~~~~~~~~~~~~~~Pretty Printing~~~~~~~~~~~~~~~~~~~~^\n" +
+            "*---------------------------------------------------------*";
     static final String end = "*----------------------------*End of Program*----------------------------*";
 
 
@@ -76,6 +76,7 @@ public class Project3 {
         if anything fails, exit program
         */
         if(!newCreateAirlineAndFlight(args,ex)) return;
+        if(ex.printFlight) printFlight(ex);
         /*
         try to read txt file
         if anything fails, exit program
@@ -86,7 +87,6 @@ public class Project3 {
         if(ex.pStatus==-2 || ex.pStatus==-1){
             if(!prettyPrint(ex.pStatus, ex))return;
         }
-        if(ex.printFlight) printFlight(ex);
         System.out.println(end);
     }
 
@@ -108,6 +108,7 @@ public class Project3 {
                     out = new FileWriter(file,true);
                 }
             }else if(status== -2){
+                System.out.println(pretty);
                 out = new PrintWriter(System.out);
             }else{
                 System.err.println("Incorrect Status code!");
@@ -362,7 +363,7 @@ public class Project3 {
      * */
     private static void printFlight(Project3 curr){
         Flight fl = curr.aFlight;
-        System.out.println("*--------------------------*Airline and Flights*-------------------------*");
+        System.out.println("*----------------------------*Flight Entered*----------------------------*");
         System.out.println(curr.anAirline.getName() + " " +fl.getNumber());
         System.out.println("Departing From: " + fl.getSource());
         System.out.println("Departure Date: " + fl.getDepDate());
@@ -370,6 +371,7 @@ public class Project3 {
         System.out.println("Bound For     : " + fl.getDestination());
         System.out.println("Arrival Date  : " + fl.getArrDate());
         System.out.println("Arrival Time  : " + fl.getArrTime());
+        System.out.println("*------------------------------------------------------------------------*");
     }
 
     /**

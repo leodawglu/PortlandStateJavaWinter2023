@@ -47,7 +47,7 @@ class Project3Test {
       assertThat(readme, not(nullValue()));
       BufferedReader reader = new BufferedReader(new InputStreamReader(readme));
       String line = reader.readLine();
-      assertThat(line, containsString("Project2"));
+      assertThat(line, containsString("Airline"));
     }
   }
 
