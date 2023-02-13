@@ -382,6 +382,7 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
     }catch(IllegalArgumentException e){
       error = "Arrival date & time " + formatter.format(this.getArrival()) +
               " cannot be earlier than Departure date & time " + formatter.format(this.getDeparture());
+      System.out.println(error);
     }catch(NullPointerException e){
 
     }

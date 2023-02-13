@@ -58,9 +58,9 @@ public class Project3 {
 
     public static void subMainForTesting(String[] args)throws IOException{
         System.out.println(welcome);
-        printFile(usageFile);
         if(args.length==0){
-            System.out.println("No command line arguments. Try -README for more details");
+            System.out.println("No command line arguments. Try -README for more details or review usage below.");
+            printFile(usageFile);
             return;
         }
         Project3 ex = new Project3();
