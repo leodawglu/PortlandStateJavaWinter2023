@@ -13,12 +13,7 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 public class XmlParser implements AirlineParser<Airline> {
     private Airline airline;
@@ -27,10 +22,20 @@ public class XmlParser implements AirlineParser<Airline> {
     private StringBuilder err = new StringBuilder();
     private Document xml;
 
+    /**
+     * Constructor for XmlParser
+     * @param filepath - only accepts a string filepath
+     * */
     public XmlParser(String filepath){
         this.filepath=filepath;
     }
 
+    /**
+     * parse() method
+     * @return Airline object when the XML file is successfully parsed
+     * @return null when any flight information is invalid
+     * @throws ParserException if the XML file path is invalid
+     * */
     public Airline parse() throws ParserException{
         try {
             if(filepath.isEmpty()) throw new ParserException("File path is empty");
@@ -42,11 +47,8 @@ public class XmlParser implements AirlineParser<Airline> {
             builder.setEntityResolver(helper);
             //xml = builder.parse(this.getClass().getResourceAsStream(filepath));
             xml = builder.parse(new File(filepath));
-        } catch (SAXException | IOException e) {
-            throw new ParserException("Please enter a valid XML file path.",e);
-        } catch(ParserException e){
+        } catch (SAXException | IOException | ParserException e) {
             err.append(e.getMessage());
-            /**KEEP?*/
             throw new ParserException("Please enter a valid XML file path.",e);
         }
 
@@ -58,8 +60,10 @@ public class XmlParser implements AirlineParser<Airline> {
         for(int i=0; i<innerFlights.getLength(); i++){
             Flight fl = buildFlight(innerFlights.item(i));
             if(fl.getError().length()!=0){
-                System.out.println("Flight information for the number " + i
-                        + " of XML file is formatted incorrectly, please review and correct the file.");
+                err.append("Flight information for the number ");
+                err.append(i+1);
+                err.append(" of XML file is formatted incorrectly, please review and correct the file.");
+                System.out.println(err);
                 return null;
             }
             this.airline.addFlight(fl);
@@ -68,17 +72,29 @@ public class XmlParser implements AirlineParser<Airline> {
         return airline;
     }
 
+    /**
+     * buildDoc method
+     * @param factory DocumentBuilderFactor
+     * @return a DocumentBuilder object
+     * */
     private DocumentBuilder buildDoc(DocumentBuilderFactory factory){
         DocumentBuilder builder =
                 null;
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
+            err.append("DocumentBuilderFactory could not produce a builder.");
+            System.out.println(err);
             throw new RuntimeException(e);
         }
         return builder;
     }
 
+    /**
+     * createDate method
+     * @param date accepts an Element object
+     * @return String object with the date in MM/DD/YYYY format
+     * */
     private String createDate(Element date){
         String day = date.getAttribute("day");
         String month = date.getAttribute("month");
@@ -87,6 +103,11 @@ public class XmlParser implements AirlineParser<Airline> {
         return sb.toString();
     }
 
+    /**
+     * createTime method
+     * @param time accepts an Element object
+     * @return String object with the time in 24hr HH:MM format
+     * */
     private String createTime(Element time){
         String hour = time.getAttribute("hour");
         int minute = Integer.parseInt(time.getAttribute("minute"));
@@ -96,6 +117,13 @@ public class XmlParser implements AirlineParser<Airline> {
         return sb.toString();
     }
 
+    /**
+     * datetime method
+     * @param flElement accepts an Element that is a flight
+     * @param type accepts a String object that declares that the flight is for depart or arrive
+     * @return new String[]{date, time} object
+     * calls createDate and createTime methods
+     * */
     private String[] datetime(Element flElement, String type){
         Node n = flElement.getElementsByTagName(type).item(0);
         Element datetime = (Element)n;
@@ -107,6 +135,14 @@ public class XmlParser implements AirlineParser<Airline> {
         String time = createTime(timeElement);
         return new String[]{date,time};
     }
+
+    /**
+     * buildFlight method
+     * Constructs a Flight object with the flight number, departure & arrival airport,
+     * date & time information
+     * @param fl accepts a Node object
+     * @return Flight object
+     * */
     private Flight buildFlight(Node fl){
         if(fl==null)return null;
         Element flElement = (Element)fl;
@@ -120,4 +156,10 @@ public class XmlParser implements AirlineParser<Airline> {
         return new Flight(number,src,depart[0],depart[1],dest,arrive[0],arrive[1],true);
     }
 
+    /**
+     * @return String of stored error message
+     * */
+    public String getErrorMsg(){
+        return err.toString();
+    }
 }
