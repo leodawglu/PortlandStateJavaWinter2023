@@ -7,10 +7,8 @@
 package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.AirlineDumper;
-import edu.pdx.cs410J.ParserException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,7 +31,8 @@ public class XmlDumper implements AirlineDumper<Airline> {
     }
 
     /**
-     * @param airways Accepts an airline object and dumps the airline and its flight information into file
+     * @param airways Accepts an airline object
+     * dumps the airline and its flight information into an XML file
      * */
     @Override
     public void dump(Airline airways) {
@@ -44,7 +43,6 @@ public class XmlDumper implements AirlineDumper<Airline> {
         }
         this.airways = airways;
         try {
-            if(filepath.isEmpty()) throw new IOException("File path is empty");
             AirlineXmlHelper helper = new AirlineXmlHelper();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setValidating(true);
@@ -57,13 +55,16 @@ public class XmlDumper implements AirlineDumper<Airline> {
             Element airline = doc.createElement("airline");
             Element name = doc.createElement("name");
             name.setTextContent(this.airways.getName());
+            airline.appendChild(name);
+
             for(Flight fl:this.airways.getFlights()){
-                airline.appendChild(createFlight(doc,fl));
+                airline.appendChild(createFlightElements(doc,fl));
             }
             doc.appendChild(airline);
 
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer t = tf.newTransformer();
+            t.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd");
             t.setOutputProperty(OutputKeys.INDENT, "yes");
             t.setOutputProperty(OutputKeys.METHOD, "xml");
             t.setOutputProperty(OutputKeys.ENCODING, "us-ascii");
@@ -75,9 +76,6 @@ public class XmlDumper implements AirlineDumper<Airline> {
             t.transform(source,result);
             System.out.println("XML file for " + this.airways.getName() + " created successfully.");
 
-        } catch (IOException e) {
-            err.append(e.getMessage());
-            //throw new ParserException("Please enter a valid XML file path.",e);
         } catch (ParserConfigurationException e) {
             err.append("DocumentBuilderFactory could not produce a builder.");
             System.err.println(err);
@@ -94,17 +92,13 @@ public class XmlDumper implements AirlineDumper<Airline> {
 
     }
 
-    private Element createFlight(Document doc, Flight fl){
-        if(fl==null){
-            err.append("Flight object cannot be null for createFlight method! Please amend code construction.");
-            System.err.println(err);
-            return null;
-        }
-        if(doc==null){
-            err.append("Document object cannot be null for createFlight method! Please amend code construction.");
-            System.err.println(err);
-            return null;
-        }
+    /**
+     * @param doc Accepts document object created by Document Builder
+     * @param fl Accepts a flight object
+     * createFlight method creates the XML elements according to details within a flight object
+     * @return Element object which stores the flight elements created
+     * */
+    private Element createFlightElements(Document doc, Flight fl){
         Element flight = doc.createElement("flight");
         Element number = doc.createElement("number");
         number.setTextContent(Integer.toString(fl.getNumber()));
@@ -113,43 +107,36 @@ public class XmlDumper implements AirlineDumper<Airline> {
         Element src = doc.createElement("src");
         src.setTextContent(fl.getSource());
         flight.appendChild(src);
-        Element depart = createDatetime("depart",doc, fl);
+        Element depart = createDatetimeElements("depart",doc, fl);
         flight.appendChild(depart);
 
         /*Arrival*/
         Element dest = doc.createElement("dest");
         dest.setTextContent(fl.getDestination());
         flight.appendChild(dest);
-        Element arrive = createDatetime("arrive",doc, fl);
+        Element arrive = createDatetimeElements("arrive",doc, fl);
         flight.appendChild(arrive);
 
         return flight;
     }
 
-    private Element createDatetime(String type, Document doc, Flight fl){
-        if(fl==null){
-            err.append("Flight object provided for XmlDumper datetime method cannot be null!");
-            System.err.println(err);
-            return null;
-        }
-        if(doc == null){
-            err.append("Document object provided for XmlDumper datetime method cannot be null!");
-            System.err.println(err);
-            return null;
-        }
+    /**
+     * @param fl Accepts flight object
+     * @param type String declares whether the datetime elements are created for depart or arrive
+     * @param doc Accepts Document object created by DocumentBuilder
+     * createDateTime method creates date and time elements for either the depart or arrive info of flight
+     * @return an Element object which stores the date and time elements created
+     * */
+    private Element createDatetimeElements(String type, Document doc, Flight fl){
         String[] hoursMins;
         String[] monthDayYear;
         Element direction = doc.createElement(type);
         if(type.equalsIgnoreCase("depart")){
             hoursMins = fl.getDepTime24().split(":");
             monthDayYear = fl.getDepDate().split("/");
-        } else if (type.equalsIgnoreCase("arrive")) {
+        } else { // "arrive"
             hoursMins = fl.getArrTime24().split(":");
             monthDayYear = fl.getArrDate().split("/");
-        } else {
-            err.append("Wrong input type for XmlDumper datetime method. Must be depart or arrive!");
-            System.err.println(err);
-            return null;
         }
         Element date = doc.createElement("date");
         date.setAttribute("day",monthDayYear[1]);
@@ -164,4 +151,19 @@ public class XmlDumper implements AirlineDumper<Airline> {
         return direction;
     }
 
+    /**
+     * Deletes the XML file using the filepath associated with the XmlDumper object
+     * */
+    public void deleteXmlFile(){
+        File temp = new File(filepath);
+        temp.delete();
+        System.out.println("Deleted XML file for " + airways.getName() +" successfully.");
+    }
+
+    /**
+     * @return String of error message stored within XmlDumper object
+     * */
+    public String getErrorMsg(){
+        return err.toString();
+    }
 }

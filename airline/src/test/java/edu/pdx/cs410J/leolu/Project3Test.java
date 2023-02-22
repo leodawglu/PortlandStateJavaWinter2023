@@ -205,7 +205,8 @@ class Project3Test {
             "Bound For     : SEA\n" +
             "Arrival Date  : 05/20/2023\n" +
             "Arrival Time  : 12:10 PM\n" +
-            "Duration      : 35hrs 30mins"));
+            "Duration HH|MM: 35hrs 30mins\n" +
+            "Duration(mins): 2130"));
     System.setOut(System.out);
   }
 
@@ -217,24 +218,6 @@ class Project3Test {
 
     Project3 proj = new Project3();
     proj.subMainForTesting(args);
-    //File file = proj.getpFile();
-    /*
-    BufferedReader reader = new BufferedReader(new FileReader(proj.getpFile()));
-    String contents="";
-    String line;
-    while ((line = reader.readLine()) != null) {
-      contents += line;
-      contents += "\n";
-    }
-    reader.close();
-    assertThat(contents,containsString("Flight Number : 25\n" +
-            "Departing From: TPE\n" +
-            "Departure Date: 05/19/2023\n" +
-            "Departure Time: 12:40 AM\n" +
-            "Bound For     : SEA\n" +
-            "Arrival Date  : 05/20/2023\n" +
-            "Arrival Time  : 12:10 PM\n" +
-            "Duration      : 35hrs 30mins"));*/
   }
   @Test
   void prettyPrintPrintToFile(@TempDir File tempDir) throws IOException{
@@ -255,7 +238,7 @@ class Project3Test {
     reader.close();
     assertThat(contents, containsString(air.getName()));
     assertThat(contents, containsString("Flight Number : "));
-    assertThat(contents, containsString("Duration      : "));
+    assertThat(contents, containsString("Duration HH|MM: "));
 
   }
 
