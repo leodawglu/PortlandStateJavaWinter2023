@@ -45,7 +45,6 @@ public class XmlParser implements AirlineParser<Airline> {
             DocumentBuilder builder = buildDoc(factory);
             builder.setErrorHandler(helper);
             builder.setEntityResolver(helper);
-            //xml = builder.parse(this.getClass().getResourceAsStream(filepath));
             xml = builder.parse(new File(filepath));
         } catch (SAXException | IOException | ParserException e) {
             err.append(e.getMessage());

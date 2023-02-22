@@ -36,7 +36,8 @@ public class PrettyPrinter implements AirlineDumper<Airline> {
                 pw.println("Bound For     : " + fl.getDestination());
                 pw.println("Arrival Date  : " + fl.getArrDate());
                 pw.println("Arrival Time  : " + fl.getArrTime());
-                pw.println("Duration      : " + fl.getFlightDuration()/60 + "hrs " + fl.getFlightDuration()%60 + "mins");
+                pw.println("Duration HH|MM: " + fl.getFlightDuration()/60 + "hrs " + fl.getFlightDuration()%60 + "mins");
+                pw.println("Duration(mins): " + fl.getFlightDuration());
             }
             pw.println("*---------------------------END---------------------------*");
             pw.flush();

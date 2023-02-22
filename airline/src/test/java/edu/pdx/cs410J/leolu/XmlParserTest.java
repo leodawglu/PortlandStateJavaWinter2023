@@ -2,9 +2,6 @@ package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.ParserException;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXParseException;
-
-import java.io.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -37,6 +34,5 @@ public class XmlParserTest {
         parser.parse();
         String error = parser.getErrorMsg();
         assertThat(error, containsString("XML file is formatted incorrectly"));
-        //assertThrows(ParserException.class, ()->parser.parse());
     }
 }

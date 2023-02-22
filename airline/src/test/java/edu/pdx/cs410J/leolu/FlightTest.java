@@ -242,4 +242,46 @@ public class FlightTest {
     seattle.setFlightDuration();
     assertThat(seattle.getFlightDuration(),equalTo(120));
   }
+
+  @Test
+  void canParseFlightDepartureArrival24TimeIntoHoursAndMins() {
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea", "Departure");
+    seattle.setDateTime("2/8/2023", "2:40 AM", "Departure");
+    seattle.setAirportCode("tpe", "Arrival");
+    seattle.setDateTime("2/8/2023", "7:01 pM", "Arrival");
+    seattle.setFlightDuration();
+    String[] departure = seattle.getDepTime24().split(":");
+    int dH = Integer.parseInt(departure[0]), dM = Integer.parseInt(departure[1]);
+    String[] arrival = seattle.getArrTime24().split(":");
+    int aH = Integer.parseInt(arrival[0]), aM = Integer.parseInt(arrival[1]);
+    System.out.println(dH + " | " + dM);
+    System.out.println(aH + " | " + aM);
+    assertThat(dH,equalTo(2));
+    assertThat(dM,equalTo(40));
+    assertThat(aH,equalTo(19));
+    assertThat(aM,equalTo(1));
+  }
+
+  @Test
+  void canParseFlightDepartureArrivalDateIntoMonthDayYear() {
+    Flight seattle = new Flight();
+    seattle.setAirportCode("sea", "Departure");
+    seattle.setDateTime("2/8/2023", "2:40 AM", "Departure");
+    seattle.setAirportCode("tpe", "Arrival");
+    seattle.setDateTime("2/8/2023", "7:01 pM", "Arrival");
+    seattle.setFlightDuration();
+    String[] departure = seattle.getDepDate().split("/");
+    int dMonth = Integer.parseInt(departure[0]), dDay = Integer.parseInt(departure[1]), dYear = Integer.parseInt(departure[2]);
+    String[] arrival = seattle.getArrDate().split("/");
+    int aMonth = Integer.parseInt(arrival[0]), aDay = Integer.parseInt(arrival[1]), aYear = Integer.parseInt(arrival[2]);
+    System.out.println(dMonth + " | " + dDay + " | " + dYear);
+    System.out.println(aMonth + " | " + aDay + " | " + aYear);
+    assertThat(dMonth,equalTo(2));
+    assertThat(dDay,equalTo(8));
+    assertThat(dYear,equalTo(2023));
+    assertThat(aMonth,equalTo(2));
+    assertThat(aDay,equalTo(8));
+    assertThat(aYear,equalTo(2023));
+  }
 }
