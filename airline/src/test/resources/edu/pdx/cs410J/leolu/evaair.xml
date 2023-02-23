@@ -16,19 +16,6 @@
         </arrive>
     </flight>
     <flight>
-        <number>52</number>
-        <src>TPE</src>
-        <depart>
-            <date day="19" month="05" year="2023"/>
-            <time hour="22" minute="10"/>
-        </depart>
-        <dest>IAH</dest>
-        <arrive>
-            <date day="20" month="05" year="2023"/>
-            <time hour="21" minute="40"/>
-        </arrive>
-    </flight>
-    <flight>
         <number>25</number>
         <src>TPE</src>
         <depart>

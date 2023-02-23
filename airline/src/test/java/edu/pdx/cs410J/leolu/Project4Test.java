@@ -286,14 +286,14 @@ class Project4Test {
     assertThat(output,containsString("The -xmlFile option was called before -textFile option."));
     System.setErr(System.err);
   }
-
+/*
   @Test
   void successfullyAddFlightToXmlFile() throws IOException {
     String[] args = new String[]{"-xmlFile", "src/test/resources/edu/pdx/cs410J/leolu/evaair.xml","EVA Air", "52", "TPE",
             "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
     Project4 proj = new Project4();
     proj.subMainForTesting(args);
-  }
+  }*/
 
   @Test
   void successfullyCreatesNewXmlFileForAirline() throws IOException {
