@@ -8,23 +8,16 @@
  * */
 package edu.pdx.cs410J.leolu;
 
-import edu.pdx.cs410J.InvokeMainTestCase;
-import edu.pdx.cs410J.ParserException;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * A unit test for code in the <code>Project2</code> class.  This is different
@@ -137,9 +130,9 @@ class Project3Test {
     Project3 proj = new Project3();
 
     proj.optionChecker("-pretty",proj);
-    assertEquals(proj.pStatus,1);
+    assertEquals(proj.prettyStatus,1);
     proj.optionChecker("-",proj);
-    assertEquals(proj.pStatus,-2);
+    assertEquals(proj.prettyStatus,-2);
     proj.optionChecker("-pretty",proj);
     String output = baos.toString();
     assertThat(output,containsString("can only be called once."));
@@ -154,7 +147,7 @@ class Project3Test {
     Project3 proj = new Project3();
 
     proj.optionChecker("-pretty",proj);
-    assertEquals(proj.pStatus,1);
+    assertEquals(proj.prettyStatus,1);
     proj.optionChecker("-pretty",proj);
     String output = baos.toString();
     assertThat(output,containsString("should be followed by a file name"));
@@ -172,20 +165,6 @@ class Project3Test {
     assertThat(output,containsString("Incorrect Status code!"));
     System.setErr(System.err);
   }
-/*
-  @Test
-  void prettyPrintMethodInvokedWithBadFilePathThrowsIOException(){
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(baos);
-    System.setErr(ps);
-    Project3 proj = new Project3();
-    proj.pFilePath="petty.txt";
-    proj.anAirline = new Airline("Test");
-    proj.prettyPrint(-2,proj);
-    String output = baos.toString();
-    assertThat(output,containsString("Bad file path:"));
-    System.setErr(System.err);
-  }*/
 
   @Test
   void prettyPrintMethodPrintToStdOut() throws IOException {
@@ -244,7 +223,6 @@ class Project3Test {
 
   @Test
   void prettyPrintAnAirlineToStdOut() throws IOException {
-    //String path=getClass().getResource("prettywriting.txt").getPath();
     String airpath=getClass().getResource("evaair.txt").getPath();
     String[] args = new String[]{"-textFile",airpath,"-pretty","-","-print","EVA Air", "52", "TPE",
             "05/19/2023", "12:20","am", "IAH", "05/19/2023", "2:00","pm"};
@@ -264,4 +242,82 @@ class Project3Test {
     proj.subMainForTesting(args);
   }
 
+  @Test
+  void xmlFileFollowedByDashPrintsErr() throws IOException {
+    String[] args = new String[]{"-xmlFile", "-","EVA Air", "25", "TPE",
+            "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+
+    String output = baos.toString();
+    assertThat(output,containsString("The -xmlFile option should be followed by a xml file name."));
+    System.setErr(System.err);
+  }
+
+  @Test
+  void xmlFileCalledAfterTextFilePrintsErr() throws IOException {
+    String[] args = new String[]{"-textFile","sometext.txt","-xmlFile", "somexml.xml","EVA Air", "25", "TPE",
+            "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+
+    String output = baos.toString();
+    assertThat(output,containsString("The -textFile option was called before -xmlFile option."));
+    System.setErr(System.err);
+  }
+
+  @Test
+  void textFileCalledAfterXmlFilePrintsErr() throws IOException {
+    String[] args = new String[]{"-xmlFile", "somexml.xml","-textFile","sometext.txt","EVA Air", "25", "TPE",
+            "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+
+    String output = baos.toString();
+    assertThat(output,containsString("The -xmlFile option was called before -textFile option."));
+    System.setErr(System.err);
+  }
+
+  @Test
+  void successfullyAddFlightToXmlFile() throws IOException {
+    String[] args = new String[]{"-xmlFile", "src/test/resources/edu/pdx/cs410J/leolu/evaair.xml","EVA Air", "52", "TPE",
+            "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+  }
+
+  @Test
+  void successfullyCreatesNewXmlFileForAirline() throws IOException {
+    String path="src/test/resources/edu/pdx/cs410J/leolu/taiwanair.xml";
+    String[] args = new String[]{"-xmlFile",path,"Taiwan Air", "52", "TPE",
+            "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+    File temp = new File(path);
+    temp.delete();
+  }
+
+  @Test
+  void differentAirlineNameBetweenXMLFileAndArgsPrintErr() throws IOException {
+    String[] args = new String[]{"-xmlFile", "src/test/resources/edu/pdx/cs410J/leolu/evaair.xml","EVAV Air", "52", "TPE",
+            "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    System.setErr(ps);
+    Project3 proj = new Project3();
+    proj.subMainForTesting(args);
+
+    String output = baos.toString();
+    assertThat(output,containsString("does not match"));
+    System.setErr(System.err);
+  }
 }

@@ -17,7 +17,7 @@ public class XmlDumperTest {
         Flight f2 = new Flight("27","SEA","01/23/2023","22:40","PDX","01/23/2023", "23:40", true);
         airline.addFlight(f1);
         airline.addFlight(f2);
-        XmlDumper dumper = new XmlDumper("src/test/resources/edu/pdx/cs410J/leolu/first-airline.xml");
+        XmlDumper dumper = new XmlDumper("src/test/resources/edu/pdx/cs410J/leolu/first-airline");
         dumper.dump(airline);
         dumper.deleteXmlFile();
     }

@@ -1,3 +1,9 @@
+/**
+ * The {code XmlParser} class
+ * @author Leo Lu
+ * PSU CS510 Advanced Java Winter 2023
+ *
+ * */
 package edu.pdx.cs410J.leolu;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * <code>XmlParser</code> class for Project 4.
+ * Validates XML file according to provided DTD:
+ * http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd
+ * File will only be parsed when it is valid.
+ * An airline object is produced from the airline and flight details within the xml file.
+ */
 public class XmlParser implements AirlineParser<Airline> {
     private Airline airline;
     final String DTD = "";
@@ -61,7 +74,7 @@ public class XmlParser implements AirlineParser<Airline> {
             if(fl.getError().length()!=0){
                 err.append("Flight information for the number ");
                 err.append(i+1);
-                err.append(" of XML file is formatted incorrectly, please review and correct the file.");
+                err.append(" of XML file does not conform to the DTD, please review and correct the file.");
                 System.out.println(err);
                 return null;
             }

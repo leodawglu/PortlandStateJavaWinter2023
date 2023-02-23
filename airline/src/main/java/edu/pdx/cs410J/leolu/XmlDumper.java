@@ -19,7 +19,9 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 
 /**
- * A skeletal implementation of the <code>XmlDumper</code> class for Project 2.
+ * <code>XmlDumper</code> class for Project 4.
+ * Produces valid XML file according to provided DTD:
+ * http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd
  */
 public class XmlDumper implements AirlineDumper<Airline> {
 

@@ -12,11 +12,9 @@ import edu.pdx.cs410J.ParserException;
 import java.io.*;
 
 /**
- * A skeletal implementation of the <code>TextParser</code> class for Project 2.
+ *  <code>TextParser</code> class
  *
- * TO DO:
- *
- * 2. Be able to read flights line by line
+ * Read flights line by line
  * flight number, departure, departure date, departure time, arrival, arrival date, arrival time
  * should any details be incorrect, print errors, then exit according to specification
  * perhaps print the entire line that's wrong, and use a pointer to locate what's wrong
@@ -81,7 +79,8 @@ public class TextParser implements AirlineParser<Airline> {
         this.airline.addFlight(fl);
         if(fl.getError().length()!=0){
           System.out.println("Flight information in line " + lineNumber +
-                  " of file is not formatted correctly, please review information above.");
+                  " of txt file is not formatted correctly, please review information above.");
+          System.err.println("Provided txt file is malformed.");
           return null;
         }
         ++lineNumber;
@@ -90,7 +89,7 @@ public class TextParser implements AirlineParser<Airline> {
       return this.airline;
 
     }catch (ParserException e) {
-      throw new ParserException("Malformed airline file", e);
+      throw new ParserException("Malformed airline txt file", e);
     }catch(IOException e){
       System.err.println("An error occurred: " + e.getMessage());
     }catch(IllegalArgumentException e){

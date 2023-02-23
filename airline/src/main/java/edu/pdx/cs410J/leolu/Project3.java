@@ -16,10 +16,11 @@ public class Project3 {
     boolean printFlight = false, readMe = false, tooMany=false;
     Airline anAirline;
     Flight aFlight;
-    String filePath = "", pFilePath = "";
+    String txtFilePath = "", prettyFilePath = "", xmlFilePath="";
     File pFile = null;
-    int argCount=0,idx=0, fStatus = 0, pStatus = 0;
-    //pStatus: 0 - not called, 1 - called but no file/std out, -1 - file specified, -2 - to std out
+    int argCount=0,idx=0, txtStatus = 0, prettyStatus = 0, xmlStatus = 0;
+    //prettyStatus: 0 - not called, 1 - called but no file/std out, -1 - file specified, -2 - to std out
+    //xmlStatus: 0 - not called, 1 - called but no filepath, -1 - file specified
     static final int min=8; // total number of airline and flight argument strings
     int min12hr=2; //arg index adjustment for 12hr format inputs: 0 for 24hr, 2 for 12hr format
     static final String readMeFile="README.txt";
@@ -81,11 +82,14 @@ public class Project3 {
         try to read txt file
         if anything fails, exit program
         */
-        if(ex.fStatus==-1){
-            if(!txtFile(ex.filePath, ex.anAirline))return;
+        if(ex.txtStatus ==-1){
+            if(!txtFile(ex.txtFilePath, ex.anAirline))return;
         }
-        if(ex.pStatus==-2 || ex.pStatus==-1){
-            if(!prettyPrint(ex.pStatus, ex))return;
+        if(ex.xmlStatus ==-1){
+            if(!createXmlFile(ex.xmlFilePath, ex.anAirline))return;
+        }
+        if(ex.prettyStatus ==-2 || ex.prettyStatus ==-1){
+            if(!prettyPrint(ex.prettyStatus, ex))return;
         }
         System.out.println(end);
     }
@@ -100,7 +104,7 @@ public class Project3 {
         Writer out = null;
         try{
             if(status == -1){
-                File file = new File(curr.pFilePath);
+                File file = new File(curr.prettyFilePath);
                 curr.pFile = file;
                 if(file.length() == 0){
                     out = new FileWriter(file);
@@ -117,7 +121,7 @@ public class Project3 {
             PrettyPrinter dumper = new PrettyPrinter(out);
             dumper.dump(curr.anAirline);
         }catch(IOException e){
-            System.err.println("Bad file path: "+curr.pFilePath);
+            System.err.println("Bad file path: "+curr.prettyFilePath);
             return false;
         }
         return true;
@@ -135,15 +139,22 @@ public class Project3 {
             if(arg.startsWith("-")){
                 if(!optionChecker(arg,curr)) return false;
             }
-            else if(curr.fStatus == 1){// set fileName
+            else if(curr.txtStatus == 1){// set fileName
                 /* NO REQUIREMENT FOR THE SUFFIX/EXTENSION OF FILE NAME*/
-                curr.filePath =arg;
-                curr.fStatus = -1; //fileName is set
+                curr.txtFilePath = arg;
+                curr.txtStatus = -1; //fileName is set
                 curr.idx+=1;
             }
-            else if(curr.pStatus == 1){
-                curr.pFilePath = arg;
-                curr.pStatus = -1;
+            else if(curr.xmlStatus == 1){// set fileName
+                /* NO REQUIREMENT FOR THE SUFFIX/EXTENSION OF FILE NAME*/
+                curr.xmlFilePath = arg;
+                curr.xmlStatus = -1; //fileName is set
+                curr.idx+=1;
+            }
+            else if(curr.prettyStatus == 1){
+                /* NO REQUIREMENT FOR THE SUFFIX/EXTENSION OF FILE NAME*/
+                curr.prettyFilePath = arg;
+                curr.prettyStatus = -1;
                 curr.idx+=1;
             }
             else if(curr.argCount>=(curr.min+curr.min12hr)){
@@ -157,6 +168,48 @@ public class Project3 {
         return true;
     }
 
+    /**
+     * @param path String xml file path provided in args
+     * @param airline Airline created from user input args
+     * If xml file has contents, it will be parsed first by XmlParser
+     * and the file airline name will be checked against airline from input args
+     * before both are merged together.
+     * Airline is dumped into specified file path by XmlDumper
+     * */
+    public static boolean createXmlFile(String path, Airline airline){
+        File file = new File(path);
+        if(file.length()!=0){ //Not empty;
+            XmlParser parser = new XmlParser(path);
+            Airline xmlAirline = null;
+            try{
+                xmlAirline = parser.parse();
+                compareAirlineNamesBetweenFileAndArgs(airline.getName(),xmlAirline.getName());
+            }catch(ParserException e){
+                System.err.println(e.getMessage());
+                return false;
+            }catch(IllegalArgumentException e){
+                System.err.println(e.getMessage());
+                System.err.println("Please make sure that airline name matches in both" +
+                        " the file and the input string.");
+                return false;
+            }
+            for(Flight fl: xmlAirline.getFlights()) airline.addFlight(fl);
+        }
+        XmlDumper dumper = new XmlDumper(path);
+        dumper.dump(airline);
+        return true;
+    }
+
+    /**
+     * Ensures that both airlines have matching names
+     * @throws IllegalArgumentException if input arg airline name does not match
+     * */
+    private static void compareAirlineNamesBetweenFileAndArgs(String name1, String name2){
+        if(!name1.equalsIgnoreCase(name2)){
+            throw new IllegalArgumentException("Input airline name \"" + name1 +
+                    "\" does not match \"" + name2 +"\" airline in file.");
+        }
+    }
     /**
      * Uses Try-Catch to process file path provided by user
      * 3 Cases:
@@ -192,10 +245,7 @@ public class Project3 {
                     return false;
                 }//error occurred during parsing, exit program
                 // When airline names do not match, throw error and exit.
-                if(!fAirline.getName().equalsIgnoreCase(airline.getName())){
-                    throw new IllegalArgumentException("Input airline name \"" + airline.getName() +
-                            "\" does not match \"" + fAirline.getName() +"\" airline in file.");
-                }
+                compareAirlineNamesBetweenFileAndArgs(fAirline.getName(),airline.getName());
                 //When file and String arg airline names match, add new flight to airline
                 for(Flight fl: fAirline.getFlights())airline.addFlight(fl);
                 FileWriter fw = new FileWriter(file);
@@ -294,18 +344,24 @@ public class Project3 {
             printFile(readMeFile);
             return true;
         }
-        else if(curr.fStatus == 1){
+        else if(curr.txtStatus == 1){
             System.err.println("The -textFile option should be followed by a file name. \n" +
                     "Instead another option was invoked: " + opt +
                     "\nPlease review usage and try again.");
             return false;
         }
-        else if(curr.pStatus == 1 && opt.equals("-")){
-            curr.pStatus = -2;
+        else if(curr.xmlStatus == 1){
+            System.err.println("The -xmlFile option should be followed by a xml file name. \n" +
+                    "Instead another option was invoked: " + opt +
+                    "\nPlease review usage and try again.");
+            return false;
+        }
+        else if(curr.prettyStatus == 1 && opt.equals("-")){
+            curr.prettyStatus = -2;
             curr.idx+=1;
             return true;
         }
-        else if(curr.pStatus == 1){
+        else if(curr.prettyStatus == 1){
             System.err.println("The -pretty option should be followed by a file name or '-' dash" +
                     " to indicate printing to standard out. \n" +
                     "Instead another option was invoked: " + opt +
@@ -318,22 +374,44 @@ public class Project3 {
             return true;
         }
         else if(opt.equalsIgnoreCase("-textFile")){
-            if(curr.fStatus ==-1){//text file already set
+            if(curr.txtStatus ==-1){//text file already set
                 System.err.println("The -textFile option can only be called once. \n" +
                         "Please review usage and try again.");
                 return false;
             }
-            curr.fStatus = 1;
+            if(curr.xmlStatus != 0){
+                System.err.println("The -xmlFile option was called before -textFile option. \n" +
+                        "The -textFile and -xmlFile options cannot be used together.\n" +
+                        "Please review usage and try again.");
+                return false;
+            }
+            curr.txtStatus = 1;
             curr.idx+=1;
             return true;
         }
         else if(opt.equalsIgnoreCase("-pretty")){
-            if(curr.pStatus ==-1 || curr.pStatus ==-2){//text file already set
+            if(curr.prettyStatus ==-1 || curr.prettyStatus ==-2){//text file already set
                 System.err.println("The -pretty option can only be called once. \n" +
                         "Please review usage and try again.");
                 return false;
             }
-            curr.pStatus = 1;
+            curr.prettyStatus = 1;
+            curr.idx+=1;
+            return true;
+        }
+        else if(opt.equalsIgnoreCase("-xmlFile")){
+            if(curr.xmlStatus ==-1){//text file already set
+                System.err.println("The -xmlFile option can only be called once. \n" +
+                        "Please review usage and try again.");
+                return false;
+            }
+            if(curr.txtStatus !=0){
+                System.err.println("The -textFile option was called before -xmlFile option. \n" +
+                        "The -textFile and -xmlFile options cannot be used together.\n" +
+                        "Please review usage and try again.");
+                return false;
+            }
+            curr.xmlStatus = 1;
             curr.idx+=1;
             return true;
         }
