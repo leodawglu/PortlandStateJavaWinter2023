@@ -11,7 +11,7 @@ import edu.pdx.cs410J.ParserException;
 import java.io.*;
 import java.util.Scanner;
 
-public class Project3 {
+public class Project4 {
 
     boolean printFlight = false, readMe = false, tooMany=false;
     Airline anAirline;
@@ -64,7 +64,7 @@ public class Project3 {
             printFile(usageFile);
             return;
         }
-        Project3 ex = new Project3();
+        Project4 ex = new Project4();
         /*
         try to read arguments from user
         if any error is found, exit program
@@ -100,7 +100,7 @@ public class Project3 {
      * @param curr Project3 instance
      * @param status pStatus
      * */
-    public static boolean prettyPrint(int status, Project3 curr){
+    public static boolean prettyPrint(int status, Project4 curr){
         Writer out = null;
         try{
             if(status == -1){
@@ -134,7 +134,7 @@ public class Project3 {
      * Prints error if too many arguments are entered
      * Counts number of args
      * */
-    private static boolean newArgumentReader(String[] args, Project3 curr){
+    private static boolean newArgumentReader(String[] args, Project4 curr){
         for(String arg: args){
             if(arg.startsWith("-")){
                 if(!optionChecker(arg,curr)) return false;
@@ -280,7 +280,7 @@ public class Project3 {
      * @param args User String args entered
      * @param curr Project 2 Instance
      * */
-    public static boolean newCreateAirlineAndFlight(String[] args, Project3 curr){
+    public static boolean newCreateAirlineAndFlight(String[] args, Project4 curr){
         try{
             String airlineName = args[curr.idx];
             curr.anAirline = new Airline(airlineName);
@@ -316,7 +316,7 @@ public class Project3 {
      * @param curr Project3 instance
      * @param count number of args entered
      * */
-    public static void missingArgsPrintln(int count, Project3 curr){
+    public static void missingArgsPrintln(int count, Project4 curr){
         System.out.println("The following arguments are missing: ");
         if(count<1) System.out.println("Airline Name");
         if(count<2) System.out.println("Flight Number");
@@ -338,7 +338,7 @@ public class Project3 {
      * @param curr Project 2 instance
      * */
 
-    public static boolean optionChecker(String opt, Project3 curr){
+    public static boolean optionChecker(String opt, Project4 curr){
         if(opt.equalsIgnoreCase("-README")){
             curr.readMe=true;
             printFile(readMeFile);
@@ -425,7 +425,7 @@ public class Project3 {
      * @param fileName takes any valid file path
      * */
     private static void printFile(String fileName){
-        InputStream file = Project3.class.getResourceAsStream(fileName);
+        InputStream file = Project4.class.getResourceAsStream(fileName);
         Scanner scanner = new Scanner(file);
         String line;
         while(scanner.hasNextLine()){
@@ -439,7 +439,7 @@ public class Project3 {
      * Prints flight information entered by user should -print option be called
      * @param curr Project2 Instance
      * */
-    private static void printFlight(Project3 curr){
+    private static void printFlight(Project4 curr){
         Flight fl = curr.aFlight;
         System.out.println("*----------------------------*Flight Entered*----------------------------*");
         System.out.println(curr.anAirline.getName() + " " +fl.getNumber());

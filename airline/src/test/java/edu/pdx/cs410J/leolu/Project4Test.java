@@ -1,5 +1,5 @@
 /**
- * The {@code Project2Test} class contains unit tests for the {@link edu.pdx.cs410J.leolu.Project3} class
+ * The {@code Project2Test} class contains unit tests for the {@link edu.pdx.cs410J.leolu.Project4} class
  *
  *
  * @author Leo Lu
@@ -30,12 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * So class can be tested independently
  *
  */
-class Project3Test {
+class Project4Test {
 
   @Test
   void readmeCanBeReadAsResource() throws IOException {
     try (
-      InputStream readme = Project3.class.getResourceAsStream("README.txt")
+      InputStream readme = Project4.class.getResourceAsStream("README.txt")
     ) {
       assertThat(readme, not(nullValue()));
       BufferedReader reader = new BufferedReader(new InputStreamReader(readme));
@@ -46,17 +46,17 @@ class Project3Test {
 
   @Test
   void sampleTestPrintInput() throws IOException {
-    Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
+    Project4.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "23:40", "SEA", "05/19/2023", "18:40"});
   }
 
   @Test
   void sampleREADMETestInput() throws IOException {
-    Project3.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
+    Project4.main(new String[] {"-README","-print", "Java Airlines", "12345", "PDX", "05/19/2023", "11:53", "SEA", "05/21/2023", "17:33"});
   }
 
   @Test
   void sample12hrTestPrintInput() throws IOException {
-    Project3.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "3:40","pm", "SEA", "05/19/2023", "8:40","AM"});
+    Project4.main(new String[] {"-print", "EVA Airways", "26", "TPE", "05/19/2023", "3:40","pm", "SEA", "05/19/2023", "8:40","AM"});
   }
 
   @Test
@@ -64,7 +64,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.main(new String[]{"-print", "EVA Air", "12345", "SEA", "05/19/2023", "11:03","am", "LAX" ,"05/19/2023", "11:53","pm"});
     String output = baos.toString();
     assertThat(output,containsString("EVA Air 12345\n" +
@@ -79,7 +79,7 @@ class Project3Test {
 
   @Test
   void toggleMin12hrChangeDefaultValueFrom2To0(){
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.toggleMin12hr();
     assertThat(proj.min12hr,equalTo(0));
     proj.toggleMin12hr();
@@ -91,7 +91,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.missingArgsPrintln(0,proj);
     String output = baos.toString();
     assertThat(output,containsString("Arrival Time AM/PM"));
@@ -103,7 +103,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.missingArgsPrintln(10,proj);
     String output = baos.toString();
     assertThat(output,equalTo("The following arguments are missing: \nPlease review usage and try again.\n"));
@@ -114,7 +114,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.toggleMin12hr();
     proj.missingArgsPrintln(0,proj);
     String output = baos.toString();
@@ -127,7 +127,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
 
     proj.optionChecker("-pretty",proj);
     assertEquals(proj.prettyStatus,1);
@@ -144,7 +144,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
 
     proj.optionChecker("-pretty",proj);
     assertEquals(proj.prettyStatus,1);
@@ -159,7 +159,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.prettyPrint(3,proj);
     String output = baos.toString();
     assertThat(output,containsString("Incorrect Status code!"));
@@ -173,7 +173,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setOut(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
 
     String output = baos.toString();
@@ -195,7 +195,7 @@ class Project3Test {
     String[] args = new String[]{"-pretty",path,"-print","EVA Air", "25", "TPE",
             "05/19/2023", "12:40","am", "SEA", "05/20/2023", "12:10","pm"};
 
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
   }
   @Test
@@ -227,7 +227,7 @@ class Project3Test {
     String[] args = new String[]{"-textFile",airpath,"-pretty","-","-print","EVA Air", "52", "TPE",
             "05/19/2023", "12:20","am", "IAH", "05/19/2023", "2:00","pm"};
 
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
   }
 
@@ -238,7 +238,7 @@ class Project3Test {
     String[] args = new String[]{"-textFile",airpath,"-pretty",path,"-print","EVA Air", "52", "TPE",
             "05/19/2023", "12:20","am", "IAH", "05/19/2023", "2:00","pm"};
 
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
   }
 
@@ -249,7 +249,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
 
     String output = baos.toString();
@@ -264,7 +264,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
 
     String output = baos.toString();
@@ -279,7 +279,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
 
     String output = baos.toString();
@@ -291,7 +291,7 @@ class Project3Test {
   void successfullyAddFlightToXmlFile() throws IOException {
     String[] args = new String[]{"-xmlFile", "src/test/resources/edu/pdx/cs410J/leolu/evaair.xml","EVA Air", "52", "TPE",
             "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
   }
 
@@ -300,7 +300,7 @@ class Project3Test {
     String path="src/test/resources/edu/pdx/cs410J/leolu/taiwanair.xml";
     String[] args = new String[]{"-xmlFile",path,"Taiwan Air", "52", "TPE",
             "05/19/2023", "10:10","pm", "IAH", "05/20/2023", "9:40","pm"};
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
     File temp = new File(path);
     temp.delete();
@@ -313,7 +313,7 @@ class Project3Test {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream ps = new PrintStream(baos);
     System.setErr(ps);
-    Project3 proj = new Project3();
+    Project4 proj = new Project4();
     proj.subMainForTesting(args);
 
     String output = baos.toString();
