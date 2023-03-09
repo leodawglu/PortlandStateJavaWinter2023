@@ -27,7 +27,7 @@ class Project5IT extends InvokeMainTestCase {
     @Test
     void test0RemoveAllMappings() throws IOException {
       AirlineRestClient client = new AirlineRestClient(HOSTNAME, Integer.parseInt(PORT));
-      client.removeAllDictionaryEntries();
+      client.removeAllAirlines();
     }
 
     @Test

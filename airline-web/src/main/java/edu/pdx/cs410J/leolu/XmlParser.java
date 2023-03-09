@@ -6,23 +6,24 @@
  * */
 package edu.pdx.cs410J.leolu;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-
 import edu.pdx.cs410J.AirlineParser;
 import edu.pdx.cs410J.ParserException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import javax.xml.parsers.ParserConfigurationException;
+import java.io.StringReader;
 
 /**
- * <code>XmlParser</code> class for Project 4.
+ * <code>XmlParser</code> class for Project 5.
  * Validates XML file according to provided DTD:
  * http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd
  * File will only be parsed when it is valid.
@@ -32,8 +33,10 @@ public class XmlParser implements AirlineParser<Airline> {
     private Airline airline;
     final String DTD = "";
     private String filepath ="";
+    private String httpResponseContent = "";
     private StringBuilder err = new StringBuilder();
     private Document xml;
+    private boolean isHttpResponse = false;
 
     /**
      * Constructor for XmlParser
@@ -41,6 +44,16 @@ public class XmlParser implements AirlineParser<Airline> {
      * */
     public XmlParser(String filepath){
         this.filepath=filepath;
+    }
+
+    /**
+     * Constructor for XmlParser
+     * @param httpResponseContent - only accepts a string from a http response
+     * @param isHttpResponse - set this.isHttpResponse to true for parser
+     * */
+    public XmlParser(String httpResponseContent, boolean isHttpResponse){
+        this.httpResponseContent = httpResponseContent;
+        this.isHttpResponse = isHttpResponse;
     }
 
     /**
@@ -58,9 +71,12 @@ public class XmlParser implements AirlineParser<Airline> {
             DocumentBuilder builder = buildDoc(factory);
             builder.setErrorHandler(helper);
             builder.setEntityResolver(helper);
-            xml = builder.parse(new File(filepath));
+            if(isHttpResponse) xml = builder.parse(new InputSource(new StringReader(httpResponseContent)));
+            else xml = builder.parse(new File(filepath));
         } catch (SAXException | IOException | ParserException e) {
             err.append(e.getMessage());
+            if(isHttpResponse) throw new ParserException("HTTP Response content could not be parsed, " +
+                    "please reload and try again.");//Maybe use Mockito to invoke?
             throw new ParserException("Please enter a valid XML file path.",e);
         }
 

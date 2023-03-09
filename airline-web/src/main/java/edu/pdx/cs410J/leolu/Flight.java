@@ -9,6 +9,7 @@ package edu.pdx.cs410J.leolu;
 
 import edu.pdx.cs410J.AbstractFlight;
 import edu.pdx.cs410J.AirportNames;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,7 +59,7 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
    * @param aTime Flight arrival Time
    *
    * */
-  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime){
+  public Flight(String fN, String dep, String dDate, String dTime, String arr, String aDate, String aTime){
     setDateTime(dDate,dTime,"Departure");
     setDateTime(aDate,aTime,"Arrival");
     setFlightNumber(fN);
@@ -81,7 +82,7 @@ public class Flight extends AbstractFlight implements Comparable<Flight> {
    * @param aTime Flight arrival Time
    * @param format if True, change time format to 24 hr (12 hr is default)
    * */
-  public Flight(String fN, String dep, String dDate, String dTime,  String arr, String aDate, String aTime, boolean format){
+  public Flight(String fN, String dep, String dDate, String dTime, String arr, String aDate, String aTime, boolean format){
     if(format)toggle12HrFormat();
     setDateTime(dDate,dTime,"Departure");
     setDateTime(aDate,aTime,"Arrival");

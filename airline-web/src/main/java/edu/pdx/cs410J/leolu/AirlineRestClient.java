@@ -5,7 +5,6 @@ import edu.pdx.cs410J.ParserException;
 import edu.pdx.cs410J.web.HttpRequestHelper;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Map;
 
 import static edu.pdx.cs410J.web.HttpRequestHelper.Response;
@@ -32,6 +31,7 @@ public class AirlineRestClient
      */
     public AirlineRestClient( String hostName, int port )
     {
+        //request url is : http://localhost:8080/airline/flights
         this(new HttpRequestHelper(String.format("http://%s:%d/%s/%s", hostName, port, WEB_APP, SERVLET)));
     }
 
@@ -40,37 +40,27 @@ public class AirlineRestClient
       this.http = http;
     }
 
-  /**
-   * Returns all dictionary entries from the server
-   */
-  public Map<String, String> getAllDictionaryEntries() throws IOException, ParserException {
-    Response response = http.get(Map.of());
-    throwExceptionIfNotOkayHttpStatus(response);
+    /**
+     * getAirline() method
+     * @return Airline object parsed from
+     * */
+    public Airline getAirline(String airlineName) throws IOException, ParserException {
+        Response response = http.get(Map.of("airline",airlineName));
+        String xmlInStringFormat = response.getContent();
 
-    TextParser parser = new TextParser(new StringReader(response.getContent()));
-    return parser.parse();
-  }
+        XmlParser parser = new XmlParser(xmlInStringFormat, true);
 
-  /**
-   * Returns the definition for the given word
-   */
-  public String getDefinition(String word) throws IOException, ParserException {
-    Response response = http.get(Map.of(AirlineServlet.AIRLINE_NAME_PARAMETER, word));
-    throwExceptionIfNotOkayHttpStatus(response);
-    String content = response.getContent();
+        return parser.parse();
+    }
 
-    TextParser parser = new TextParser(new StringReader(content));
-    Map<String, String> dictionaryWithOneWord = parser.parse();
-    return dictionaryWithOneWord.get(word);
-  }
 
-  public void addDictionaryEntry(String word, String definition) throws IOException {
-    Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAMETER, word,
-                                         AirlineServlet.DEFINITION_PARAMETER, definition));
+  public void addFlightToAirline(String word, String definition) throws IOException {
+    Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAM, word,
+                                         AirlineServlet.FLIGHT_NUMBER_PARAMETER, definition));
     throwExceptionIfNotOkayHttpStatus(response);
   }
 
-  public void removeAllDictionaryEntries() throws IOException {
+  public void removeAllAirlines() throws IOException {
     Response response = http.delete(Map.of());
     throwExceptionIfNotOkayHttpStatus(response);
   }

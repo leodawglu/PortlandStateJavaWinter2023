@@ -17,11 +17,11 @@ public class TextParser {
     this.reader = reader;
   }
 
-  public Map<String, String> parse() throws ParserException {
+  public Airline parse() throws ParserException {
     Pattern pattern = Pattern.compile("(.*) : (.*)");
 
     Map<String, String> map = new HashMap<>();
-
+    Airline airline = null;
     try (
       BufferedReader br = new BufferedReader(this.reader)
     ) {
@@ -32,16 +32,21 @@ public class TextParser {
           throw new ParserException("Unexpected text: " + line);
         }
 
-        String word = matcher.group(1);
-        String definition = matcher.group(2);
-
-        map.put(word, definition);
+        String airlineName = matcher.group(1);
+        String flightNumberAsString = matcher.group(2);
+        if(airline == null){
+          airline = new Airline(airlineName);
+        }
+        Flight fl = new Flight();
+        fl.setFlightNumber(flightNumberAsString);
+        airline.addFlight(fl);
+        map.put(airlineName, flightNumberAsString);
       }
 
     } catch (IOException e) {
       throw new ParserException("While parsing dictionary", e);
     }
 
-    return map;
+    return airline;
   }
 }

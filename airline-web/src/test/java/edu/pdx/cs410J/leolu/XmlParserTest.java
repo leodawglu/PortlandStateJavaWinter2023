@@ -4,8 +4,9 @@ import edu.pdx.cs410J.ParserException;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class XmlParserTest {
 
     final String VALID = "src/test/resources/edu/pdx/cs410J/leolu/valid-airline.xml";

@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -38,32 +40,131 @@ class AirlineServletTest {
     verify(response).setStatus(HttpServletResponse.SC_OK);
   }*/
 
+  /*Corresponds to writeAllDictionaryEntries method*/
   @Test
-  void initiallyServletContainsNoDictionaryEntries() throws IOException {
+  void tryDoGet(){
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=name");
+  }
+  @Test
+  void gettingFlightsForNonExistentAirlineReturns404() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Airline");
     HttpServletResponse response = mock(HttpServletResponse.class);
     PrintWriter pw = mock(PrintWriter.class);
 
     when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
-
-    // Nothing is written to the response's PrintWriter
-    verify(pw, never()).println(anyString());
-    verify(response).setStatus(HttpServletResponse.SC_OK);
+    verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
   }
+  @Test
+  void emptyQueryStringReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn(null);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).sendError(400,"Query String was empty.");
+  }
+
+  @Test
+  void noDefinedAirlineNameReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("src=PDX&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).setStatus(400);
+  }
+
+  @Test
+  void definedDestButNoSrcReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).setStatus(400);
+  }
+
+  @Test
+  void definedSrcButNoDestReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("PDX");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).setStatus(400);
+  }
+
+  @Test
+  void extraneousParamsInQueryStringReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    Map<String, String[]> extraneousMap = new HashMap<>();
+    extraneousMap.put("Extraneous", new String[]{});
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("PDX");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
+    when(request.getParameterMap()).thenReturn(extraneousMap);
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).setStatus(400);
+  }
+
   @Test
   void addFlightInNewAirline() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
 
-    String airline = "Airline";
+    String airlineName = "Airline";
     int flightNumber = 123;
-    String flightNumberAsString = Integer.toString(flightNumber);
+    String flightNumberAsString = String.valueOf(flightNumber);
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAMETER)).thenReturn(airline);
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn(airlineName);
     when(request.getParameter(AirlineServlet.FLIGHT_NUMBER_PARAMETER)).thenReturn(flightNumberAsString);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -77,20 +178,23 @@ class AirlineServletTest {
     servlet.doPost(request, response);
 
     String xml = stringWriter.toString();
-    assertThat(xml,containsString(airline));
+    assertThat(xml,containsString(airlineName));
     assertThat(xml,containsString(flightNumberAsString));
 
-    assertThat(stringWriter.toString(), containsString(Messages.definedWordAs(airline, flightNumberAsString)));
+    assertThat(stringWriter.toString(), containsString(Messages.definedWordAs(airlineName, flightNumberAsString)));
 
     // Use an ArgumentCaptor when you want to make multiple assertions against the value passed to the mock
     ArgumentCaptor<Integer> statusCode = ArgumentCaptor.forClass(Integer.class);
     verify(response).setStatus(statusCode.capture());
 
     assertThat(statusCode.getValue(), equalTo(HttpServletResponse.SC_OK));
+    Airline airline = servlet.getAirline(airlineName);
+    assertThat(airline.getName(), equalTo(airlineName));
 
-    assertThat(servlet.getDefinition(airline), equalTo(flightNumberAsString));
+    Flight flight = airline.getFlights().iterator().next();
+    assertThat(flight.getNumber(),equalTo(flightNumber));
   }
-  /*
+/*
   @Test
   void addOneWordToDictionary() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
@@ -99,7 +203,7 @@ class AirlineServletTest {
     String definition = "TEST DEFINITION";
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getParameter(AirlineServlet.WORD_PARAMETER)).thenReturn(word);
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAMETER)).thenReturn(word);
     when(request.getParameter(AirlineServlet.DEFINITION_PARAMETER)).thenReturn(definition);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -121,6 +225,6 @@ class AirlineServletTest {
     assertThat(statusCode.getValue(), equalTo(HttpServletResponse.SC_OK));
 
     assertThat(servlet.getDefinition(word), equalTo(definition));
-  }*/
-
+  }
+*/
 }

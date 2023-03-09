@@ -8,8 +8,10 @@
 package edu.pdx.cs410J.leolu;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
-import static org.hamcrest.CoreMatchers.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AirlineTest {
