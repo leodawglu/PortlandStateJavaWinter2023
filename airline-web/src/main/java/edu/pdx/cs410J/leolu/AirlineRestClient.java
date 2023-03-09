@@ -56,7 +56,7 @@ public class AirlineRestClient
 
   public void addFlightToAirline(String word, String definition) throws IOException {
     Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAM, word,
-                                         AirlineServlet.FLIGHT_NUMBER_PARAMETER, definition));
+                                         AirlineServlet.FLIGHT_NUMBER_PARAM, definition));
     throwExceptionIfNotOkayHttpStatus(response);
   }
 

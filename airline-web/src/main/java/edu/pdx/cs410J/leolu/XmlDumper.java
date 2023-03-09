@@ -17,6 +17,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.Writer;
 
 /**
  * <code>XmlDumper</code> class for Project 4.
@@ -26,11 +27,14 @@ import java.io.File;
 public class XmlDumper implements AirlineDumper<Airline> {
 
     private String filepath;
+    private Writer writer;
     private Airline airways;
     private StringBuilder err = new StringBuilder();
     public XmlDumper(String filepath) {
         this.filepath = filepath;
     }
+    
+    public XmlDumper(Writer writer){this.writer = writer;}
 
     /**
      * @param airways Accepts an airline object
@@ -72,8 +76,10 @@ public class XmlDumper implements AirlineDumper<Airline> {
             t.setOutputProperty(OutputKeys.ENCODING, "us-ascii");
 
             DOMSource source = new DOMSource(doc);
-
-            StreamResult result = new StreamResult(new File(filepath));
+            
+            StreamResult result;
+            if(filepath!=null)result = new StreamResult(new File(filepath));
+            else result = new StreamResult(writer);
 
             t.transform(source,result);
             System.out.println("XML file for " + this.airways.getName() + " created successfully.");

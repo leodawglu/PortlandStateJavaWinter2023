@@ -21,11 +21,12 @@ import java.util.Map;
 public class AirlineServlet extends HttpServlet {
 
   static final String AIRLINE_NAME_PARAM = "airline", SOURCE_PARAM = "src" , DESTINATION_PARAM = "dest",
-          FLIGHT_NUMBER_PARAMETER = "flightNumber", DEPARTURE_DATETIME = "depart", ARRIVAL_DATETIME = "arrive";
+          FLIGHT_NUMBER_PARAM = "flightNumber", DEPARTURE_DATETIME = "depart", ARRIVAL_DATETIME = "arrive";
 
 
     // K,V : airlineName : Airline Object
   private final Map<String, Airline> airlines = new HashMap<>();
+  protected String errorMsgForTesting="";
 
   /**
    * Handles an HTTP GET request from a client by writing the definition of the
@@ -54,9 +55,15 @@ public class AirlineServlet extends HttpServlet {
                   "was not specified in query string: " + queryString );
           return;
       }
+      if(!airlines.containsKey(airlineName)){
+          responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,"Airline name " +
+                  "was not found: " + airlineName );
+          return;
+      }
       if(src!=null || dest!=null){
           getFlightsWithSpecificSRCAndDest(response,queryString,airlineName,src,dest);
       }
+
 
       /*
       String word = getParameter( AIRLINE_NAME_PARAMETER, request );
@@ -80,31 +87,62 @@ public class AirlineServlet extends HttpServlet {
             return;
         }
 
+        if(!isRealAirportCode(src)){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                    "Departure airport code is invalid, src: " + src);
+            return;
+        }
+        if(!isRealAirportCode(dest)){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                    "Departure airport code is invalid, dest: " + dest);
+            return;
+        }
+        Airline requestedAirline = airlines.get(airlineName);
+        Airline filteredAirlineWithMatchingFlights = new Airline(airlineName);
+        for(Flight fl: requestedAirline.getFlights()){
+            if(fl.getSource().equals(src)&& fl.getDestination().equals(dest))
+                filteredAirlineWithMatchingFlights.addFlight(fl);
+        }
+        if(filteredAirlineWithMatchingFlights.getFlights().isEmpty()){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,
+                    "Flights with departure airport " + src +
+                            " and arrival airport " + dest +
+                    " could not be found for " + airlineName );
+            return;
+        }
+
+    }
+    protected void addNewAirlineToMap(String airlineName){
+      airlines.put(airlineName,new Airline(airlineName));
     }
 
     private boolean isRealAirportCode(String code) {
         return AirportNames.getNamesMap().containsKey(code);
     }
-    private void checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
+    protected void checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
       Map<String, String[]> paramMap = request.getParameterMap();
       Iterator<String> iterate = paramMap.keySet().iterator();
-      if(type.equals("get")){
-          while(iterate.hasNext()){
-              String key = iterate.next();
-              if(key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM){
-                  responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
-                          "In search request, extraneous parameter was found in query string: " + request.getQueryString());
-                  return;
-              }
+      while(iterate.hasNext()){
+          String key = iterate.next();
+          if(type.equals("get")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM){
+              responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                      "In search GET request, extraneous parameter was found in query string: " + key);
+              return;
           }
-      }else{//POST check params for adding flights
-
+          if(type.equals("post")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM
+                  &&key!= FLIGHT_NUMBER_PARAM && key!=DEPARTURE_DATETIME && key!=ARRIVAL_DATETIME){
+              responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                      "In add POST request, extraneous parameter was found in query string: " + key);
+              return;
+          }
       }
+
     }
 
     private void responseSetStatusAndSendError(HttpServletResponse response, int status, String msg) throws IOException {
       response.setStatus(status);
       response.sendError(status,msg);
+      errorMsgForTesting = msg;
   }
 
   /*
@@ -152,9 +190,9 @@ MAP:
           return;
       }
 
-      String flightNumberAsString = getParameter(FLIGHT_NUMBER_PARAMETER, request );
+      String flightNumberAsString = getParameter(FLIGHT_NUMBER_PARAM, request );
       if ( flightNumberAsString == null) {
-          missingRequiredParameter( response, FLIGHT_NUMBER_PARAMETER );
+          missingRequiredParameter( response, FLIGHT_NUMBER_PARAM);
           return;
       }
 

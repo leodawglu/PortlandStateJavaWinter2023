@@ -41,17 +41,14 @@ class AirlineServletTest {
   }*/
 
   /*Corresponds to writeAllDictionaryEntries method*/
-  @Test
-  void tryDoGet(){
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getQueryString()).thenReturn("airline=name");
-  }
+
   @Test
   void gettingFlightsForNonExistentAirlineReturns404() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Airline");
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("DOESNOTEXIST");
     HttpServletResponse response = mock(HttpServletResponse.class);
     PrintWriter pw = mock(PrintWriter.class);
 
@@ -59,6 +56,7 @@ class AirlineServletTest {
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+    assertThat(servlet.errorMsgForTesting,containsString("Airline name was not found:"));
   }
   @Test
   void emptyQueryStringReturns400() throws IOException {
@@ -89,13 +87,15 @@ class AirlineServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
-    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    verify(response).setStatus(400);
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("Airline name was not specified in query string:"));
   }
 
   @Test
   void definedDestButNoSrcReturns400() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getQueryString()).thenReturn("airline=Flyaway&src=&dest=LAX");
@@ -111,12 +111,14 @@ class AirlineServletTest {
     servlet.doGet(request, response);
     //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setStatus(400);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("Query string \"dest\" is defined, but \"src\" was not defined! :"));
   }
 
   @Test
   void definedSrcButNoDestReturns400() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
-
+    servlet.addNewAirlineToMap("Flyaway");
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=");
     when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
@@ -129,17 +131,65 @@ class AirlineServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
-    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    verify(response).setStatus(400);
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    //verify(response).setStatus(400);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("Query string \"src\" is defined, but \"dest\" was not defined! :"));
   }
 
   @Test
-  void extraneousParamsInQueryStringReturns400() throws IOException {
+  void invalidSrcReturns400() throws IOException {
     AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=P1X&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("P1X");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    //verify(response).setStatus(400);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("Departure airport code is invalid, src:"));
+  }
+
+  @Test
+  void invalidDestReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=L1X");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("PDX");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("L1X");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("Departure airport code is invalid, dest:"));
+  }
+
+  @Test
+  void extraneousParamsInGetQueryStringReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
     Map<String, String[]> extraneousMap = new HashMap<>();
     extraneousMap.put("Extraneous", new String[]{});
     HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=LAX");
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=LAX&Extraneous=stuff");
     when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
     when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("PDX");
     when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
@@ -153,6 +203,44 @@ class AirlineServletTest {
     servlet.doGet(request, response);
     //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setStatus(400);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("In search GET request, extraneous parameter was found in query string:"));
+  }
+
+  @Test
+  void extraneousParamsInPostQueryStringReturns400() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
+    Map<String, String[]> extraneousMap = new HashMap<>();
+    extraneousMap.put("Extraneous", new String[]{});
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameterMap()).thenReturn(extraneousMap);
+    servlet.checkQueryStringForExtraneousParams(request, response,"post");
+    assertThat(servlet.errorMsgForTesting,
+            containsString("In add POST request, extraneous parameter was found in query string:"));
+  }
+
+  @Test
+  void airlineDoesNotContainFlightsWithMatchingSrcAndDestReturns404() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    servlet.addNewAirlineToMap("Flyaway");
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getQueryString()).thenReturn("airline=Flyaway&src=PDX&dest=LAX");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("Flyaway");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("PDX");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
+
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    PrintWriter pw = mock(PrintWriter.class);
+
+    when(response.getWriter()).thenReturn(pw);
+
+    servlet.doGet(request, response);
+    verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+    //verify(response).setStatus(404);
+    assertThat(servlet.errorMsgForTesting,
+            containsString("could not be found for"));
   }
 
   @Test
@@ -165,7 +253,7 @@ class AirlineServletTest {
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn(airlineName);
-    when(request.getParameter(AirlineServlet.FLIGHT_NUMBER_PARAMETER)).thenReturn(flightNumberAsString);
+    when(request.getParameter(AirlineServlet.FLIGHT_NUMBER_PARAM)).thenReturn(flightNumberAsString);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
 
