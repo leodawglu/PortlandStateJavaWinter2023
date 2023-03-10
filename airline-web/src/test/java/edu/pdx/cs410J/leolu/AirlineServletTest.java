@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +51,6 @@ class AirlineServletTest {
     when(request.getQueryString()).thenReturn("airline=Flyaway&src=&dest=LAX");
     when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("DOESNOTEXIST");
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -65,9 +63,6 @@ class AirlineServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getQueryString()).thenReturn(null);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -82,9 +77,6 @@ class AirlineServletTest {
     when(request.getQueryString()).thenReturn("src=PDX&dest=LAX");
     when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("");
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -104,9 +96,6 @@ class AirlineServletTest {
     when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -126,9 +115,6 @@ class AirlineServletTest {
     when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -148,9 +134,6 @@ class AirlineServletTest {
     when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("LAX");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -172,14 +155,11 @@ class AirlineServletTest {
     when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("L1X");
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     assertThat(servlet.errorMsgForTesting,
-            containsString("Departure airport code is invalid, dest:"));
+            containsString("Arrival airport code is invalid, dest:"));
   }
 
   @Test
@@ -196,10 +176,6 @@ class AirlineServletTest {
     when(request.getParameterMap()).thenReturn(extraneousMap);
 
     HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
-
     servlet.doGet(request, response);
     //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setStatus(400);
@@ -244,7 +220,191 @@ class AirlineServletTest {
   }
 
   @Test
-  void addFlightInNewAirline() throws IOException {
+  void getWrittenAirlineResponse() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    when(response.getWriter()).thenReturn(pw);
+
+    ArrayList<Flight> flights = new ArrayList<>();
+    flights.add(new Flight("26","SEA","01/23/2023", "10:40 am","JFK","01/23/2023", "11:40 pm"));
+    Airline airline = new Airline("EVA Air",flights);
+
+    servlet.writeAirlineAndFlightsToResponse(response,airline,HttpServletResponse.SC_OK);
+    System.out.println(sw.toString());
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+    assertThat(sw.toString(),equalTo("<?xml version=\"1.0\" encoding=\"us-ascii\" standalone=\"no\"?>\n" +
+            "<!DOCTYPE airline SYSTEM \"http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd\">\n" +
+            "<airline>\n" +
+            "    <name>EVA Air</name>\n" +
+            "    <flight>\n" +
+            "        <number>26</number>\n" +
+            "        <src>SEA</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"23\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"10\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>JFK</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"23\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"23\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "</airline>\n"));
+  }
+
+  @Test
+  void getAllFlightsFromAirline() throws IOException{
+    AirlineServlet servlet = new AirlineServlet();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+    when(request.getQueryString()).thenReturn("airline=EVA Air");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("EVA Air");
+
+    ArrayList<Flight> flights = new ArrayList<>();
+    flights.add(new Flight("26","SEA","01/23/2023", "10:40 am","JFK","01/23/2023", "11:40 pm"));
+    flights.add(new Flight("25","TPE","01/22/2023", "10:40 am","JFK","01/22/2023", "11:40 pm"));
+    flights.add(new Flight("24","SEA","01/21/2023", "10:40 am","TPE","01/21/2023", "11:40 pm"));
+    Airline airline = new Airline("EVA Air",flights);
+
+    servlet.addAirlineToMap(airline);
+    servlet.doGet(request, response);
+    System.out.println(sw.toString());
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+    assertThat(sw.toString(),equalTo("<?xml version=\"1.0\" encoding=\"us-ascii\" standalone=\"no\"?>\n" +
+            "<!DOCTYPE airline SYSTEM \"http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd\">\n" +
+            "<airline>\n" +
+            "    <name>EVA Air</name>\n" +
+            "    <flight>\n" +
+            "        <number>24</number>\n" +
+            "        <src>SEA</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"21\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"10\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>TPE</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"21\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"23\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "    <flight>\n" +
+            "        <number>26</number>\n" +
+            "        <src>SEA</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"23\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"10\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>JFK</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"23\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"23\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "    <flight>\n" +
+            "        <number>25</number>\n" +
+            "        <src>TPE</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"22\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"10\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>JFK</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"22\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"23\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "</airline>\n"));
+  }
+
+  @Test
+  void getFilteredFlightsBasedOnSRCAndDESTFromAirline() throws IOException{
+    AirlineServlet servlet = new AirlineServlet();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+    when(request.getQueryString()).thenReturn("airline=EVA Air");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("EVA Air");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("TPE");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("SIN");
+
+    ArrayList<Flight> flights = new ArrayList<>();
+    flights.add(new Flight("26","SEA","01/23/2023", "10:40 am","JFK","01/23/2023", "11:40 pm"));
+    flights.add(new Flight("25","TPE","01/22/2023", "10:40 am","JFK","01/22/2023", "11:40 pm"));
+    flights.add(new Flight("24","SEA","01/21/2023", "10:40 am","TPE","01/21/2023", "11:40 pm"));
+    flights.add(new Flight("52","TPE","01/22/2023", "10:40 am","SIN","01/22/2023", "3:40 pm"));
+    flights.add(new Flight("55","TPE","01/21/2023", "1:40 pm","SIN","01/21/2023", "6:40 pm"));
+    Airline airline = new Airline("EVA Air",flights);
+
+    servlet.addAirlineToMap(airline);
+    servlet.doGet(request, response);
+    System.out.println(sw.toString());
+    verify(response).setStatus(HttpServletResponse.SC_OK);
+    assertThat(sw.toString(),equalTo("<?xml version=\"1.0\" encoding=\"us-ascii\" standalone=\"no\"?>\n" +
+            "<!DOCTYPE airline SYSTEM \"http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd\">\n" +
+            "<airline>\n" +
+            "    <name>EVA Air</name>\n" +
+            "    <flight>\n" +
+            "        <number>55</number>\n" +
+            "        <src>TPE</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"21\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"13\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>SIN</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"21\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"18\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "    <flight>\n" +
+            "        <number>52</number>\n" +
+            "        <src>TPE</src>\n" +
+            "        <depart>\n" +
+            "            <date day=\"22\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"10\" minute=\"40\"/>\n" +
+            "        </depart>\n" +
+            "        <dest>SIN</dest>\n" +
+            "        <arrive>\n" +
+            "            <date day=\"22\" month=\"01\" year=\"2023\"/>\n" +
+            "            <time hour=\"15\" minute=\"40\"/>\n" +
+            "        </arrive>\n" +
+            "    </flight>\n" +
+            "</airline>\n"));
+  }
+
+  @Test
+  void addNewAirlineAndNewFlight() throws IOException {
+    AirlineServlet servlet = new AirlineServlet();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+
+    when(response.getWriter()).thenReturn(pw);
+    when(request.getQueryString()).thenReturn("airline=EVA Air&flightNumber=25&src=TPE&depart=10:40%20am&dest=SIN&arrive=3:40%20pm");
+    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAM)).thenReturn("EVA Air");
+    when(request.getParameter(AirlineServlet.SOURCE_PARAM)).thenReturn("TPE");
+    when(request.getParameter(AirlineServlet.DESTINATION_PARAM)).thenReturn("SIN");
+    when(request.getParameter(AirlineServlet.FLIGHT_NUMBER_PARAM)).thenReturn("25");
+    when(request.getParameter(AirlineServlet.DEPARTURE_DATETIME)).thenReturn("01/22/2023 10:40 am");
+    when(request.getParameter(AirlineServlet.ARRIVAL_DATETIME)).thenReturn("01/22/2023 3:40 pm");
+
+    servlet.doPost(request, response);
+    System.out.println(sw);
+    verify(response).setStatus(HttpServletResponse.SC_CREATED);
+    /*
     AirlineServlet servlet = new AirlineServlet();
 
     String airlineName = "Airline";
@@ -280,39 +440,7 @@ class AirlineServletTest {
     assertThat(airline.getName(), equalTo(airlineName));
 
     Flight flight = airline.getFlights().iterator().next();
-    assertThat(flight.getNumber(),equalTo(flightNumber));
+    assertThat(flight.getNumber(),equalTo(flightNumber));*/
   }
-/*
-  @Test
-  void addOneWordToDictionary() throws IOException {
-    AirlineServlet servlet = new AirlineServlet();
 
-    String word = "TEST WORD";
-    String definition = "TEST DEFINITION";
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getParameter(AirlineServlet.AIRLINE_NAME_PARAMETER)).thenReturn(word);
-    when(request.getParameter(AirlineServlet.DEFINITION_PARAMETER)).thenReturn(definition);
-
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    // Use a StringWriter to gather the text from multiple calls to println()
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter pw = new PrintWriter(stringWriter, true);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    servlet.doPost(request, response);
-
-    assertThat(stringWriter.toString(), containsString(Messages.definedWordAs(word, definition)));
-
-    // Use an ArgumentCaptor when you want to make multiple assertions against the value passed to the mock
-    ArgumentCaptor<Integer> statusCode = ArgumentCaptor.forClass(Integer.class);
-    verify(response).setStatus(statusCode.capture());
-
-    assertThat(statusCode.getValue(), equalTo(HttpServletResponse.SC_OK));
-
-    assertThat(servlet.getDefinition(word), equalTo(definition));
-  }
-*/
 }

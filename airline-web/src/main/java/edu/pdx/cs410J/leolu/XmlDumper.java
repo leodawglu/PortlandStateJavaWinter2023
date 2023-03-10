@@ -82,7 +82,7 @@ public class XmlDumper implements AirlineDumper<Airline> {
             else result = new StreamResult(writer);
 
             t.transform(source,result);
-            System.out.println("XML file for " + this.airways.getName() + " created successfully.");
+            if(filepath!=null)System.out.println("XML file for " + this.airways.getName() + " created successfully.");
 
         } catch (ParserConfigurationException e) {
             err.append("DocumentBuilderFactory could not produce a builder.");

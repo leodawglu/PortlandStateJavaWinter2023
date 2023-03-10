@@ -2,12 +2,16 @@ package edu.pdx.cs410J.leolu;
 
 import com.google.common.annotations.VisibleForTesting;
 import edu.pdx.cs410J.AirportNames;
+import edu.pdx.cs410J.ParserException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -20,83 +24,52 @@ import java.util.Map;
  */
 public class AirlineServlet extends HttpServlet {
 
-  static final String AIRLINE_NAME_PARAM = "airline", SOURCE_PARAM = "src" , DESTINATION_PARAM = "dest",
-          FLIGHT_NUMBER_PARAM = "flightNumber", DEPARTURE_DATETIME = "depart", ARRIVAL_DATETIME = "arrive";
+    private final SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy h:mm a");
+    static final String AIRLINE_NAME_PARAM = "airline", SOURCE_PARAM = "src" , DESTINATION_PARAM = "dest",
+            FLIGHT_NUMBER_PARAM = "flightNumber", DEPARTURE_DATETIME = "depart", ARRIVAL_DATETIME = "arrive";
 
 
-    // K,V : airlineName : Airline Object
-  private final Map<String, Airline> airlines = new HashMap<>();
-  protected String errorMsgForTesting="";
+    // K,V : airlineName , Airline Object
+    private final Map<String, Airline> airlines = new HashMap<>();
+    protected String errorMsgForTesting="";
 
-  /**
-   * Handles an HTTP GET request from a client by writing the definition of the
-   * word specified in the "word" HTTP parameter to the HTTP response.  If the
-   * "word" parameter is not specified, all of the entries in the dictionary
-   * are written to the HTTP response.
-   */
-  @Override
-  protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws IOException
-  {
-      //response.setContentType( "text/plain" );
-      Airline air = null;
-      String queryString = request.getQueryString();// Use to decide what kind of request it is for
-      String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
-      String src = request.getParameter(SOURCE_PARAM);
-      String dest = request.getParameter(DESTINATION_PARAM);
-      if(queryString == null || queryString.length()==0){
-          responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query String was empty." );
-          return;
-      }
+    /**
+     * Handles an HTTP GET request from a client by writing the definition of the
+     * word specified in the "word" HTTP parameter to the HTTP response.  If the
+     * "word" parameter is not specified, all of the entries in the dictionary
+     * are written to the HTTP response.
+     */
+    @Override
+    protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        String queryString = request.getQueryString();// Use to decide what kind of request it is for
+        String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
+        String src = request.getParameter(SOURCE_PARAM);
+        String dest = request.getParameter(DESTINATION_PARAM);
+        if(queryString == null || queryString.length()==0){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query String was empty." );
+            return;
+        }
 
-      checkQueryStringForExtraneousParams(request,response,"get");
+        if(!checkQueryStringForExtraneousParams(request,response,"get"))return;
 
-      if(airlineName == null || airlineName.length()==0){
-          responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Airline name " +
-                  "was not specified in query string: " + queryString );
-          return;
-      }
-      if(!airlines.containsKey(airlineName)){
-          responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,"Airline name " +
-                  "was not found: " + airlineName );
-          return;
-      }
-      if(src!=null || dest!=null){
-          getFlightsWithSpecificSRCAndDest(response,queryString,airlineName,src,dest);
-      }
+        if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
 
-
-      /*
-      String word = getParameter( AIRLINE_NAME_PARAMETER, request );
-      if (word != null) {
-          writeDefinition(word, response);
-
-      } else {
-          writeAllDictionaryEntries(response);
-      }*/
-  }
+        if(!airlines.containsKey(airlineName)){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,"Airline name " +
+                    "was not found: " + airlineName );
+            return;
+        }
+        if(src!=null || dest!=null){
+            getFlightsWithSpecificSRCAndDest(response,queryString,airlineName,src,dest);
+            return;
+        }
+        //When SRC & DEST not specified, get all flights from airline:
+        writeAirlineAndFlightsToResponse(response,airlines.get(airlineName),HttpServletResponse.SC_OK);
+    }
 
     private void getFlightsWithSpecificSRCAndDest(HttpServletResponse response, String queryString, String airlineName, String src, String dest) throws IOException {
-        if((src==null||src.length()==0)&& dest!=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"dest\" is defined, " +
-                    "but \"src\" was not defined! : " + queryString);
-            return;
-        }
-        if((dest==null||dest.length()==0)&& src!=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"src\" is defined, " +
-                    "but \"dest\" was not defined! : " + queryString);
-            return;
-        }
-
-        if(!isRealAirportCode(src)){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
-                    "Departure airport code is invalid, src: " + src);
-            return;
-        }
-        if(!isRealAirportCode(dest)){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
-                    "Departure airport code is invalid, dest: " + dest);
-            return;
-        }
+        if (validateSRCAndDEST(response, queryString, src, dest)) return;
         Airline requestedAirline = airlines.get(airlineName);
         Airline filteredAirlineWithMatchingFlights = new Airline(airlineName);
         for(Flight fl: requestedAirline.getFlights()){
@@ -107,205 +80,228 @@ public class AirlineServlet extends HttpServlet {
             responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,
                     "Flights with departure airport " + src +
                             " and arrival airport " + dest +
-                    " could not be found for " + airlineName );
+                            " could not be found for " + airlineName );
             return;
         }
+        writeAirlineAndFlightsToResponse(response,filteredAirlineWithMatchingFlights,HttpServletResponse.SC_OK);
+    }
 
+    private boolean validateSRCAndDEST(HttpServletResponse response, String queryString, String src, String dest) throws IOException {
+        if((src ==null|| src.length()==0)&& dest !=null){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"dest\" is defined, " +
+                    "but \"src\" was not defined! : " + queryString);
+            return true;
+        }
+        if((dest ==null|| dest.length()==0)&& src !=null){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"src\" is defined, " +
+                    "but \"dest\" was not defined! : " + queryString);
+            return true;
+        }
+
+        if(!isRealAirportCode(src)){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                    "Departure airport code is invalid, src: " + src);
+            return true;
+        }
+        if(!isRealAirportCode(dest)){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                    "Arrival airport code is invalid, dest: " + dest);
+            return true;
+        }
+        return false;
     }
+
+    protected void writeAirlineAndFlightsToResponse(HttpServletResponse response, Airline airline, int status) throws IOException {
+        response.setContentType("application/xml;charset=us-ascii");
+        PrintWriter pw = response.getWriter();
+        XmlDumper dumper = new XmlDumper(pw);
+        dumper.dump(airline);
+
+        response.setStatus(status);
+    }
+
     protected void addNewAirlineToMap(String airlineName){
-      airlines.put(airlineName,new Airline(airlineName));
+        airlines.put(airlineName,new Airline(airlineName));
     }
+    protected void addAirlineToMap(Airline airline){airlines.put(airline.getName(),airline);}
 
     private boolean isRealAirportCode(String code) {
         return AirportNames.getNamesMap().containsKey(code);
     }
-    protected void checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
-      Map<String, String[]> paramMap = request.getParameterMap();
-      Iterator<String> iterate = paramMap.keySet().iterator();
-      while(iterate.hasNext()){
-          String key = iterate.next();
-          if(type.equals("get")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM){
-              responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
-                      "In search GET request, extraneous parameter was found in query string: " + key);
-              return;
-          }
-          if(type.equals("post")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM
-                  &&key!= FLIGHT_NUMBER_PARAM && key!=DEPARTURE_DATETIME && key!=ARRIVAL_DATETIME){
-              responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
-                      "In add POST request, extraneous parameter was found in query string: " + key);
-              return;
-          }
-      }
-
+    protected boolean checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
+        Map<String, String[]> paramMap = request.getParameterMap();
+        Iterator<String> iterate = paramMap.keySet().iterator();
+        while(iterate.hasNext()){
+            String key = iterate.next();
+            if(type.equals("get")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM){
+                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                        "In search GET request, extraneous parameter was found in query string: " + key);
+                return false;
+            }
+            if(type.equals("post")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM
+                    &&key!= FLIGHT_NUMBER_PARAM && key!=DEPARTURE_DATETIME && key!=ARRIVAL_DATETIME){
+                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+                        "In add POST request, extraneous parameter was found in query string: " + key);
+                return false;
+            }
+        }
+        return true;
     }
 
     private void responseSetStatusAndSendError(HttpServletResponse response, int status, String msg) throws IOException {
-      response.setStatus(status);
-      response.sendError(status,msg);
-      errorMsgForTesting = msg;
-  }
+        response.setStatus(status);
+        response.sendError(status,msg);
+        errorMsgForTesting = msg;
+    }
 
-  /*
-  Example http request url
-  https://www.example.com/products?category=electronics&price_min=100&price_max=500
+    /**
+     * Handles an HTTP POST request by storing the dictionary entry for the
+     * "word" and "definition" request parameters.  It writes the dictionary
+     * entry to the HTTP response.
+     */
+    @Override
+    protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        String queryString = request.getQueryString();// Use to decide what kind of request it is for
+        if(queryString == null || queryString.length()==0){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query String was empty." );
+            return;
+        }
+        if(!checkQueryStringForExtraneousParams(request,response,"post"))return;
 
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+        String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
+        if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
 
-    // Get the request URI
-    String uri = request.getRequestURI(); // Returns "/products"
+        String src = request.getParameter(SOURCE_PARAM);
+        String dest = request.getParameter(DESTINATION_PARAM);
+        if (validateSRCAndDEST(response, queryString, src, dest)) return;
 
-    // Get the query string
-    String queryString = request.getQueryString(); // Returns "category=electronics&price_min=100&price_max=500"
+        String flightNumber = request.getParameter(FLIGHT_NUMBER_PARAM);
+        if (!validateParam(response, queryString, flightNumber, FLIGHT_NUMBER_PARAM)) return;
+        String departureDateTime = request.getParameter(DEPARTURE_DATETIME);
+        if (!validateParam(response, queryString, departureDateTime, DEPARTURE_DATETIME)) return;
 
-    // Get a single parameter value
-    String category = request.getParameter("category"); // Returns "electronics"
+        String arrivalDateTime = request.getParameter(ARRIVAL_DATETIME);
+        if (!validateParam(response, queryString, arrivalDateTime, ARRIVAL_DATETIME)) return;
 
-    // Get all parameter values as a map
-    Map<String, String[]> paramMap = request.getParameterMap(); // Returns a map containing all parameters and their values
-MAP:
-{
-    "category": ["electronics"],
-    "price_min": ["100"],
-    "price_max": ["500"]
-}
-    // Do something with the retrieved information...
-}
+        String[] depDateTime = departureDateTime.split(" ");
+        String[] arrDateTime = arrivalDateTime.split(" ");
+        Flight newFlight = new Flight(flightNumber,src,depDateTime[0],depDateTime[1]+" "+depDateTime[2],
+                dest,arrDateTime[0],arrDateTime[1]+" "+arrDateTime[2]);
 
-  * */
+        Airline responseAirline = new Airline(airlineName);
+        responseAirline.addFlight(newFlight);
+        writeAirlineAndFlightsToResponse(response,responseAirline ,HttpServletResponse.SC_CREATED);
+        if(airlines.containsKey(airlineName))airlines.get(airlineName).addFlight(newFlight);
+        else airlines.put(airlineName,responseAirline);
+    }
 
-  /**
-   * Handles an HTTP POST request by storing the dictionary entry for the
-   * "word" and "definition" request parameters.  It writes the dictionary
-   * entry to the HTTP response.
-   */
-  @Override
-  protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
-  {
-      response.setContentType( "text/plain" );
+    private boolean validateParam(HttpServletResponse response, String queryString, String param, String paramType) throws IOException {
+        String type = "";
+        if(paramType.equals(AIRLINE_NAME_PARAM)) type = "Airline name ";
+        else if(paramType.equals(FLIGHT_NUMBER_PARAM)) type = "Flight number ";
+        else if(paramType.equals(DEPARTURE_DATETIME)) type = "Departure datetime ";
+        else if(paramType.equals(ARRIVAL_DATETIME)) type = "Arrival datetime ";
 
-      String airlineName = getParameter(AIRLINE_NAME_PARAM, request );
-      if (airlineName == null) {
-          missingRequiredParameter(response, AIRLINE_NAME_PARAM);
-          return;
-      }
+        if(param == null || param.length()==0){
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,type +
+                    "was not specified in query string: " + queryString);
+            return false;
+        }
+        if(paramType.equals(DEPARTURE_DATETIME) || paramType.equals(ARRIVAL_DATETIME)){
+            try{
+                Date date = formatter.parse(param);
+            }catch(ParseException e){
+                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+ param +"\""+
+                        " is not a correctly formatted datetime: MM/DD/YYYY HH:MM AM|PM \n" +
+                        "Please note only a single space is needed to separate MM/DD/YYYY, HH:MM, and AM|PM !");
+                return false;
+            }
+        }
+        if(paramType.equals(DEPARTURE_DATETIME)){
+            try{
+                Integer.parseInt(param);
+            }catch(NumberFormatException e){
+                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+param +"\""+
+                        " is not a integer number to be set as a flight number.");
+                return false;
+            }
+        }
+        return true;
+    }
 
-      String flightNumberAsString = getParameter(FLIGHT_NUMBER_PARAM, request );
-      if ( flightNumberAsString == null) {
-          missingRequiredParameter( response, FLIGHT_NUMBER_PARAM);
-          return;
-      }
+    /**
+     * Handles an HTTP DELETE request by removing all dictionary entries.  This
+     * behavior is exposed for testing purposes only.  It's probably not
+     * something that you'd want a real application to expose.
+     */
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain");
 
-      Airline airline = this.airlines.get(airlineName);
-      if(airline==null){
-          airline = new Airline(airlineName);
-          this.airlines.put(airlineName,airline);
-      }
-      Flight fl = new Flight();
-      fl.setFlightNumber(flightNumberAsString);
-      airline.addFlight(fl);
+        this.airlines.clear();
 
+        PrintWriter pw = response.getWriter();
+        pw.println(Messages.allDictionaryEntriesDeleted());
+        pw.flush();
 
-      PrintWriter pw = response.getWriter();
-      pw.println(Messages.definedWordAs(airlineName, flightNumberAsString));
-      pw.flush();
+        response.setStatus(HttpServletResponse.SC_OK);
 
-      response.setStatus( HttpServletResponse.SC_OK);
-  }
+    }
 
-  /**
-   * Handles an HTTP DELETE request by removing all dictionary entries.  This
-   * behavior is exposed for testing purposes only.  It's probably not
-   * something that you'd want a real application to expose.
-   */
-  @Override
-  protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      response.setContentType("text/plain");
+    /**
+     * Writes an error message about a missing parameter to the HTTP response.
+     *
+     * The text of the error message is created by {@link Messages#missingRequiredParameter(String)}
+     */
+    private void missingRequiredParameter( HttpServletResponse response, String parameterName )
+            throws IOException
+    {
+        String message = Messages.missingRequiredParameter(parameterName);
+        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
+    }
 
-      this.airlines.clear();
+    /**
+     * Writes the definition of the given word to the HTTP response.
+     *
+     * The text of the message is formatted with {@link TextDumper}
+     */
+    private void writeDefinition(String airlineName, HttpServletResponse response) throws IOException {
+        Airline airways = this.airlines.get(airlineName);
 
-      PrintWriter pw = response.getWriter();
-      pw.println(Messages.allDictionaryEntriesDeleted());
-      pw.flush();
+        if (airways == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
-      response.setStatus(HttpServletResponse.SC_OK);
-
-  }
-
-  /**
-   * Writes an error message about a missing parameter to the HTTP response.
-   *
-   * The text of the error message is created by {@link Messages#missingRequiredParameter(String)}
-   */
-  private void missingRequiredParameter( HttpServletResponse response, String parameterName )
-      throws IOException
-  {
-      String message = Messages.missingRequiredParameter(parameterName);
-      response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
-  }
-
-  /**
-   * Writes the definition of the given word to the HTTP response.
-   *
-   * The text of the message is formatted with {@link TextDumper}
-   */
-  private void writeDefinition(String airlineName, HttpServletResponse response) throws IOException {
-    Airline airways = this.airlines.get(airlineName);
-
-    if (airways == null) {
-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-
-    } else {
-      PrintWriter pw = response.getWriter();
+        } else {
+            PrintWriter pw = response.getWriter();
 /*
       Map<String, Airline> wordDefinition = Map.of(airlineName, airways);
       TextDumper dumper = new TextDumper(pw);
       dumper.dump(wordDefinition);
 */
-      response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
     }
-  }
 
-  /**
-   * Writes all of the dictionary entries to the HTTP response.
-   *
-   * The text of the message is formatted with {@link TextDumper}
-   */
-  private void writeAllDictionaryEntries(HttpServletResponse response ) throws IOException
-  {
-      PrintWriter pw = response.getWriter();
-      /*
-      TextDumper dumper = new TextDumper(pw);
-      dumper.dump(dictionary);*/
 
-      response.setStatus( HttpServletResponse.SC_OK );
-  }
+    /**
+     * Returns the value of the HTTP request parameter with the given name.
+     *
+     * @return <code>null</code> if the value of the parameter is
+     *         <code>null</code> or is the empty string
+     */
+    private String getParameter(String name, HttpServletRequest request) {
+        String value = request.getParameter(name);
+        if (value == null || "".equals(value)) {
+            return null;
 
-  /**
-   * Writes all of the airlines to HTTP response
-   * */
-  private void writeAirlines(HttpServletResponse response, Airline... airlines) throws IOException{
-
-  }
-
-  /**
-   * Returns the value of the HTTP request parameter with the given name.
-   *
-   * @return <code>null</code> if the value of the parameter is
-   *         <code>null</code> or is the empty string
-   */
-  private String getParameter(String name, HttpServletRequest request) {
-    String value = request.getParameter(name);
-    if (value == null || "".equals(value)) {
-      return null;
-
-    } else {
-      return value;
+        } else {
+            return value;
+        }
     }
-  }
 
-  @VisibleForTesting
-  Airline getAirline(String airlineName) {
-      return this.airlines.get(airlineName);
-  }
+    @VisibleForTesting
+    Airline getAirline(String airlineName) {
+        return this.airlines.get(airlineName);
+    }
 }

@@ -37,7 +37,7 @@ public class AirlineRestClient
 
     @VisibleForTesting
     AirlineRestClient(HttpRequestHelper http) {
-      this.http = http;
+        this.http = http;
     }
 
     /**
@@ -54,23 +54,23 @@ public class AirlineRestClient
     }
 
 
-  public void addFlightToAirline(String word, String definition) throws IOException {
-    Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAM, word,
-                                         AirlineServlet.FLIGHT_NUMBER_PARAM, definition));
-    throwExceptionIfNotOkayHttpStatus(response);
-  }
-
-  public void removeAllAirlines() throws IOException {
-    Response response = http.delete(Map.of());
-    throwExceptionIfNotOkayHttpStatus(response);
-  }
-
-  private void throwExceptionIfNotOkayHttpStatus(Response response) {
-    int code = response.getHttpStatusCode();
-    if (code != HTTP_OK) {
-      String message = response.getContent();
-      throw new RestException(code, message);
+    public void addFlightToAirline(String word, String definition) throws IOException {
+        Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAM, word,
+                AirlineServlet.FLIGHT_NUMBER_PARAM, definition));
+        throwExceptionIfNotOkayHttpStatus(response);
     }
-  }
+
+    public void removeAllAirlines() throws IOException {
+        Response response = http.delete(Map.of());
+        throwExceptionIfNotOkayHttpStatus(response);
+    }
+
+    private void throwExceptionIfNotOkayHttpStatus(Response response) {
+        int code = response.getHttpStatusCode();
+        if (code != HTTP_OK) {
+            String message = response.getContent();
+            throw new RestException(code, message);
+        }
+    }
 
 }
