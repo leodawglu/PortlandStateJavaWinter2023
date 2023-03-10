@@ -41,81 +41,6 @@ public class Project5 {
 
     public static void main(String[] args) {
         invokedByMain(args);
-/*
-        String hostName = null;
-        String portString = null;
-        String airlineName = null;
-        String flightNumberAsString = null;
-
-
-        for (String arg : args) {
-            if (hostName == null) {
-                hostName = arg;
-
-            } else if ( portString == null) {
-                portString = arg;
-
-            } else if (airlineName == null) {
-                airlineName = arg;
-
-            } else if (flightNumberAsString == null) {
-                flightNumberAsString = arg;
-
-            } else {
-                usage("Extraneous command line argument: " + arg);
-            }
-        }
-
-        if (hostName == null) {
-            usage( MISSING_ARGS );
-            return;
-
-        } else if ( portString == null) {
-            usage( "Missing port" );
-            return;
-        }
-
-        int port;
-        try {
-            port = Integer.parseInt( portString );
-
-        } catch (NumberFormatException ex) {
-            usage("Port \"" + portString + "\" must be an integer");
-            return;
-        }
-        //when HostName and port are clearly defined, initialize AirlineRestClient
-        AirlineRestClient client = new AirlineRestClient(hostName, port);
-
-        try {
-            if (airlineName == null) {
-                error("Airline name required");
-                // Print all word/definition pairs
-
-                Map<String, String> dictionary = client.getAllAirlineEntries();
-                StringWriter sw = new StringWriter();
-                PrettyPrinter pretty = new PrettyPrinter(sw);
-                pretty.dump(dictionary);
-                message = sw.toString();
-
-            } else if (flightNumberAsString == null) {
-                // Pretty Print the entire airline
-                Airline airline = client.getAirline(airlineName);
-                System.out.println(airline.toString());
-
-            } else {
-                // Post the word/definition pair
-                client.addFlightToAirline(airlineName, flightNumberAsString);
-                //message = Messages.definedWordAs(airlineName, flightNumberAsString);
-            }
-
-        } catch (IOException | ParserException ex ) {
-            error("While contacting server: " + ex.getMessage());
-            return;
-        }
-
-        System.out.println(message);
-
- */
     }
 
     public static void invokedByMain(String[] args){
@@ -138,12 +63,6 @@ public class Project5 {
             // TO DO: get flight from Servlet and print
             //printFlight(exec);
         }
-        /*
-        try{
-        }catch(IOException | ParserException ex){
-            error("While contacting server: " + ex.getMessage());
-            return;
-        }*/
     }
     /**
      * CHANGE!

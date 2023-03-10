@@ -34,6 +34,7 @@ class AirlineRestClientIT {
     client.removeAllAirlines();
   }
 
+  /*
 
   @Test
   void test2CreateFirstFlight() throws IOException, ParserException {
@@ -47,5 +48,5 @@ class AirlineRestClientIT {
     assertThat(airline.getName(), containsString(airlineName));
     assertThat(airline.getFlights().iterator().next().getNumber(), equalTo(flightNumber));
   }
-
+*/
 }

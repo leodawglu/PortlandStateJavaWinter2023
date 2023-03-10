@@ -31,6 +31,15 @@ public class AirlineRestClientTest {
     //assertThat(client.getAllAirlineEntries(), equalTo(dictionary));
   }
 
+  @Test
+  void addNewFlightAndAirline() throws IOException {
+    /*AirlineRestClient not using (hostname, port) ! not talking to servlet yet*/
+    String[] flightInfo = new String[]{"EVA Air","25","SEA","01/21/2023", "1:40 pm","SIN","01/21/2023", "6:40 pm"};
+    HttpRequestHelper http = mock(HttpRequestHelper.class);
+    AirlineRestClient client = new AirlineRestClient(http);
+    //client.addFlightToAirline(flightInfo);
+  }
+
   private HttpRequestHelper.Response dictionaryAsText(Map<String, String> dictionary) {
     StringWriter writer = new StringWriter();
     new TextDumper(writer).dump(dictionary);

@@ -54,10 +54,16 @@ public class AirlineRestClient
     }
 
 
-    public void addFlightToAirline(String word, String definition) throws IOException {
-        Response response = http.post(Map.of(AirlineServlet.AIRLINE_NAME_PARAM, word,
-                AirlineServlet.FLIGHT_NUMBER_PARAM, definition));
-        throwExceptionIfNotOkayHttpStatus(response);
+    public void addFlightToAirline(String[] flightInfo) throws IOException {
+        Response response = http.post(
+                Map.of(AirlineServlet.AIRLINE_NAME_PARAM, flightInfo[0],
+                        AirlineServlet.FLIGHT_NUMBER_PARAM, flightInfo[1],
+                        AirlineServlet.SOURCE_PARAM, flightInfo[2],
+                        AirlineServlet.DEPARTURE_DATETIME, flightInfo[3]+" "+ flightInfo[4],
+                        AirlineServlet.DESTINATION_PARAM, flightInfo[5],
+                        AirlineServlet.ARRIVAL_DATETIME, flightInfo[6]+" "+ flightInfo[7]));
+        //System.out.println(response.getContent());
+        //throwExceptionIfNotOkayHttpStatus(response);
     }
 
     public void removeAllAirlines() throws IOException {

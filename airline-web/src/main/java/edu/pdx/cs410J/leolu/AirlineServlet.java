@@ -47,7 +47,7 @@ public class AirlineServlet extends HttpServlet {
         String src = request.getParameter(SOURCE_PARAM);
         String dest = request.getParameter(DESTINATION_PARAM);
         if(queryString == null || queryString.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query String was empty." );
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query String was empty." );
             return;
         }
 
@@ -88,12 +88,12 @@ public class AirlineServlet extends HttpServlet {
 
     private boolean validateSRCAndDEST(HttpServletResponse response, String queryString, String src, String dest) throws IOException {
         if((src ==null|| src.length()==0)&& dest !=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"dest\" is defined, " +
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"dest\" is defined, " +
                     "but \"src\" was not defined! : " + queryString);
             return true;
         }
         if((dest ==null|| dest.length()==0)&& src !=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query string \"src\" is defined, " +
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"src\" is defined, " +
                     "but \"dest\" was not defined! : " + queryString);
             return true;
         }
@@ -164,7 +164,7 @@ public class AirlineServlet extends HttpServlet {
     {
         String queryString = request.getQueryString();// Use to decide what kind of request it is for
         if(queryString == null || queryString.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"Query String was empty." );
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query String was empty." );
             return;
         }
         if(!checkQueryStringForExtraneousParams(request,response,"post"))return;
@@ -204,13 +204,13 @@ public class AirlineServlet extends HttpServlet {
         else if(paramType.equals(ARRIVAL_DATETIME)) type = "Arrival datetime ";
 
         if(param == null || param.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,type +
+            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,type +
                     "was not specified in query string: " + queryString);
             return false;
         }
         if(paramType.equals(DEPARTURE_DATETIME) || paramType.equals(ARRIVAL_DATETIME)){
             try{
-                Date date = formatter.parse(param);
+                formatter.parse(param);
             }catch(ParseException e){
                 responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+ param +"\""+
                         " is not a correctly formatted datetime: MM/DD/YYYY HH:MM AM|PM \n" +
@@ -218,12 +218,12 @@ public class AirlineServlet extends HttpServlet {
                 return false;
             }
         }
-        if(paramType.equals(DEPARTURE_DATETIME)){
+        if(paramType.equals(FLIGHT_NUMBER_PARAM)){
             try{
                 Integer.parseInt(param);
             }catch(NumberFormatException e){
                 responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+param +"\""+
-                        " is not a integer number to be set as a flight number.");
+                        " is not a integer number, and cannot be set as flight number.");
                 return false;
             }
         }
@@ -247,57 +247,6 @@ public class AirlineServlet extends HttpServlet {
 
         response.setStatus(HttpServletResponse.SC_OK);
 
-    }
-
-    /**
-     * Writes an error message about a missing parameter to the HTTP response.
-     *
-     * The text of the error message is created by {@link Messages#missingRequiredParameter(String)}
-     */
-    private void missingRequiredParameter( HttpServletResponse response, String parameterName )
-            throws IOException
-    {
-        String message = Messages.missingRequiredParameter(parameterName);
-        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
-    }
-
-    /**
-     * Writes the definition of the given word to the HTTP response.
-     *
-     * The text of the message is formatted with {@link TextDumper}
-     */
-    private void writeDefinition(String airlineName, HttpServletResponse response) throws IOException {
-        Airline airways = this.airlines.get(airlineName);
-
-        if (airways == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-
-        } else {
-            PrintWriter pw = response.getWriter();
-/*
-      Map<String, Airline> wordDefinition = Map.of(airlineName, airways);
-      TextDumper dumper = new TextDumper(pw);
-      dumper.dump(wordDefinition);
-*/
-            response.setStatus(HttpServletResponse.SC_OK);
-        }
-    }
-
-
-    /**
-     * Returns the value of the HTTP request parameter with the given name.
-     *
-     * @return <code>null</code> if the value of the parameter is
-     *         <code>null</code> or is the empty string
-     */
-    private String getParameter(String name, HttpServletRequest request) {
-        String value = request.getParameter(name);
-        if (value == null || "".equals(value)) {
-            return null;
-
-        } else {
-            return value;
-        }
     }
 
     @VisibleForTesting
