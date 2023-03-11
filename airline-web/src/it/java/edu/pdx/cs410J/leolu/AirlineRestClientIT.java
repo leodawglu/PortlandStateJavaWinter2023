@@ -34,6 +34,15 @@ class AirlineRestClientIT {
     client.removeAllAirlines();
   }
 
+  @Test
+  void addNewAirlineAndNewFlight(){
+    AirlineRestClient client = newAirlineRestClient();
+    String[] flightInfo = new String[]{"EVA Air","52","TPE","02/02/2022 10:30 AM","SIN","02/02/2022 3:30 PM"};
+    client.addFlightToAirline(flightInfo);
+    Airline airline = client.getAirline("EVA Air", null,null);
+    assertThat(airline.getName(),containsString("EVA Air"));
+  }
+
   /*
 
   @Test

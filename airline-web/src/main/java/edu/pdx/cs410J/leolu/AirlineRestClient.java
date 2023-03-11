@@ -42,28 +42,54 @@ public class AirlineRestClient
 
     /**
      * getAirline() method
-     * @return Airline object parsed from
+     * @return Airline object retrieved from Http Response using XmlParser to parse the XML content
      * */
-    public Airline getAirline(String airlineName) throws IOException, ParserException {
-        Response response = http.get(Map.of("airline",airlineName));
-        String xmlInStringFormat = response.getContent();
+    public Airline getAirline(String airlineName, String src, String dest) {
+        Airline found = null;
+        Response response = null;
+        try{
 
-        XmlParser parser = new XmlParser(xmlInStringFormat, true);
+            if(src==null && dest ==null)
+                response = http.get(Map.of(AirlineServlet.AIRLINE_NAME_PARAM,airlineName));
+            else
+                response = http.get(Map.of(AirlineServlet.AIRLINE_NAME_PARAM,airlineName,
+                        AirlineServlet.SOURCE_PARAM,src,
+                        AirlineServlet.DESTINATION_PARAM,dest));
 
-        return parser.parse();
+            String xmlInStringFormat = response.getContent();
+            XmlParser parser = new XmlParser(xmlInStringFormat, true);
+            found = parser.parse();
+
+        }catch(IOException e){
+            System.err.println("IOException thrown when getting data from response output: "
+                    + e.getMessage());
+        }catch(ParserException e){
+            System.out.println(response.getContent());
+        }
+        return found;
     }
 
-
-    public void addFlightToAirline(String[] flightInfo) throws IOException {
-        Response response = http.post(
-                Map.of(AirlineServlet.AIRLINE_NAME_PARAM, flightInfo[0],
-                        AirlineServlet.FLIGHT_NUMBER_PARAM, flightInfo[1],
-                        AirlineServlet.SOURCE_PARAM, flightInfo[2],
-                        AirlineServlet.DEPARTURE_DATETIME, flightInfo[3]+" "+ flightInfo[4],
-                        AirlineServlet.DESTINATION_PARAM, flightInfo[5],
-                        AirlineServlet.ARRIVAL_DATETIME, flightInfo[6]+" "+ flightInfo[7]));
+    /**
+     * Invoked for POST requests
+     * Maps flight information into HTTP POST Request
+     * Then the request is sent to servlet
+     * */
+    public void addFlightToAirline(String[] flightInfo) {
+        Response response;
+        try{
+            response = http.post(
+                    Map.of(AirlineServlet.AIRLINE_NAME_PARAM, flightInfo[0],
+                            AirlineServlet.FLIGHT_NUMBER_PARAM, flightInfo[1],
+                            AirlineServlet.SOURCE_PARAM, flightInfo[2],
+                            AirlineServlet.DEPARTURE_DATETIME, flightInfo[3],
+                            AirlineServlet.DESTINATION_PARAM, flightInfo[4],
+                            AirlineServlet.ARRIVAL_DATETIME, flightInfo[5]));
+            throwExceptionIfNotOkayHttpStatus(response);
+        }catch(IOException e){
+            System.err.println("IOException thrown when writing data to response output stream: "
+                    + e.getMessage());
+        }
         //System.out.println(response.getContent());
-        //throwExceptionIfNotOkayHttpStatus(response);
     }
 
     public void removeAllAirlines() throws IOException {

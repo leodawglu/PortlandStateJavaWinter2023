@@ -64,7 +64,7 @@ public class XmlParser implements AirlineParser<Airline> {
      * */
     public Airline parse() throws ParserException{
         try {
-            if(filepath.isEmpty()) throw new ParserException("File path is empty");
+            if(!isHttpResponse&&filepath.isEmpty()) throw new ParserException("File path is empty");
             AirlineXmlHelper helper = new AirlineXmlHelper();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setValidating(true);

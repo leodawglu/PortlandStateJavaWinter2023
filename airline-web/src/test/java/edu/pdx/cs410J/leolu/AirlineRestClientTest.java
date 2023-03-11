@@ -12,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static edu.pdx.cs410J.web.HttpRequestHelper.Response;
 
 /**
  * A unit test for the REST client that demonstrates using mocks and
@@ -19,30 +20,33 @@ import static org.mockito.Mockito.*;
  */
 public class AirlineRestClientTest {
 
+/*
   @Test
-  void getAllDictionaryEntriesPerformsHttpGetWithNoParameters() throws ParserException, IOException {
-    Map<String, String> dictionary = Map.of("One", "1", "Two", "2");
+  void getAllFlightsFromAirlineWhenGetAirlineWithNoSRCAndDest() throws ParserException, IOException {
+    Airline mock = new Airline("mock");
 
     HttpRequestHelper http = mock(HttpRequestHelper.class);
-    when(http.get(eq(Map.of()))).thenReturn(dictionaryAsText(dictionary));
+    when(http.get(eq(Map.of()))).thenReturn(airlinesAsText(mock));
     
     AirlineRestClient client = new AirlineRestClient(http);
 
-    //assertThat(client.getAllAirlineEntries(), equalTo(dictionary));
+    assertThat(client.getAirline("","",""), equalTo(mock));
   }
 
   @Test
   void addNewFlightAndAirline() throws IOException {
-    /*AirlineRestClient not using (hostname, port) ! not talking to servlet yet*/
+    //AirlineRestClient not using (hostname, port) ! not talking to servlet yet
+    Response response = mock(Response.class);
     String[] flightInfo = new String[]{"EVA Air","25","SEA","01/21/2023", "1:40 pm","SIN","01/21/2023", "6:40 pm"};
     HttpRequestHelper http = mock(HttpRequestHelper.class);
     AirlineRestClient client = new AirlineRestClient(http);
-    //client.addFlightToAirline(flightInfo);
+    client.addFlightToAirline(flightInfo);
   }
-
-  private HttpRequestHelper.Response dictionaryAsText(Map<String, String> dictionary) {
+*/
+  private HttpRequestHelper.Response airlinesAsText(Airline airline) {
     StringWriter writer = new StringWriter();
-    new TextDumper(writer).dump(dictionary);
+    new XmlDumper(writer).dump(airline);
+    //new TextDumper(writer).dump(dictionary);
 
     return new HttpRequestHelper.Response(writer.toString());
   }

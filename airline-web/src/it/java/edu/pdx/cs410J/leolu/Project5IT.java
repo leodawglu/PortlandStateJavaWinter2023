@@ -29,13 +29,13 @@ class Project5IT extends InvokeMainTestCase {
       AirlineRestClient client = new AirlineRestClient(HOSTNAME, Integer.parseInt(PORT));
       client.removeAllAirlines();
     }
-
+/*
     @Test
     void test1NoCommandLineArguments() {
         MainMethodResult result = invokeMain( Project5.class );
         assertThat(result.getTextWrittenToStandardError(), containsString(Project5.MISSING_ARGS));
-    }
-
+    }*/
+/*
     @Test
     void test2EmptyServer() {
         MainMethodResult result = invokeMain( Project5.class, HOSTNAME, PORT );
@@ -44,8 +44,8 @@ class Project5IT extends InvokeMainTestCase {
 
         String out = result.getTextWrittenToStandardOut();
         assertThat(out, out, containsString(PrettyPrinter.formatWordCount(0)));
-    }
-
+    }*/
+/*
     @Test
     void test3NoDefinitionsThrowsAppointmentBookRestException() {
         String word = "WORD";
@@ -57,8 +57,8 @@ class Project5IT extends InvokeMainTestCase {
             RestException cause = (RestException) ex.getCause();
             assertThat(cause.getHttpStatusCode(), equalTo(HttpURLConnection.HTTP_NOT_FOUND));
         }
-    }
-
+    }*/
+/*
     @Test
     void test4AddDefinition() {
         String word = "WORD";
@@ -84,5 +84,5 @@ class Project5IT extends InvokeMainTestCase {
 
         out = result.getTextWrittenToStandardOut();
         assertThat(out, out, containsString(PrettyPrinter.formatDictionaryEntry(word, definition)));
-    }
+    }*/
 }

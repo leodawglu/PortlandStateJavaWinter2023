@@ -1,4 +1,4 @@
-# Airline Project3
+# Airline-Web Project
 Is an Airline Flight Management System - A Java Command Line Program
 
 A simple command line program that creates an airline and a flight with a user argument. It can also read/write the airline and flight to a text file.
@@ -20,11 +20,7 @@ These instructions will help you run the program on your local machine for testi
 - Run the program using the `java` command in the terminal/command prompt
 
 ## Usage
-Converter Usage: java edu.pdx.cs410J.leolu.Converter textFile xmlFile
-
-General Usage:
-java -jar target/airline-2023.0.0.jar [options] <args>
-
+Usage: java -jar target/airline-client.jar [options] <args>
 args are (in this order):
 airline          The name of the airline
 flightNumber     The flight number (Positive Numbers only)
@@ -34,17 +30,28 @@ dest             Three-letter code of departure airport (Alphabets Only)
 arrive           Arrival date and time (mm/dd/yyyy hh:mm am/pm 12hr format only)
 
 Options:
-    -pretty file     Pretty print the airline’s flights to
-                     a text file or standard out (file -)
-	-textFile file   Where to read/write the airline info
-	-xmlFile file   Where to read/write the airline info
+    -host hostname   Host computer on which the server runs
+	-port port       Port on which the server is listening
+	-search          Search for flights
 	-print           Prints a description of the new flight
 	-README          Prints a README for this project and exits
 
+Note -search and -print CANNOT be specified together
+Note that time must be specified in 12-hr format HH:MM AM/PM e.g.: 11:30 am
+Note that multi-word arguments must be delimited with double quotes.
+For Example, airline: "Hello Airways"
+
+Examples:
+-host localhost -port 8080 -print "AirDave" 123 PDX 07/19/2023 1:02 pm LAX 07/19/2023 6:22 pm
+-host localhost -port 8080  "EVA Air" 25 SEA 1/26/2023 10:10 am TPE 1/27/2023 5:30 pm
+-host localhost -port 8080 -search "EVA Air"
+-host localhost -port 8080 -search "AirDave" PDX LAX
+-README
+
 Note -textFile and -xmlFile CANNOT be specified together
 Note that time must be specified in 12-hr format HH:MM AM/PM e.g.: 11:30 am
-Note that multi-word arguments must be delimited with double quotes. 
-For Example, airline: "Hello Airways"  
+Note that multi-word arguments must be delimited with double quotes.
+For Example, airline: "Hello Airways"
 
 Examples:
 

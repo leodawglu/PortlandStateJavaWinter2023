@@ -1,10 +1,6 @@
 package edu.pdx.cs410J.leolu;
 
-import edu.pdx.cs410J.ParserException;
-
 import java.io.*;
-import java.util.Map;
-import java.util.Scanner;
 
 /**
  * The main class that parses the command line and communicates with the
@@ -19,18 +15,17 @@ public class Project5 {
 
     * */
     /*Project 4 Variables*/
-    boolean printFlight = false, readMe = false, tooManyArguments = false, search = false;
+    Airline anAirline;
+    Flight aFlight;
+    boolean printFlight = false, readMe = false, search = false;
     int hostNameState = 0, portState = 0;
     // 0: -option not invoked, 1: invoked but not set, -1: set
     int idx = 0, argCount = 0;
-    String airlineName = null;
     String hostName = null;
     int port = -1;
 
-    Map<String, String>  airlineAndFlightStringInformation;
-    String flightNumberAsString = null;
-    static final String readMeFile="README.txt";
-    static final String usageFile="USAGE.txt";
+    static final String readMeFile="src/main/resources/edu.pdx.cs410J.leolu/README.txt";
+    static final String usageFile="src/main/resources/edu.pdx.cs410J.leolu/USAGE.txt";
 
 
     /*Project 5 variables*/
@@ -50,20 +45,105 @@ public class Project5 {
             return;
         }
         Project5 exec = new Project5();
-        if(!argumentReader(args,exec))return;
-        if(exec.readMe) return;
+        if(!argumentReader(args,exec)){
+            printFile(usageFile);
+            return;
+        }
+        if(exec.readMe){
+            printFile(readMeFile);
+            return;
+        }
 
         exec.client = new AirlineRestClient(exec.hostName,exec.port);
         if(exec.search){
             //USE SEARCH arg parser
+            searchForAirlineAndFlights(args,exec);
         }else{
             //USE normal Airline and Flight parser
+            if(!createAirlineAndFlight(args,exec))return;
+            if(exec.printFlight) {
+                printFlight(exec);
+            }
         }
-        if(exec.printFlight) {
-            // TO DO: get flight from Servlet and print
-            //printFlight(exec);
+        
+    }
+
+    /**
+     * This method is called when the -search function is invoked
+     * Within the String[] args, there are two types of valid args
+     * 1: airlineName
+     * 2: airlineName, SRC, DEST
+     * @param args accepts String[] args
+     * @param exec Project5 object
+     * */
+    protected static void searchForAirlineAndFlights(String[] args, Project5 exec) {
+        int type = args.length-exec.idx;
+        Airline airline = null;
+        if(type<1){
+            System.err.println("No arguments were entered for -search option.\n" +
+                    "Please review usage and try again.");
+        }else if(type==2||type>3){
+            System.err.println("Please enter only the airline name to get all flights from that airline,\n" +
+                    "OR enter the airline name, departure airport code, and arrival airport code " +
+                    "to get flights that match the specified itinerary.\n" +
+                    "Please review usage and try again.");
+        }else if(type==1){
+            airline = exec.client.getAirline(args[exec.idx],null,null);
+        }else if(type==3){
+            airline = exec.client.getAirline(args[exec.idx],args[exec.idx+1],args[exec.idx+2]);
+        }
+        if(airline!=null){
+            exec.anAirline=airline;
+            printFlight(exec);
         }
     }
+
+    /**
+     * Creates Airline with airlineName
+     * Creates an empty Flight
+     * Uses a try-catch to add flight args to Flight object
+     * If any flight arg is incorrect, error is printed
+     * If there is any missing arg, error of missing detail is printed
+     * Calls AirlineRestClient to create the flight and airline in servlet
+     * @return true if airline and flight creation is successful
+     * @return false if any process fails
+     * @param args User String args entered
+     * @param exec Project5 object
+     * */
+    protected static boolean createAirlineAndFlight(String[] args, Project5 exec) {
+        try{
+            String airlineName = args[exec.idx];
+            exec.anAirline = new Airline(airlineName);
+            String flightNumber = args[exec.idx+1];
+            String dAirport = args[exec.idx+2];
+            /*Departure Date & Time*/
+            String dDate = args[exec.idx+3];
+            String dTime = args[exec.idx+4];
+            dTime += " " +args[exec.idx+5];
+            String aAirport = args[exec.idx+6];
+            /*Arrival Date & Time*/
+            String aDate = args[exec.idx+7];
+            String aTime = args[exec.idx+8];
+            aTime += " "+args[exec.idx+9];
+
+            Flight fl = new Flight(flightNumber,dAirport,dDate,dTime,aAirport,aDate,aTime);
+            if(!exec.anAirline.getError().equals("")||!fl.getError().equals("")){
+                System.err.println("*------------*Please review input errors above and try again*------------*");
+                return false;
+            }
+
+            exec.anAirline.addFlight(fl);
+            exec.aFlight = fl;
+            exec.client.addFlightToAirline(new String[]{airlineName,flightNumber
+                    ,dAirport,dDate + " " +dTime
+                    , aAirport,aDate + " " +aTime });
+        }catch(ArrayIndexOutOfBoundsException e){
+            missingArgsPrintln(exec.argCount);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * CHANGE!
      * Reads command line String[] args
@@ -72,7 +152,7 @@ public class Project5 {
      * Prints error if too many arguments are entered
      * Counts number of args
      * */
-    private static boolean argumentReader(String[] args, Project5 curr){
+    protected static boolean argumentReader(String[] args, Project5 curr){
         for(String arg: args){
             if(arg.startsWith("-")){
                 if(!optionChecker(arg,curr)) return false;
@@ -86,39 +166,34 @@ public class Project5 {
                 try {
                     curr.port = Integer.parseInt( arg );
                 } catch (NumberFormatException ex) {
-                    usage("Port \"" + arg + "\" must be an integer");
+                    System.err.println("Port number must be an integer! Provided port is not an integer: "+ arg +
+                            "\nPlease review usage and try again.");
                     return false;
                 }
                 curr.portState = -1; //hostName is set;
                 curr.idx+=1;
             }else if(curr.search && curr.argCount >= SEARCH_ARG_COUNT_REQUIREMENT){
-                System.out.println(arg + " is an extraneous argument. \n" +
+                System.err.println(arg + " is an extraneous argument when using -search function. \n" +
                         "Please review usage and try again.");
-                curr.tooManyArguments=true; // use this to print usage
                 return false;
             }else if(curr.argCount >= ARG_COUNT_REQUIREMENT){
-                System.out.println(arg + " is an extraneous argument. \n" +
+                System.err.println(arg + " is an extraneous argument. \n" +
                         "Please review usage and try again.");
-                curr.tooManyArguments=true; // use this to print usage
                 return false;
             }
             else curr.argCount++;
         }
+        if(curr.readMe)return true;
         if(curr.hostNameState != -1){
             System.err.println("Hostname is missing!\n" +
                     "Please review usage and try again.");
             return false;
         }
         if(curr.portState != -1){
-            System.err.println("Port is missing!\n" +
+            System.err.println("Port number is missing!\n" +
                     "Please review usage and try again.");
             return false;
         }
-        return true;
-    }
-
-    public static boolean searchFunction(String[] args, Project5 curr){
-
         return true;
     }
 
@@ -135,16 +210,16 @@ public class Project5 {
             printFile(readMeFile);
             return true;
         }
-        /*
-        * TO DO!!! -SEARCH OPTION LOGIC
-        * CHANGES THE ENTIRE BEHAVIOR
-        * !*!*! -SEARCH IS NOT VALID WITH -PRINT !*!*!
-        * Two behaviors:
-        * -search "Some Airline"
-        * > Pretty prints all flights in the airline
-        * -search "Some Airline" PDX LAS
-        * > Pretty prints all flights ORIGINATING from PDX and TERMINATING at LAS
-        * */
+        else if(opt.equalsIgnoreCase("-search")){
+            if(curr.printFlight){
+                System.err.println("The -search option cannot be invoked with -print option. \n" +
+                        "Please review usage and try again.");
+                return false;
+            }
+            curr.search=true;
+            curr.idx+=1;
+            return true;
+        }
         else if(opt.equalsIgnoreCase("-host")){
             if(curr.hostNameState != 0){
                 System.err.println("The -host option can only be called once. \n" +
@@ -152,6 +227,7 @@ public class Project5 {
                 return false;
             }
             curr.hostNameState = 1;//await assignment;
+            curr.idx+=1;
             return true;
         }
         else if(opt.equalsIgnoreCase("-port")){
@@ -161,16 +237,17 @@ public class Project5 {
                 return false;
             }
             curr.portState = 1;
+            curr.idx+=1;
             return true;
         }
         else if(opt.equalsIgnoreCase("-print")){
             if(curr.search){
-                System.err.println("The -search option cannot be invoked with -print option. \n" +
+                System.err.println("The -print option cannot be invoked with -search option. \n" +
                         "Please review usage and try again.");
                 return false;
             }
             curr.printFlight = true;
-            curr.idx+=1; //TO DO: REPLACE STRING ARG READ LOGIC
+            curr.idx+=1;
             return true;
         }
         System.err.println(opt + " is not a valid option. \n" +
@@ -181,10 +258,9 @@ public class Project5 {
 
     /**
      * Uses the number of args entered to print out which airline and flight detail is missing
-     * @param curr Project5 instance
      * @param count number of args entered
      * */
-    public static void missingArgsPrintln(int count, Project5 curr){
+    public static void missingArgsPrintln(int count){
         System.out.println("The following arguments are missing: ");
         if(count<1) System.out.println("Airline Name");
         if(count<2) System.out.println("Flight Number");
@@ -203,61 +279,42 @@ public class Project5 {
      * Prints flight information entered by user should -print option be called
      * @param curr Project2 Instance
      * */
-    /*
-    private static void printFlight(Project4 curr){
-        Flight fl = curr.aFlight;
-        System.out.println("*----------------------------*Flight Entered*----------------------------*");
-        System.out.println(curr.anAirline.getName() + " " +fl.getNumber());
-        System.out.println("Departing From: " + fl.getSource());
-        System.out.println("Departure Date: " + fl.getDepDate());
-        System.out.println("Departure Time: " + fl.getDepTime());
-        System.out.println("Bound For     : " + fl.getDestination());
-        System.out.println("Arrival Date  : " + fl.getArrDate());
-        System.out.println("Arrival Time  : " + fl.getArrTime());
-        System.out.println("*------------------------------------------------------------------------*");
-    }*/
+
+    private static void printFlight(Project5 curr){
+        System.out.println("*---------------------------------------------------------*");
+        System.out.println("Airline       : "+curr.anAirline.getName());
+        for(Flight fl: curr.anAirline.getFlights()){
+            System.out.println("*---------------------------------------------------------*");
+            System.out.println("Flight Number : " +fl.getNumber());
+            System.out.println("Departing From: " + fl.getSource());
+            System.out.println("Departure Date: " + fl.getDepDate());
+            System.out.println("Departure Time: " + fl.getDepTime());
+            System.out.println("Bound For     : " + fl.getDestination());
+            System.out.println("Arrival Date  : " + fl.getArrDate());
+            System.out.println("Arrival Time  : " + fl.getArrTime());
+            System.out.println("Duration HH|MM: " + fl.getFlightDuration()/60 + "hrs " + fl.getFlightDuration()%60 + "mins");
+            System.out.println("Duration(mins): " + fl.getFlightDuration());
+        }
+        System.out.println("*---------------------------END---------------------------*");
+    }
 
 
     /**
      * Prints README.txt file to console when -README is present in command-line arguments
      * @param fileName takes any valid file path
      * */
-    private static void printFile(String fileName){
-        InputStream file = Project5.class.getResourceAsStream(fileName);
-        Scanner scanner = new Scanner(file);
-        String line;
-        while(scanner.hasNextLine()){
-            line = scanner.nextLine();
-            System.out.println(line);
+    private static void printFile(String fileName) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String line = reader.readLine();
+            while (line != null) {
+                System.out.println(line);
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
         }
-        scanner.close();
-    }
-    private static void error( String message )
-    {
-        PrintStream err = System.err;
-        err.println("** " + message);
     }
 
-    /**
-     * Prints usage information for this program and exits
-     * @param message An error message to print
-     */
-    private static void usage( String message )
-    {
-        PrintStream err = System.err;
-        err.println("** " + message);
-        err.println();
-        err.println("usage: java Project5 host port [word] [definition]");
-        err.println("  host         Host of web server");
-        err.println("  port         Port of web server");
-        err.println("  word         Word in dictionary");
-        err.println("  definition   Definition of word");
-        err.println();
-        err.println("This simple program posts words and their definitions");
-        err.println("to the server.");
-        err.println("If no definition is specified, then the word's definition");
-        err.println("is printed.");
-        err.println("If no word is specified, all dictionary entries are printed");
-        err.println();
-    }
 }

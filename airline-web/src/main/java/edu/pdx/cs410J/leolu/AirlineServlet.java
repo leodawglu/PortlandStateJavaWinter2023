@@ -39,12 +39,13 @@ public class AirlineServlet extends HttpServlet {
     @Override
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        errorMsgForTesting="";
         boolean goodRequest = true;
         String queryString = request.getQueryString();// Use to decide what kind of request it is for
         String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
         String src = request.getParameter(SOURCE_PARAM);
         String dest = request.getParameter(DESTINATION_PARAM);
-        if(queryString == null || queryString.length()==0){
+        if(queryString == null || (queryString!=null&&queryString.length()==0)){
             response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
             return;
         }
@@ -77,6 +78,9 @@ public class AirlineServlet extends HttpServlet {
 
     }
 
+    /**
+     * Invoked when the GET requests is for specific SRC and DEST codes
+     * */
     private void getFlightsWithSpecificSRCAndDest(HttpServletResponse response, String queryString, String airlineName, String src, String dest) throws IOException {
         Airline requestedAirline = airlines.get(airlineName);
         Airline filteredAirlineWithMatchingFlights = new Airline(airlineName);
@@ -87,32 +91,41 @@ public class AirlineServlet extends HttpServlet {
         if(filteredAirlineWithMatchingFlights.getFlights().isEmpty()){
             errorMsgForTesting += "HTTP 404 | Flights with departure airport " + src +
                     " and arrival airport " + dest +
-                    " could not be found for " + airlineName;
+                    " could not be found for " + airlineName +"\n";
             response.sendError(HttpServletResponse.SC_NOT_FOUND,errorMsgForTesting);
             return;
         }
         writeAirlineAndFlightsToResponse(response,filteredAirlineWithMatchingFlights,HttpServletResponse.SC_OK);
     }
 
+    /**
+     * Checks both SRC and DEST together for GET requests
+     * Checks if either or both are null and tests if the airport codes are valid
+     * */
     private boolean validateSRCAndDEST(HttpServletResponse response, String queryString, String src, String dest) throws IOException {
         boolean state = true;
-        if((src ==null|| src.length()==0)&& dest !=null){
+        if(src==null && dest==null){
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string both \"src\" and \"dest\" " +
+                    "are not defined! : " + queryString);
+            state = false;
+        }
+        if((src ==null|| (src!=null&&src.length()==0))&& dest !=null){
             responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"dest\" is defined, " +
                     "but \"src\" was not defined! : " + queryString);
             state = false;
         }
-        if((dest ==null|| dest.length()==0)&& src !=null){
+        if((dest ==null|| (dest!=null&&dest.length()==0))&& src !=null){
             responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"src\" is defined, " +
                     "but \"dest\" was not defined! : " + queryString);
             state = false;
         }
 
-        if(src.length()!=0 && !isRealAirportCode(src.toUpperCase())){
+        if(src!=null&&src.length()!=0 && !isRealAirportCode(src.toUpperCase())){
             responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                     "Departure airport code is invalid, src: " + src);
             state = false;
         }
-        if(dest.length()!=0 && !isRealAirportCode(dest.toUpperCase())){
+        if(dest!=null &&dest.length()!=0 && !isRealAirportCode(dest.toUpperCase())){
             responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                     "Arrival airport code is invalid, dest: " + dest);
             state = false;
@@ -120,6 +133,10 @@ public class AirlineServlet extends HttpServlet {
         return state;
     }
 
+    /**
+     * Invoked when request is valid
+     * Writes requested airline and flight(s) info to response in XML format using XmlDumper
+     * */
     protected void writeAirlineAndFlightsToResponse(HttpServletResponse response, Airline airline, int status) throws IOException {
         response.setContentType("application/xml;charset=us-ascii");
         PrintWriter pw = response.getWriter();
@@ -134,9 +151,15 @@ public class AirlineServlet extends HttpServlet {
     }
     protected void addAirlineToMap(Airline airline){airlines.put(airline.getName(),airline);}
 
+    /**
+     * Checks if the provided SRC or DEST airport codes are real airport codes
+     * */
     private boolean isRealAirportCode(String code) {
         return AirportNames.getNamesMap().containsKey(code);
     }
+    /**
+     * Checks for extraneous parameter values in the request
+     * */
     protected boolean checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
         boolean state = true;
         Map<String, String[]> paramMap = request.getParameterMap();
@@ -158,6 +181,9 @@ public class AirlineServlet extends HttpServlet {
         return state;
     }
 
+    /**
+     * Sets error status and adds error message to errorMsgForTesting log
+     * */
     private void responseSetStatusAndAddErrorMsg(HttpServletResponse response, int status, String msg) throws IOException {
         response.setStatus(status);
         codesCaught++;
@@ -165,19 +191,21 @@ public class AirlineServlet extends HttpServlet {
     }
 
     /**
-     * Handles an HTTP POST request by storing the dictionary entry for the
-     * "word" and "definition" request parameters.  It writes the dictionary
-     * entry to the HTTP response.
+     * Handles an HTTP POST request by checking each parameter value for validity
+     * Creates a new flight along with a temporary airline if valid
+     * Temporary airline is added to map if airline does not exist yet
      */
     @Override
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        errorMsgForTesting="";
         boolean goodRequest = true;
         String queryString = request.getQueryString();// Use to decide what kind of request it is for
+        /*
         if(queryString == null || queryString.length()==0){
             response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
             return;
-        }
+        }*/
         goodRequest &= checkQueryStringForExtraneousParams(request,response,"post");
         //if(!checkQueryStringForExtraneousParams(request,response,"post"))return;
 
@@ -218,6 +246,11 @@ public class AirlineServlet extends HttpServlet {
         else airlines.put(airlineName,responseAirline);
     }
 
+    /**
+     * Invoked when the Get or Post request is bad
+     * Chooses the appropriate error to send within the response
+     * @param response HttpServletResponse object
+     * */
     private void isBadRequest(HttpServletResponse response) throws IOException {
         if(codesCaught>1) response.sendError(HttpServletResponse.SC_BAD_REQUEST,errorMsgForTesting);
         else{
@@ -225,6 +258,14 @@ public class AirlineServlet extends HttpServlet {
         }
     }
 
+    /**
+     * This method validates the value of the specified parameter value in the request
+     * If the value is not acceptable, a HTTP status and a message is added to the HTTP response
+     * @param response HttpServletResponse
+     * @param queryString String request.queryString()
+     * @param param String specified parameter value
+     * @param paramType String, example: "Airline name "
+     * */
     private boolean validateParam(HttpServletResponse response, String queryString, String param, String paramType) throws IOException {
         String type = "";
         if(paramType.equals(AIRLINE_NAME_PARAM)) type = "Airline name ";
@@ -271,7 +312,7 @@ public class AirlineServlet extends HttpServlet {
         this.airlines.clear();
 
         PrintWriter pw = response.getWriter();
-        pw.println(Messages.allDictionaryEntriesDeleted());
+        pw.println("All dictionary entries have been deleted");
         pw.flush();
 
         response.setStatus(HttpServletResponse.SC_OK);

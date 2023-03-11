@@ -1,46 +1,46 @@
+/**
+ * The {code PrettyPrinter} class
+ * @author Leo Lu
+ * PSU CS510 Advanced Java Winter 2023
+ *
+ * */
 package edu.pdx.cs410J.leolu;
 
-import com.google.common.annotations.VisibleForTesting;
+import edu.pdx.cs410J.AirlineDumper;
 
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Map;
 
-public class PrettyPrinter {
-  private final Writer writer;
+public class PrettyPrinter implements AirlineDumper<Airline> {
+    private final Writer writer;
 
-  @VisibleForTesting
-  static String formatWordCount(int count )
-  {
-    return String.format( "Dictionary on server contains %d words", count );
-  }
-
-  @VisibleForTesting
-  static String formatDictionaryEntry(String word, String definition )
-  {
-    return String.format("  %s -> %s", word, definition);
-  }
-
-
-  public PrettyPrinter(Writer writer) {
-    this.writer = writer;
-  }
-
-  public void dump(Map<String, String> dictionary) {
-    try (
-      PrintWriter pw = new PrintWriter(this.writer)
-    ) {
-
-      pw.println(formatWordCount(dictionary.size()));
-
-      for (Map.Entry<String, String> entry : dictionary.entrySet()) {
-        String word = entry.getKey();
-        String definition = entry.getValue();
-        pw.println(formatDictionaryEntry(word, definition));
-      }
-
-      pw.flush();
+    public PrettyPrinter(Writer writer) {
+        this.writer = writer;
     }
 
-  }
+    /**
+     * @param airline Accepts an airline object and pretty prints the airline and its flights into file
+     * */
+    @Override
+    public void dump(Airline airline) {
+        try (PrintWriter pw = new PrintWriter(this.writer))
+        {
+            pw.println("*---------------------------------------------------------*");
+            pw.println("Airline       : "+airline.getName());
+            for(Flight fl: airline.getFlights()){
+                pw.println("*---------------------------------------------------------*");
+                pw.println("Flight Number : " +fl.getNumber());
+                pw.println("Departing From: " + fl.getSource());
+                pw.println("Departure Date: " + fl.getDepDate());
+                pw.println("Departure Time: " + fl.getDepTime());
+                pw.println("Bound For     : " + fl.getDestination());
+                pw.println("Arrival Date  : " + fl.getArrDate());
+                pw.println("Arrival Time  : " + fl.getArrTime());
+                pw.println("Duration HH|MM: " + fl.getFlightDuration()/60 + "hrs " + fl.getFlightDuration()%60 + "mins");
+                pw.println("Duration(mins): " + fl.getFlightDuration());
+            }
+            pw.println("*---------------------------END---------------------------*");
+            pw.flush();
+        }
+    }
 }
