@@ -2,7 +2,6 @@ package edu.pdx.cs410J.leolu;
 
 import com.google.common.annotations.VisibleForTesting;
 import edu.pdx.cs410J.AirportNames;
-import edu.pdx.cs410J.ParserException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,10 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This servlet ultimately provides a REST API for working with an
@@ -32,6 +28,7 @@ public class AirlineServlet extends HttpServlet {
     // K,V : airlineName , Airline Object
     private final Map<String, Airline> airlines = new HashMap<>();
     protected String errorMsgForTesting="";
+    protected int codesCaught = 0;
 
     /**
      * Handles an HTTP GET request from a client by writing the definition of the
@@ -42,34 +39,45 @@ public class AirlineServlet extends HttpServlet {
     @Override
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        boolean goodRequest = true;
         String queryString = request.getQueryString();// Use to decide what kind of request it is for
         String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
         String src = request.getParameter(SOURCE_PARAM);
         String dest = request.getParameter(DESTINATION_PARAM);
         if(queryString == null || queryString.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query String was empty." );
+            response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
             return;
         }
 
-        if(!checkQueryStringForExtraneousParams(request,response,"get"))return;
-
-        if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
+        goodRequest &= checkQueryStringForExtraneousParams(request,response,"get");
+        //if(!checkQueryStringForExtraneousParams(request,response,"get"))return;
+        goodRequest &= validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM);
+        //if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
 
         if(!airlines.containsKey(airlineName)){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,"Airline name " +
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_NOT_FOUND,"Airline name " +
                     "was not found: " + airlineName );
-            return;
+            goodRequest = false;
         }
         if(src!=null || dest!=null){
-            getFlightsWithSpecificSRCAndDest(response,queryString,airlineName,src,dest);
-            return;
+            goodRequest &= validateSRCAndDEST(response, queryString, src, dest);
+            if(!goodRequest){
+                isBadRequest(response);
+                return;
+            }
+            getFlightsWithSpecificSRCAndDest(response,queryString,airlineName,src.toUpperCase(),dest.toUpperCase());
+        }else{
+            //When SRC & DEST not specified, get all flights from airline:
+            if(!goodRequest){
+                isBadRequest(response);
+                return;
+            }
+            writeAirlineAndFlightsToResponse(response,airlines.get(airlineName),HttpServletResponse.SC_OK);
         }
-        //When SRC & DEST not specified, get all flights from airline:
-        writeAirlineAndFlightsToResponse(response,airlines.get(airlineName),HttpServletResponse.SC_OK);
+
     }
 
     private void getFlightsWithSpecificSRCAndDest(HttpServletResponse response, String queryString, String airlineName, String src, String dest) throws IOException {
-        if (validateSRCAndDEST(response, queryString, src, dest)) return;
         Airline requestedAirline = airlines.get(airlineName);
         Airline filteredAirlineWithMatchingFlights = new Airline(airlineName);
         for(Flight fl: requestedAirline.getFlights()){
@@ -77,38 +85,39 @@ public class AirlineServlet extends HttpServlet {
                 filteredAirlineWithMatchingFlights.addFlight(fl);
         }
         if(filteredAirlineWithMatchingFlights.getFlights().isEmpty()){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_NOT_FOUND,
-                    "Flights with departure airport " + src +
-                            " and arrival airport " + dest +
-                            " could not be found for " + airlineName );
+            errorMsgForTesting += "HTTP 404 | Flights with departure airport " + src +
+                    " and arrival airport " + dest +
+                    " could not be found for " + airlineName;
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,errorMsgForTesting);
             return;
         }
         writeAirlineAndFlightsToResponse(response,filteredAirlineWithMatchingFlights,HttpServletResponse.SC_OK);
     }
 
     private boolean validateSRCAndDEST(HttpServletResponse response, String queryString, String src, String dest) throws IOException {
+        boolean state = true;
         if((src ==null|| src.length()==0)&& dest !=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"dest\" is defined, " +
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"dest\" is defined, " +
                     "but \"src\" was not defined! : " + queryString);
-            return true;
+            state = false;
         }
         if((dest ==null|| dest.length()==0)&& src !=null){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"src\" is defined, " +
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query string \"src\" is defined, " +
                     "but \"dest\" was not defined! : " + queryString);
-            return true;
+            state = false;
         }
 
-        if(!isRealAirportCode(src)){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+        if(src.length()!=0 && !isRealAirportCode(src.toUpperCase())){
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                     "Departure airport code is invalid, src: " + src);
-            return true;
+            state = false;
         }
-        if(!isRealAirportCode(dest)){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+        if(dest.length()!=0 && !isRealAirportCode(dest.toUpperCase())){
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                     "Arrival airport code is invalid, dest: " + dest);
-            return true;
+            state = false;
         }
-        return false;
+        return state;
     }
 
     protected void writeAirlineAndFlightsToResponse(HttpServletResponse response, Airline airline, int status) throws IOException {
@@ -129,29 +138,30 @@ public class AirlineServlet extends HttpServlet {
         return AirportNames.getNamesMap().containsKey(code);
     }
     protected boolean checkQueryStringForExtraneousParams(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
+        boolean state = true;
         Map<String, String[]> paramMap = request.getParameterMap();
         Iterator<String> iterate = paramMap.keySet().iterator();
         while(iterate.hasNext()){
             String key = iterate.next();
-            if(type.equals("get")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM){
-                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+            if(type.equals("get")&&!key.equals(AIRLINE_NAME_PARAM)&&!key.equals(SOURCE_PARAM)&&!key.equals(DESTINATION_PARAM)){
+                responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                         "In search GET request, extraneous parameter was found in query string: " + key);
-                return false;
+                state = false;
             }
-            if(type.equals("post")&&key!=AIRLINE_NAME_PARAM && key!=SOURCE_PARAM && key!=DESTINATION_PARAM
-                    &&key!= FLIGHT_NUMBER_PARAM && key!=DEPARTURE_DATETIME && key!=ARRIVAL_DATETIME){
-                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,
+            if(type.equals("post")&&!key.equals(AIRLINE_NAME_PARAM)&&!key.equals(SOURCE_PARAM)&&!key.equals(DESTINATION_PARAM)
+                    &&!key.equals(FLIGHT_NUMBER_PARAM)&&!key.equals(DEPARTURE_DATETIME)&&!key.equals(ARRIVAL_DATETIME)){
+                responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,
                         "In add POST request, extraneous parameter was found in query string: " + key);
-                return false;
+                state = false;
             }
         }
-        return true;
+        return state;
     }
 
-    private void responseSetStatusAndSendError(HttpServletResponse response, int status, String msg) throws IOException {
+    private void responseSetStatusAndAddErrorMsg(HttpServletResponse response, int status, String msg) throws IOException {
         response.setStatus(status);
-        response.sendError(status,msg);
-        errorMsgForTesting = msg;
+        codesCaught++;
+        errorMsgForTesting += (new StringBuilder("HTTP " + status + " | " + msg + "\n")).toString();
     }
 
     /**
@@ -162,38 +172,57 @@ public class AirlineServlet extends HttpServlet {
     @Override
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        boolean goodRequest = true;
         String queryString = request.getQueryString();// Use to decide what kind of request it is for
         if(queryString == null || queryString.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,"Query String was empty." );
+            response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
             return;
         }
-        if(!checkQueryStringForExtraneousParams(request,response,"post"))return;
+        goodRequest &= checkQueryStringForExtraneousParams(request,response,"post");
+        //if(!checkQueryStringForExtraneousParams(request,response,"post"))return;
 
         String airlineName = request.getParameter(AIRLINE_NAME_PARAM);
-        if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
+        goodRequest &= validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM);
+        //if (!validateParam(response, queryString, airlineName, AIRLINE_NAME_PARAM)) return;
 
         String src = request.getParameter(SOURCE_PARAM);
         String dest = request.getParameter(DESTINATION_PARAM);
-        if (validateSRCAndDEST(response, queryString, src, dest)) return;
+        goodRequest &= validateSRCAndDEST(response, queryString, src, dest);
+        //if (validateSRCAndDEST(response, queryString, src, dest)) return;
 
         String flightNumber = request.getParameter(FLIGHT_NUMBER_PARAM);
-        if (!validateParam(response, queryString, flightNumber, FLIGHT_NUMBER_PARAM)) return;
+        goodRequest &= validateParam(response, queryString, flightNumber, FLIGHT_NUMBER_PARAM);
+        //if (!validateParam(response, queryString, flightNumber, FLIGHT_NUMBER_PARAM)) return;
         String departureDateTime = request.getParameter(DEPARTURE_DATETIME);
-        if (!validateParam(response, queryString, departureDateTime, DEPARTURE_DATETIME)) return;
+        goodRequest &= validateParam(response, queryString, departureDateTime, DEPARTURE_DATETIME);
+        //if (!validateParam(response, queryString, departureDateTime, DEPARTURE_DATETIME)) return;
 
         String arrivalDateTime = request.getParameter(ARRIVAL_DATETIME);
-        if (!validateParam(response, queryString, arrivalDateTime, ARRIVAL_DATETIME)) return;
+        goodRequest &= validateParam(response, queryString, arrivalDateTime, ARRIVAL_DATETIME);
+        //if (!validateParam(response, queryString, arrivalDateTime, ARRIVAL_DATETIME)) return;
+
+        if(!goodRequest){
+            isBadRequest(response);
+            return;
+        }
 
         String[] depDateTime = departureDateTime.split(" ");
         String[] arrDateTime = arrivalDateTime.split(" ");
-        Flight newFlight = new Flight(flightNumber,src,depDateTime[0],depDateTime[1]+" "+depDateTime[2],
-                dest,arrDateTime[0],arrDateTime[1]+" "+arrDateTime[2]);
+        Flight newFlight = new Flight(flightNumber,src.toUpperCase(),depDateTime[0],depDateTime[1]+" "+depDateTime[2],
+                dest.toUpperCase(),arrDateTime[0],arrDateTime[1]+" "+arrDateTime[2]);
 
         Airline responseAirline = new Airline(airlineName);
         responseAirline.addFlight(newFlight);
         writeAirlineAndFlightsToResponse(response,responseAirline ,HttpServletResponse.SC_CREATED);
         if(airlines.containsKey(airlineName))airlines.get(airlineName).addFlight(newFlight);
         else airlines.put(airlineName,responseAirline);
+    }
+
+    private void isBadRequest(HttpServletResponse response) throws IOException {
+        if(codesCaught>1) response.sendError(HttpServletResponse.SC_BAD_REQUEST,errorMsgForTesting);
+        else{
+            response.sendError(response.getStatus(),errorMsgForTesting);
+        }
     }
 
     private boolean validateParam(HttpServletResponse response, String queryString, String param, String paramType) throws IOException {
@@ -204,7 +233,7 @@ public class AirlineServlet extends HttpServlet {
         else if(paramType.equals(ARRIVAL_DATETIME)) type = "Arrival datetime ";
 
         if(param == null || param.length()==0){
-            responseSetStatusAndSendError(response,HttpServletResponse.SC_PRECONDITION_FAILED,type +
+            responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_PRECONDITION_FAILED,type +
                     "was not specified in query string: " + queryString);
             return false;
         }
@@ -212,7 +241,7 @@ public class AirlineServlet extends HttpServlet {
             try{
                 formatter.parse(param);
             }catch(ParseException e){
-                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+ param +"\""+
+                responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,"\""+ param +"\""+
                         " is not a correctly formatted datetime: MM/DD/YYYY HH:MM AM|PM \n" +
                         "Please note only a single space is needed to separate MM/DD/YYYY, HH:MM, and AM|PM !");
                 return false;
@@ -222,7 +251,7 @@ public class AirlineServlet extends HttpServlet {
             try{
                 Integer.parseInt(param);
             }catch(NumberFormatException e){
-                responseSetStatusAndSendError(response,HttpServletResponse.SC_BAD_REQUEST,"\""+param +"\""+
+                responseSetStatusAndAddErrorMsg(response,HttpServletResponse.SC_BAD_REQUEST,"\""+param +"\""+
                         " is not a integer number, and cannot be set as flight number.");
                 return false;
             }

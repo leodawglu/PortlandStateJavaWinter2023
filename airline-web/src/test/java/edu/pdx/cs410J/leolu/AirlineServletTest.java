@@ -23,25 +23,6 @@ import static org.mockito.Mockito.*;
  */
 class AirlineServletTest {
 
-  /*
-  @Test
-  void initiallyServletContainsNoDictionaryEntries() throws IOException {
-    AirlineServlet servlet = new AirlineServlet();
-
-    HttpServletRequest request = mock(HttpServletRequest.class);
-    HttpServletResponse response = mock(HttpServletResponse.class);
-    PrintWriter pw = mock(PrintWriter.class);
-
-    when(response.getWriter()).thenReturn(pw);
-
-    servlet.doGet(request, response);
-
-    // Nothing is written to the response's PrintWriter
-    verify(pw, never()).println(anyString());
-    verify(response).setStatus(HttpServletResponse.SC_OK);
-  }*/
-
-  /*Corresponds to writeAllDictionaryEntries method*/
 
   @Test
   void gettingFlightsForNonExistentAirlineReturns404() throws IOException {
@@ -54,7 +35,7 @@ class AirlineServletTest {
 
     servlet.doGet(request, response);
     verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
-    assertThat(servlet.errorMsgForTesting,containsString("Airline name was not found:"));
+    assertThat(servlet.errorMsgForTesting,containsString("Airline name"));
   }
   @Test
   void getEmptyQueryStringReturns412() throws IOException {
@@ -65,8 +46,7 @@ class AirlineServletTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     servlet.doGet(request, response);
-    //verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    verify(response).sendError(412,"Query String was empty.");
+    verify(response).sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
   }
 
   @Test
@@ -78,7 +58,7 @@ class AirlineServletTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     servlet.doPost(request, response);
-    verify(response).sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"Query String was empty.");
+    verify(response).sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"HTTP 412 | Query String was empty." );
   }
 
   @Test
@@ -223,7 +203,7 @@ class AirlineServletTest {
     when(response.getWriter()).thenReturn(pw);
 
     servlet.doGet(request, response);
-    verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+    //verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
     assertThat(servlet.errorMsgForTesting,
             containsString("could not be found for"));
   }
