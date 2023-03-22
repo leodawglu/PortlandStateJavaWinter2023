@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Airline</string>
+    <string name="create_airline">Create Airline</string>
+    <string name="create_flight">Create Flight</string>
+    <string name="view_airlines">View Airlines</string>
+    <string name="airline_flight_management">Airline Flight Management</string>
+    <string name="enter_new_airline_name">Enter New Airline Name:</string>
+    <string name="confirm_airline_name">Confirm Airline Name</string>
+    <string name="home">Home</string>
 </resources>

@@ -43,8 +43,8 @@ Options:
 
 Note -textFile and -xmlFile CANNOT be specified together
 Note that time must be specified in 12-hr format HH:MM AM/PM e.g.: 11:30 am
-Note that multi-word arguments must be delimited with double quotes. 
-For Example, airline: "Hello Airways"  
+Note that multi-word arguments must be delimited with double quotes.
+For Example, airline: "Hello Airways"
 
 Examples:
 
