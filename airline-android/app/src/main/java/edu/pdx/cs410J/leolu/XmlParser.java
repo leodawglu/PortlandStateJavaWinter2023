@@ -33,6 +33,7 @@ public class XmlParser implements AirlineParser<Airline> {
     private Airline airline;
     final String DTD = "";
     private String filepath ="";
+    private File airlineXML;
     private StringBuilder err = new StringBuilder();
     private Document xml;
 
@@ -44,6 +45,8 @@ public class XmlParser implements AirlineParser<Airline> {
         this.filepath=filepath;
     }
 
+    public XmlParser(File airlineXML){this.airlineXML = airlineXML;}
+
     /**
      * parse() method
      * @return Airline object when the XML file is successfully parsed
@@ -52,17 +55,19 @@ public class XmlParser implements AirlineParser<Airline> {
      * */
     public Airline parse() throws ParserException{
         try {
-            if(filepath.isEmpty()) throw new ParserException("File path is empty");
+            //if(filepath.isEmpty()) throw new ParserException("File path is empty");
+            if(airlineXML==null) throw new ParserException("Airline XML is null");
             AirlineXmlHelper helper = new AirlineXmlHelper();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setValidating(true);
+            factory.setValidating(false);
             DocumentBuilder builder = buildDoc(factory);
             builder.setErrorHandler(helper);
             builder.setEntityResolver(helper);
-            xml = builder.parse(new File(filepath));
+            //xml = builder.parse(new File(filepath));
+            xml = builder.parse(airlineXML);
         } catch (SAXException | IOException | ParserException e) {
             err.append(e.getMessage());
-            throw new ParserException("Please enter a valid XML file path.",e);
+            throw new ParserException("Airline XML file is null",e);
         }
 
         Element root = xml.getDocumentElement();
@@ -84,7 +89,27 @@ public class XmlParser implements AirlineParser<Airline> {
 
         return airline;
     }
+/*
+    public List<Airline> parseXMLAirlineList(){
+        List<Airline> listOfAirlines = new ArrayList<>();
 
+        try {
+            if(filepath.isEmpty()) throw new ParserException("File path is empty");
+            AirlineXmlHelper helper = new AirlineXmlHelper();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setValidating(true);
+            DocumentBuilder builder = buildDoc(factory);
+            builder.setErrorHandler(helper);
+            builder.setEntityResolver(helper);
+            xml = builder.parse(new File(filepath));
+        } catch (SAXException | IOException | ParserException e) {
+            err.append(e.getMessage());
+            //throw new ParserException("Please enter a valid XML file path.",e);
+        }
+
+        return null;
+    }
+*/
     /**
      * buildDoc method
      * @param factory DocumentBuilderFactor

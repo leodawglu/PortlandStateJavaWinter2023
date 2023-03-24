@@ -32,11 +32,13 @@ import edu.pdx.cs410J.AirlineDumper;
 public class XmlDumper implements AirlineDumper<Airline> {
 
     private String filepath;
+    private File airlineFile;
     private Airline airways;
     private StringBuilder err = new StringBuilder();
     public XmlDumper(String filepath) {
         this.filepath = filepath;
     }
+    public XmlDumper(File airlineFile){this.airlineFile = airlineFile;}
 
     /**
      * @param airways Accepts an airline object
@@ -53,7 +55,7 @@ public class XmlDumper implements AirlineDumper<Airline> {
         try {
             AirlineXmlHelper helper = new AirlineXmlHelper();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setValidating(true);
+            factory.setValidating(false);
             DocumentBuilder builder =
                     factory.newDocumentBuilder();
             builder.setErrorHandler(helper);
@@ -79,7 +81,8 @@ public class XmlDumper implements AirlineDumper<Airline> {
 
             DOMSource source = new DOMSource(doc);
 
-            StreamResult result = new StreamResult(new File(filepath));
+            //StreamResult result = new StreamResult(new File(filepath));
+            StreamResult result = new StreamResult(airlineFile);
 
             t.transform(source,result);
             System.out.println("XML file for " + this.airways.getName() + " created successfully.");

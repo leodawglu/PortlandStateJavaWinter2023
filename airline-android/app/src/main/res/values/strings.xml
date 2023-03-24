@@ -7,4 +7,5 @@
     <string name="enter_new_airline_name">Enter New Airline Name:</string>
     <string name="confirm_airline_name">Confirm Airline Name</string>
     <string name="home">Home</string>
+    <string name="create_this_airline">Create This Airline</string>
 </resources>

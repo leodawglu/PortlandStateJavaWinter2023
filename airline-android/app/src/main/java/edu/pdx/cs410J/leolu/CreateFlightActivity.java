@@ -1,40 +1,60 @@
 package edu.pdx.cs410J.leolu;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.pdx.cs410J.ParserException;
 
-public class CreateAirlineActivity extends AppCompatActivity {
-    TextView textView;
-    EditText inputText;
+public class CreateFlightActivity extends AppCompatActivity {
+    //TextView textView;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+    EditText editAirlineName=null, editFlightNumber=null, editDepCode=null,
+            editDepDate=null, editDepTime=null, editArrCode=null,
+            editArrDate=null, editArrTime=null;
     private Map<String,Airline> existingAirlineMap;
     private Map<String,Airline> newAirlineMap;
 
+    private Calendar depDate = Calendar.getInstance();
+    private Calendar arrDate = Calendar.getInstance();
     private File appDir;
     private File airlinesDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.create_airline);
-        textView = (TextView) findViewById(R.id.textView2);
-        inputText = (EditText) findViewById(R.id.editTextTextAirlineName);
+        setContentView(R.layout.create_flight);
+        //textView = (TextView) findViewById(R.id.textView2);
+        editAirlineName = (EditText) findViewById(R.id.editTextAirlineName);
+        editFlightNumber = (EditText) findViewById(R.id.editTextFlightNumber);
+        editDepCode = (EditText) findViewById(R.id.editTextDepCode);
+        editDepDate = (EditText) findViewById(R.id.editTextDepDate);
+        departureSelectDate();
+        editDepTime = (EditText) findViewById(R.id.editTextDepTime);
+        editArrCode = (EditText) findViewById(R.id.editTextArrCode);
+        editArrDate = (EditText) findViewById(R.id.editTextArrDate);
+        arrivalSelectDate();
+        editArrTime = (EditText) findViewById(R.id.editTextArrTime);
+
+
         newAirlineMap = new HashMap<>();
         populateAirlineList();
 
     }
 
+    /*
     public void updateTextViewMessage(View view){
         String airlineName = String.valueOf(inputText.getText());
         if(airlineName==null || airlineName.length()==0){
@@ -50,6 +70,37 @@ public class CreateAirlineActivity extends AppCompatActivity {
 
         System.out.println("New Airline Successfully created: " + inputText.getText());
     }
+*/
+    public void departureSelectDate(){
+        selectDate(editDepDate,depDate);
+    }
+
+    public void arrivalSelectDate(){
+        selectDate(editArrDate,arrDate);
+    }
+
+    private void selectDate(EditText pickDate, Calendar depOrArrCalendar){
+        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                depOrArrCalendar.set(Calendar.YEAR,year);
+                depOrArrCalendar.set(Calendar.MONTH,month);
+                depOrArrCalendar.set(Calendar.DAY_OF_MONTH,day);
+                pickDate.setText(updateDate(pickDate));
+            }
+        };
+        pickDate.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                new DatePickerDialog(CreateFlightActivity.this,date,depOrArrCalendar.get(Calendar.MONTH)
+                        ,depOrArrCalendar.get(Calendar.DAY_OF_MONTH), depOrArrCalendar.get(Calendar.YEAR));
+            }
+        });
+    }
+
+    private String updateDate(EditText pickDate) {
+        return dateFormat.format(pickDate.getText());
+    }
 
     private void createAirline(String airlineName) {
         Airline newAirline = new Airline(airlineName);
@@ -58,7 +109,7 @@ public class CreateAirlineActivity extends AppCompatActivity {
 
     private boolean airlineExists(String newAirlineName){
         if(existingAirlineMap.containsKey(newAirlineName.toLowerCase()) ||
-        newAirlineMap.containsKey(newAirlineName.toLowerCase()))
+                newAirlineMap.containsKey(newAirlineName.toLowerCase()))
             return true;
         return false;
     }

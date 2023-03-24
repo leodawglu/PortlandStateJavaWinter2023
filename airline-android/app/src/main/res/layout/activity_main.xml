@@ -53,6 +53,7 @@
         android:id="@+id/createFlightButton"
         android:layout_width="161dp"
         android:layout_height="55dp"
+        android:onClick="goToCreateFlightActivity"
         android:text="@string/create_flight"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
