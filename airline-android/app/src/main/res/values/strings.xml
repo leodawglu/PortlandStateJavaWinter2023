@@ -8,4 +8,19 @@
     <string name="confirm_airline_name">Confirm Airline Name</string>
     <string name="home">Home</string>
     <string name="create_this_airline">Create This Airline</string>
+    <string name="select_time">Select Time</string>
+    <string name="example_eva_air">Example: EVA Air</string>
+    <string name="example_sea">Example: SEA</string>
+    <string name="departure_ntime">Departure\nTime</string>
+    <string name="arrival_niata_code">Arrival\nIATA Code</string>
+    <string name="airline">Airline</string>
+    <string name="select_date">Select Date</string>
+    <string name="example_26">Example: 26</string>
+    <string name="arrival_ntime">Arrival\nTime</string>
+    <string name="arrival_ndate">Arrival\nDate</string>
+    <string name="flight_nnumber">Flight\nNumber</string>
+    <string name="departure_ndate">Departure\nDate</string>
+    <string name="enter_flight_details">Enter Flight Details</string>
+    <string name="example_tpe">Example: TPE</string>
+    <string name="create_this_flight">Create This Flight</string>
 </resources>

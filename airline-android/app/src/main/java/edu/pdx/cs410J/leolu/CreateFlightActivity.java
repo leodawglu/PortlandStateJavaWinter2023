@@ -3,10 +3,12 @@ package edu.pdx.cs410J.leolu;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +19,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.pdx.cs410J.AirportNames;
 import edu.pdx.cs410J.ParserException;
 
 public class CreateFlightActivity extends AppCompatActivity {
@@ -29,8 +32,8 @@ public class CreateFlightActivity extends AppCompatActivity {
     private Map<String,Airline> existingAirlineMap;
     private Map<String,Airline> newAirlineMap;
 
-    private Calendar depCal = Calendar.getInstance();
-    private Calendar arrCal = Calendar.getInstance();
+    private final Calendar depCal = Calendar.getInstance();
+    private final Calendar arrCal = Calendar.getInstance();
     private File appDir;
     private File airlinesDir;
 
@@ -106,14 +109,6 @@ public class CreateFlightActivity extends AppCompatActivity {
         tpd.show();
     }
 
-    public void departureSelectTime(){
-        selectTime(editDepTime, depCal);
-    }
-
-    public void arrivalSelectTime(){
-        selectTime(editArrTime, arrCal);
-    }
-
     private boolean airlineExists(String newAirlineName){
         if(existingAirlineMap.containsKey(newAirlineName.toLowerCase()) ||
                 newAirlineMap.containsKey(newAirlineName.toLowerCase()))
@@ -182,5 +177,98 @@ public class CreateFlightActivity extends AppCompatActivity {
                 System.err.println("XML file is null: " + airlineFiles[i].getName());
             }
         }
+    }
+
+    public boolean allInputsNotEmpty(View view){
+        boolean notEmpty = true;
+
+        if (TextUtils.isEmpty(editAirlineName.getText().toString())) {
+            editAirlineName.setError("Please enter an Airline Name");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editFlightNumber.getText().toString())) {
+            editFlightNumber.setError("Please enter a Flight Number");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editDepCode.getText().toString())) {
+            editDepCode.setError("Please enter an IATA Airport Code");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editDepDate.getText().toString())) {
+            editDepDate.setError("Please select a date");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editDepTime.getText().toString())) {
+            editDepTime.setError("Please select a time");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editArrCode.getText().toString())) {
+            editArrCode.setError("Please enter an IATA Airport Code");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editArrDate.getText().toString())) {
+            editArrDate.setError("Please select a date");
+            notEmpty = false;
+        }
+        if (TextUtils.isEmpty(editArrTime.getText().toString())) {
+            editArrTime.setError("Please select a time");
+            notEmpty = false;
+        }
+        return notEmpty;
+    }
+
+    /**
+     * @param input - airport code String to be checked if real
+     * @return boolean true when airport code is from a real airport
+     * Utilizes {@code AirportNames.getNamesMap()}
+     * */
+    private boolean isValidIATACode(String input){
+        return AirportNames.getNamesMap().containsKey(input);
+    }
+
+    public void createFlight(View view){
+        boolean good = true;
+        if(!allInputsNotEmpty(view))return;
+        if(!isValidIATACode(editDepCode.getText().toString())) {
+            good = false;
+            editDepCode.setError("Please enter a Valid IATA Code");
+        }
+        if(!isValidIATACode(editArrCode.getText().toString())) {
+            good = false;
+            editArrCode.setError("Please enter a Valid IATA Code");
+        }
+        if(arrCal.getTimeInMillis()<depCal.getTimeInMillis()){
+            good = false;
+            editDepDate.setError("Departure Date & Time cannot be after Arrival");
+            editDepTime.setError("Departure Date & Time cannot be after Arrival");
+            editArrDate.setError("Arrival Date & Time cannot be before Departure");
+            editArrTime.setError("Arrival Date & Time cannot be before Departure");
+            Toast.makeText(this,"Departure Date & Time cannot occur after Arrival",Toast.LENGTH_SHORT).show();
+        }
+        if(!good)return;
+        Flight fl = new Flight(
+                editFlightNumber.getText().toString(),
+                editDepCode.getText().toString(),
+                dateFormat.format(depCal.getTime()),
+                timeFormat.format(depCal.getTime()),
+                editArrCode.getText().toString(),
+                dateFormat.format(arrCal.getTime()),
+                timeFormat.format(arrCal.getTime()),
+                true
+        );
+        String airlineName = editAirlineName.getText().toString();
+        Airline airline;
+        if(newAirlineMap.containsKey(airlineName.toLowerCase())){
+            airline = newAirlineMap.get(airlineName.toLowerCase());
+        }
+        else if(existingAirlineMap.containsKey(airlineName.toLowerCase())){
+            airline = existingAirlineMap.get(airlineName.toLowerCase());
+        }else{
+            airline = new Airline(airlineName);
+        }
+
+        airline.addFlight(fl);
+        newAirlineMap.put(airlineName.toLowerCase(),airline);
+        Toast.makeText(this,"New Flight Created",Toast.LENGTH_SHORT).show();
     }
 }

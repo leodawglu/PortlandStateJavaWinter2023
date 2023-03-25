@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="44dp"
         android:ems="10"
-        android:hint="Example: Alaska Airlines"
+        android:hint="@string/example_eva_air"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,8 +26,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:ems="10"
-        android:hint="Example: SEA"
-        android:inputType="text|textNoSuggestions"
+        android:hint="@string/example_sea"
+        android:inputType="text"
+        android:maxLength="3"
+        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.253"
@@ -42,6 +44,7 @@
         android:ems="10"
         android:inputType="none|time"
         android:focusable="false"
+        android:hint="@string/select_time"
         android:drawableRight="@android:drawable/ic_menu_recent_history"
         app:layout_constraintBottom_toTopOf="@+id/editTextArrCode"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,32 +57,32 @@
         android:id="@+id/textViewDepTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Departure\nTime"
+        android:text="@string/departure_ntime"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/editTextDepTime"
-        app:layout_constraintHorizontal_bias="0.752"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.564" />
+        app:layout_constraintVertical_bias="0.578" />
 
     <TextView
         android:id="@+id/textViewAirlineName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Airline"
+        android:text="@string/airline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/editTextAirlineName"
-        app:layout_constraintHorizontal_bias="0.822"
+        app:layout_constraintHorizontal_bias="0.831"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.164" />
+        app:layout_constraintVertical_bias="0.183" />
 
     <TextView
         android:id="@+id/textViewArrCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="224dp"
-        android:text="Arrival\nIATA Code"
+        android:text="@string/arrival_niata_code"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -93,7 +96,7 @@
         android:layout_height="wrap_content"
         android:drawableRight="@android:drawable/ic_menu_my_calendar"
         android:ems="10"
-        android:hint="Select Date"
+        android:hint="@string/select_date"
         android:inputType="none"
         android:focusable="false"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -109,7 +112,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:ems="10"
-        android:hint="Example: 62"
+        android:hint="@string/example_26"
         android:inputType="number"
         android:digits="0123456789"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -123,7 +126,7 @@
         android:id="@+id/textViewDepCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
+        android:layout_marginStart="64dp"
         android:text="Departure\nIATA Code"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -136,69 +139,85 @@
         android:layout_height="wrap_content"
         android:drawableRight="@android:drawable/ic_menu_my_calendar"
         android:ems="10"
-        android:hint="Select Date"
-        android:inputType="none"
         android:focusable="false"
+        android:hint="@string/select_date"
+        android:inputType="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.731"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextDepCode"
-        app:layout_constraintVertical_bias="0.593" />
+        app:layout_constraintVertical_bias="0.562" />
 
-    <TextView
-        android:id="@+id/textViewArrDate"
+    <EditText
+        android:id="@+id/editTextArrTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Arrival\nDate"
+        android:drawableRight="@android:drawable/ic_menu_recent_history"
+        android:ems="10"
+        android:focusable="false"
+        android:inputType="none"
+        android:hint="@string/select_time"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editTextArrDate"
-        app:layout_constraintHorizontal_bias="0.803"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.731"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDepCode"
-        app:layout_constraintVertical_bias="0.59" />
-
-    <TextView
-        android:id="@+id/textViewFlightNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Flight\nNumber"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editTextFlightNumber"
-        app:layout_constraintHorizontal_bias="0.814"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewAirlineName"
-        app:layout_constraintVertical_bias="0.089" />
-
-    <TextView
-        android:id="@+id/textViewDepDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Departure\nDate"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/editTextArrDate"
-        app:layout_constraintHorizontal_bias="0.729"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDepCode"
-        app:layout_constraintVertical_bias="0.098" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextArrDate"
+        app:layout_constraintVertical_bias="0.115" />
 
     <TextView
         android:id="@+id/textViewArrTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Arrival\nTime"
+        android:text="@string/arrival_ntime"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.226"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.86" />
+        app:layout_constraintVertical_bias="0.83" />
+
+    <TextView
+        android:id="@+id/textViewArrDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arrival_ndate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editTextArrDate"
+        app:layout_constraintHorizontal_bias="0.803"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDepCode"
+        app:layout_constraintVertical_bias="0.56" />
+
+    <TextView
+        android:id="@+id/textViewFlightNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/flight_nnumber"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editTextFlightNumber"
+        app:layout_constraintHorizontal_bias="0.824"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAirlineName"
+        app:layout_constraintVertical_bias="0.067" />
+
+    <TextView
+        android:id="@+id/textViewDepDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/departure_ndate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/editTextArrDate"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDepCode"
+        app:layout_constraintVertical_bias="0.116" />
 
     <TextView
         android:id="@+id/textViewFlightDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter Flight Details"
+        android:text="@string/enter_flight_details"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -212,8 +231,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Example: TPE"
-        android:inputType="text|textNoSuggestions"
+        android:hint="@string/example_tpe"
+        android:inputType="text"
+        android:maxLength="3"
+        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.731"
@@ -221,26 +242,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.663" />
 
-    <EditText
-        android:id="@+id/editTextArrTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="none"
-        android:focusable="false"
-        android:drawableRight="@android:drawable/ic_menu_recent_history"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.731"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextArrDate"
-        app:layout_constraintVertical_bias="0.213" />
-
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create This Flight"
+        android:onClick="createFlight"
+        android:text="@string/create_this_flight"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
