@@ -49,6 +49,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void goToListAllAirlinesActivity(View view) throws IOException {
+        Intent intent = new Intent(this, ListAllAirlinesActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();

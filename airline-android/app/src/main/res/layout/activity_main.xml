@@ -28,7 +28,7 @@
         android:layout_width="161dp"
         android:layout_height="55dp"
         android:layout_marginTop="104dp"
-        android:onClick="displayMsg"
+        android:onClick="goToListAllAirlinesActivity"
         android:text="@string/view_airlines"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
