@@ -1,10 +1,12 @@
 package edu.pdx.cs410J.leolu;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,15 +22,15 @@ import edu.pdx.cs410J.ParserException;
 public class CreateFlightActivity extends AppCompatActivity {
     //TextView textView;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
     EditText editAirlineName=null, editFlightNumber=null, editDepCode=null,
             editDepDate=null, editDepTime=null, editArrCode=null,
             editArrDate=null, editArrTime=null;
     private Map<String,Airline> existingAirlineMap;
     private Map<String,Airline> newAirlineMap;
 
-    private Calendar depDate = Calendar.getInstance();
-    private Calendar arrDate = Calendar.getInstance();
+    private Calendar depCal = Calendar.getInstance();
+    private Calendar arrCal = Calendar.getInstance();
     private File appDir;
     private File airlinesDir;
 
@@ -36,75 +38,80 @@ public class CreateFlightActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_flight);
-        //textView = (TextView) findViewById(R.id.textView2);
         editAirlineName = (EditText) findViewById(R.id.editTextAirlineName);
         editFlightNumber = (EditText) findViewById(R.id.editTextFlightNumber);
         editDepCode = (EditText) findViewById(R.id.editTextDepCode);
         editDepDate = (EditText) findViewById(R.id.editTextDepDate);
         departureSelectDate();
         editDepTime = (EditText) findViewById(R.id.editTextDepTime);
+        editDepTime.setOnClickListener(v->selectTime(editDepTime,depCal));
         editArrCode = (EditText) findViewById(R.id.editTextArrCode);
         editArrDate = (EditText) findViewById(R.id.editTextArrDate);
         arrivalSelectDate();
         editArrTime = (EditText) findViewById(R.id.editTextArrTime);
-
+        editArrTime.setOnClickListener(v->selectTime(editArrTime,arrCal));
 
         newAirlineMap = new HashMap<>();
         populateAirlineList();
 
     }
-
-    /*
-    public void updateTextViewMessage(View view){
-        String airlineName = String.valueOf(inputText.getText());
-        if(airlineName==null || airlineName.length()==0){
-            Toast.makeText(this, "Airline Name cannot be blank", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if(airlineExists(airlineName)){
-            Toast.makeText(this, "This airline name already exists", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        createAirline(airlineName);
-        textView.setText("New Airline created: " + inputText.getText().toString().toUpperCase());
-
-        System.out.println("New Airline Successfully created: " + inputText.getText());
-    }
-*/
     public void departureSelectDate(){
-        selectDate(editDepDate,depDate);
+        selectDate(editDepDate, depCal);
     }
 
     public void arrivalSelectDate(){
-        selectDate(editArrDate,arrDate);
+        selectDate(editArrDate, arrCal);
     }
 
-    private void selectDate(EditText pickDate, Calendar depOrArrCalendar){
+    private void selectDate(EditText editText, Calendar depOrArrCalendar){
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int day) {
                 depOrArrCalendar.set(Calendar.YEAR,year);
                 depOrArrCalendar.set(Calendar.MONTH,month);
                 depOrArrCalendar.set(Calendar.DAY_OF_MONTH,day);
-                pickDate.setText(updateDate(pickDate));
+                //editText.setText(updateDate(editText));
+                updateDateInputLabel(editText,depOrArrCalendar);
             }
         };
-        pickDate.setOnClickListener(new View.OnClickListener(){
+        editText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                new DatePickerDialog(CreateFlightActivity.this,date,depOrArrCalendar.get(Calendar.MONTH)
-                        ,depOrArrCalendar.get(Calendar.DAY_OF_MONTH), depOrArrCalendar.get(Calendar.YEAR));
+                new DatePickerDialog(CreateFlightActivity.this,date
+                        ,depOrArrCalendar.get(Calendar.YEAR)
+                        ,depOrArrCalendar.get(Calendar.MONTH)
+                        ,depOrArrCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
     }
 
-    private String updateDate(EditText pickDate) {
-        return dateFormat.format(pickDate.getText());
+    private void updateDateInputLabel(EditText editText, Calendar calendar){
+        editText.setText(dateFormat.format(calendar.getTime()));
     }
 
-    private void createAirline(String airlineName) {
-        Airline newAirline = new Airline(airlineName);
-        newAirlineMap.put(airlineName.toLowerCase(),newAirline);
+    private void selectTime(EditText editTime, Calendar calendar){
+        int hr = calendar.get(Calendar.HOUR_OF_DAY);
+        int min = calendar.get(Calendar.MINUTE);
+
+        TimePickerDialog tpd = new TimePickerDialog(CreateFlightActivity.this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hr, int min) {
+                calendar.set(Calendar.HOUR_OF_DAY,hr);
+                calendar.set(Calendar.MINUTE,min);
+
+                editTime.setText(timeFormat.format(calendar.getTime()));
+            }
+        }, hr, min, true);
+        tpd.setTitle("Select Time");
+        tpd.show();
+    }
+
+    public void departureSelectTime(){
+        selectTime(editDepTime, depCal);
+    }
+
+    public void arrivalSelectTime(){
+        selectTime(editArrTime, arrCal);
     }
 
     private boolean airlineExists(String newAirlineName){
