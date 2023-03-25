@@ -1,6 +1,5 @@
 package edu.pdx.cs410J.leolu;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,38 +10,57 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.pdx.cs410J.ParserException;
 
-public class ListAllAirlinesActivity extends AppCompatActivity implements Airline_RecyclerViewInterface{
+public class ListAllFlightsActivity extends AppCompatActivity {
 
     private File appDir;
     private File airlinesDir;
     private Map<String,Airline> existingAirlineMap;
+    private List<Flight> flights = new ArrayList<>();
 
-    ArrayList<AirlineModel> airlineModels = new ArrayList<>();
+    ArrayList<FlightModel> flightModels = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recycler_view_airlines);
-        populateAirlineList();
-        RecyclerView recyclerView = findViewById(R.id.airlineRecyclerView);
-        setUpAirlineModels();
+        setContentView(R.layout.recycler_view_flights);
 
-        Airline_RecyclerViewAdapter adapter = new Airline_RecyclerViewAdapter(this,
-                airlineModels, this);
+        String airlineName = getIntent().getStringExtra("Airline");
+        populateAirlineList();
+        flights = (List<Flight>) existingAirlineMap.get(airlineName.toLowerCase()).getFlights();
+
+        RecyclerView recyclerView = findViewById(R.id.flightsRecyclerView);
+        setUpFlightModels();
+
+        Flight_RecyclerViewAdapter adapter = new Flight_RecyclerViewAdapter(this,
+                flightModels);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void setUpAirlineModels(){
-        if(existingAirlineMap == null){
-            airlineModels.add(new AirlineModel("NO AIRLINE IN SYSTEM"));
+    private void setUpFlightModels(){
+        if(flights==null || flights.size()==0){
+            flightModels.add(new FlightModel("NULL", "XXX","XXX"
+            ,"00/00/0000","23:59","00/00/0000","23:59",
+                    "00HR00MIN"));
             return;
         }
-        for(Map.Entry<String, Airline> entry : existingAirlineMap.entrySet()){
-            airlineModels.add(new AirlineModel(entry.getValue().getName()));
+        for(Flight fl: flights){
+            int mins = fl.getFlightDuration();
+            int hrs = mins/60;
+            mins %= 60;
+            flightModels.add(new FlightModel(Integer.toString(fl.getNumber()),
+                    fl.getSource(),
+                    fl.getDestination(),
+                    fl.getDepDate(),
+                    fl.getDepTime24(),
+                    fl.getArrDate(),
+                    fl.getArrTime24(),
+                    hrs+"HR"+" "+mins+"MIN"
+            ));
         }
 
     }
@@ -83,12 +101,5 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
                 System.err.println("XML file is null: " + airlineFiles[i].getName());
             }
         }
-    }
-
-    @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(this, ListAllFlightsActivity.class);
-        intent.putExtra("Airline",airlineModels.get(position).getAirlineName());
-        startActivity(intent);
     }
 }

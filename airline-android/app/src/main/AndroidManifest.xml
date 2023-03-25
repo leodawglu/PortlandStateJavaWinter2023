@@ -22,6 +22,8 @@
         </activity>
         <activity android:name=".CreateAirlineActivity"/>
         <activity android:name=".CreateFlightActivity"/>
+        <activity android:name=".ListAllAirlinesActivity"/>
+        <activity android:name=".ListAllFlightsActivity"/>
     </application>
 
 </manifest>
