@@ -57,7 +57,7 @@ public class CreateAirlineActivity extends AppCompatActivity {
     }
 
     private boolean airlineExists(String newAirlineName){
-        if(existingAirlineMap.containsKey(newAirlineName.toLowerCase()) ||
+        if((existingAirlineMap!=null && existingAirlineMap.containsKey(newAirlineName.toLowerCase())) ||
         newAirlineMap.containsKey(newAirlineName.toLowerCase()))
             return true;
         return false;
@@ -77,7 +77,7 @@ public class CreateAirlineActivity extends AppCompatActivity {
             File airlineFile = new File(airlinesDir, airlineName +".xml");
             dumper = new XmlDumper(airlineFile);
             dumper.dump(airline.getValue());
-            existingAirlineMap.put(airline.getKey(),airline.getValue());
+            if(existingAirlineMap!=null)existingAirlineMap.put(airline.getKey(),airline.getValue());
         }
         newAirlineMap = new HashMap<>();
     }

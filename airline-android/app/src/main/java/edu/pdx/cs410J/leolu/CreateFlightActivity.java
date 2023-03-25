@@ -110,7 +110,7 @@ public class CreateFlightActivity extends AppCompatActivity {
     }
 
     private boolean airlineExists(String newAirlineName){
-        if(existingAirlineMap.containsKey(newAirlineName.toLowerCase()) ||
+        if((existingAirlineMap!=null && existingAirlineMap.containsKey(newAirlineName.toLowerCase())) ||
                 newAirlineMap.containsKey(newAirlineName.toLowerCase()))
             return true;
         return false;
@@ -130,7 +130,7 @@ public class CreateFlightActivity extends AppCompatActivity {
             File airlineFile = new File(airlinesDir, airlineName +".xml");
             dumper = new XmlDumper(airlineFile);
             dumper.dump(airline.getValue());
-            existingAirlineMap.put(airline.getKey(),airline.getValue());
+            if(existingAirlineMap!=null)existingAirlineMap.put(airline.getKey(),airline.getValue());
         }
         newAirlineMap = new HashMap<>();
     }
@@ -229,11 +229,11 @@ public class CreateFlightActivity extends AppCompatActivity {
     public void createFlight(View view){
         boolean good = true;
         if(!allInputsNotEmpty(view))return;
-        if(!isValidIATACode(editDepCode.getText().toString())) {
+        if(!isValidIATACode(editDepCode.getText().toString().toUpperCase())) {
             good = false;
             editDepCode.setError("Please enter a Valid IATA Code");
         }
-        if(!isValidIATACode(editArrCode.getText().toString())) {
+        if(!isValidIATACode(editArrCode.getText().toString().toUpperCase())) {
             good = false;
             editArrCode.setError("Please enter a Valid IATA Code");
         }
