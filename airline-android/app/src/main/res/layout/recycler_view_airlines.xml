@@ -9,28 +9,25 @@
     <androidx.appcompat.widget.SearchView
         android:id="@+id/airlineSearchView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_marginBottom="25dp"
+        android:layout_height="60dp"
+        android:layout_margin="4dp"
 
         android:background="@drawable/airline_search_view_bg"
-
         app:iconifiedByDefault="false"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.024"
+        app:layout_constraintVertical_bias="0.912"
         app:queryHint="Search For Airline Here" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/airlineRecyclerView"
-        android:layout_width="391dp"
-        android:layout_height="543dp"
+        android:layout_width="390dp"
+        android:layout_height="579dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/airlineSearchView"
-        app:layout_constraintVertical_bias="0.673" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.085" />
 </androidx.constraintlayout.widget.ConstraintLayout>

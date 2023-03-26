@@ -119,9 +119,10 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(String airlineName) {
         Intent intent = new Intent(this, ListAllFlightsActivity.class);
-        intent.putExtra("Airline",airlineModels.get(position).getAirlineName());
+        Airline selectedAirline = existingAirlineMap.get(airlineName.toLowerCase());
+        intent.putExtra("Airline",selectedAirline.getName());
         startActivity(intent);
     }
 }

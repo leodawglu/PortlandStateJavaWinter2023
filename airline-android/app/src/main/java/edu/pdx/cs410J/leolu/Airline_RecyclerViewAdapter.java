@@ -49,40 +49,7 @@ public class Airline_RecyclerViewAdapter extends RecyclerView.Adapter<Airline_Re
         //just how many items to list as rows
         return airlineModels.size();
     }
-/*
-    @Override
-    public Filter getFilter() {
-        return airlineFilter;
-    }
 
-    private Filter airlineFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<AirlineModel> filteredList = new ArrayList<>();
-            if(constraint == null || constraint.length()==0 ){
-                filteredList.addAll(airlineModelsFull);
-            }else{
-                String filterPattern = constraint.toString().toLowerCase().trim();
-
-                for(AirlineModel airline: airlineModelsFull){
-                    if(airline.getAirlineName().toLowerCase().contains(filterPattern)){
-                        filteredList.add(airline);
-                    }
-                }
-            }
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults filterResults) {
-            airlineModels.clear();
-            airlineModels.addAll((List)filterResults.values);
-            notifyDataSetChanged();
-        }
-    };
-*/
     public static class MyViewHolder extends RecyclerView.ViewHolder{
         TextView airlineNameView;
         public MyViewHolder(@NonNull View itemView, Airline_RecyclerViewInterface recyclerViewInterface) {
@@ -92,9 +59,10 @@ public class Airline_RecyclerViewAdapter extends RecyclerView.Adapter<Airline_Re
                 @Override
                 public void onClick(View view) {
                     if(recyclerViewInterface != null){
+
                         int pos = getAdapterPosition();
                         if(pos != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(pos);
+                            recyclerViewInterface.onItemClick(airlineNameView.getText().toString());
                         }
                     }
                 }
