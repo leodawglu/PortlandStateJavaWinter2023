@@ -12,13 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class Airline_RecyclerViewAdapter extends RecyclerView.Adapter<Airline_RecyclerViewAdapter.MyViewHolder> {
-    ArrayList<AirlineModel> airlineModels;
+    private ArrayList<AirlineModel> airlineModels;
+    private ArrayList<AirlineModel> airlineModelsFull;
     Context context;
     private final Airline_RecyclerViewInterface recyclerViewInterface;
     public Airline_RecyclerViewAdapter(Context context, ArrayList<AirlineModel> airlineModels
             , Airline_RecyclerViewInterface recyclerViewInterface){
         this.context = context;
         this.airlineModels = airlineModels;
+        airlineModelsFull = new ArrayList<>(airlineModels);
         this.recyclerViewInterface = recyclerViewInterface;
     }
     @NonNull
@@ -37,12 +39,50 @@ public class Airline_RecyclerViewAdapter extends RecyclerView.Adapter<Airline_Re
         holder.airlineNameView.setText(airlineModels.get(position).getAirlineName());
     }
 
+    public void setFilteredList(ArrayList<AirlineModel> filteredList){
+        this.airlineModels = filteredList;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         //just how many items to list as rows
         return airlineModels.size();
     }
+/*
+    @Override
+    public Filter getFilter() {
+        return airlineFilter;
+    }
 
+    private Filter airlineFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<AirlineModel> filteredList = new ArrayList<>();
+            if(constraint == null || constraint.length()==0 ){
+                filteredList.addAll(airlineModelsFull);
+            }else{
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for(AirlineModel airline: airlineModelsFull){
+                    if(airline.getAirlineName().toLowerCase().contains(filterPattern)){
+                        filteredList.add(airline);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults filterResults) {
+            airlineModels.clear();
+            airlineModels.addAll((List)filterResults.values);
+            notifyDataSetChanged();
+        }
+    };
+*/
     public static class MyViewHolder extends RecyclerView.ViewHolder{
         TextView airlineNameView;
         public MyViewHolder(@NonNull View itemView, Airline_RecyclerViewInterface recyclerViewInterface) {

@@ -43,9 +43,9 @@ public class ListAllFlightsActivity extends AppCompatActivity {
 
     private void setUpFlightModels(){
         if(flights==null || flights.size()==0){
-            flightModels.add(new FlightModel("NULL", "XXX","XXX"
-            ,"00/00/0000","23:59","00/00/0000","23:59",
-                    "00HR00MIN"));
+            flightModels.add(new FlightModel("No Flights In System", "",""
+            ,"","","","",
+                    ""));
             return;
         }
         for(Flight fl: flights){

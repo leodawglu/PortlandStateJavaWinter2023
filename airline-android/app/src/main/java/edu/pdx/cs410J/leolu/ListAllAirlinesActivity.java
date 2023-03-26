@@ -2,8 +2,10 @@ package edu.pdx.cs410J.leolu;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,20 +22,51 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
     private File appDir;
     private File airlinesDir;
     private Map<String,Airline> existingAirlineMap;
+    private Airline_RecyclerViewAdapter adapter;
 
     ArrayList<AirlineModel> airlineModels = new ArrayList<>();
+    private SearchView searchView;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recycler_view_airlines);
         populateAirlineList();
+        searchView = findViewById(R.id.airlineSearchView);
+        searchView.clearFocus();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterList(newText);
+                return true;
+            }
+        });
+
         RecyclerView recyclerView = findViewById(R.id.airlineRecyclerView);
         setUpAirlineModels();
 
-        Airline_RecyclerViewAdapter adapter = new Airline_RecyclerViewAdapter(this,
+        adapter = new Airline_RecyclerViewAdapter(this,
                 airlineModels, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void filterList(String queryText) {
+        ArrayList<AirlineModel> filteredList = new ArrayList<>();
+        for(AirlineModel airline: airlineModels){
+             if(airline.getAirlineName().toLowerCase().contains(queryText.toLowerCase())){
+                 filteredList.add(airline);
+             }
+        }
+        if(filteredList.isEmpty()){
+            Toast.makeText(this, "No airline found with this name", Toast.LENGTH_SHORT).show();
+        }else{
+            adapter.setFilteredList(filteredList);
+        }
     }
 
     private void setUpAirlineModels(){

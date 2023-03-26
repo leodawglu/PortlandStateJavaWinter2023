@@ -23,4 +23,13 @@
     <string name="enter_flight_details">Enter Flight Details</string>
     <string name="example_tpe">Example: TPE</string>
     <string name="create_this_flight">Create This Flight</string>
+    <string name="_23hr59min">23HR59MIN</string>
+    <string name="_1234">1234</string>
+    <string name="flight_number">Flight Number</string>
+    <string name="src">SRC</string>
+    <string name="des">DES</string>
+    <string name="_12_34">12:34</string>
+    <string name="_23_59">23:59</string>
+    <string name="_12_31_2023">12/31/2023</string>
+    <string name="_01_01_2024">01/01/2024</string>
 </resources>
