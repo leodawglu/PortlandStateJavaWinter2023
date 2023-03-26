@@ -58,7 +58,7 @@ public class CreateAirlineActivity extends AppCompatActivity {
     }
 
     private boolean airlineExists(String newAirlineName){
-        if((existingAirlineMap!=null && existingAirlineMap.containsKey(newAirlineName.toLowerCase())) ||
+        if((existingAirlineMap!=null && existingAirlineMap.containsKey(newAirlineName.trim().toLowerCase())) ||
         newAirlineMap.containsKey(newAirlineName.toLowerCase()))
             return true;
         return false;
