@@ -127,7 +127,7 @@ public class CreateFlightActivity extends AppCompatActivity {
         XmlDumper dumper;
 
         for(Map.Entry<String, Airline> airline : newAirlineMap.entrySet()){
-            String airlineName = airline.getKey().replaceAll("[^a-zA-Z]+", "_").trim();
+            String airlineName = airline.getKey().trim().replaceAll("[^a-zA-Z]+", "_");
             File airlineFile = new File(airlinesDir, airlineName +".xml");
             dumper = new XmlDumper(airlineFile);
             dumper.dump(airline.getValue());
@@ -273,7 +273,7 @@ public class CreateFlightActivity extends AppCompatActivity {
                 timeFormat.format(arrCal.getTime()),
                 true
         );
-        String airlineName = editAirlineName.getText().toString();
+        String airlineName = editAirlineName.getText().toString().trim();
         Airline airline;
         if(newAirlineMap.containsKey(airlineName.toLowerCase())){
             airline = newAirlineMap.get(airlineName.toLowerCase());
@@ -294,7 +294,7 @@ public class CreateFlightActivity extends AppCompatActivity {
         int mins = newFlight.getFlightDuration();
         int hrs = mins/60;
         mins %= 60;
-        Intent intent = new Intent(this, CreateAirlineActivity.class);
+        Intent intent = new Intent(this, FlightCreatedActivity.class);
         intent.putExtra("Airline",airlineName);
         intent.putExtra("FlightNumber",newFlight.getNumber());
         intent.putExtra("Source",newFlight.getSource());

@@ -74,7 +74,7 @@ public class CreateAirlineActivity extends AppCompatActivity {
         XmlDumper dumper;
 
         for(Map.Entry<String, Airline> airline : newAirlineMap.entrySet()){
-            String airlineName = airline.getKey().replaceAll("[^a-zA-Z]+", "_").trim();
+            String airlineName = airline.getKey().trim().replaceAll("[^a-zA-Z]+", "_");
             File airlineFile = new File(airlinesDir, airlineName +".xml");
             dumper = new XmlDumper(airlineFile);
             dumper.dump(airline.getValue());
