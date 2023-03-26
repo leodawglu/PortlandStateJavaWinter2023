@@ -42,11 +42,12 @@ public class CreateAirlineActivity extends AppCompatActivity {
             return;
         }
         if(airlineExists(airlineName)){
-            Toast.makeText(this, "This airline name already exists", Toast.LENGTH_SHORT).show();
+            textView.setText("This airline already exists!");
+            Toast.makeText(this, "This airline name already exists, please use another airline name", Toast.LENGTH_SHORT).show();
             return;
         }
         createAirline(airlineName);
-        textView.setText("New Airline created: " + inputText.getText().toString().toUpperCase());
+        textView.setText("New Airline created: \n" + inputText.getText().toString().toUpperCase());
 
         System.out.println("New Airline Successfully created: " + inputText.getText());
     }

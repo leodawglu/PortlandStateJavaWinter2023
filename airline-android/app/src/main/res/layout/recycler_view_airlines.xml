@@ -6,28 +6,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/airlineRecyclerView"
+        android:layout_width="397dp"
+        android:layout_height="596dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:windowSoftInputMode="adjustResize"
+
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.118" />
+
     <androidx.appcompat.widget.SearchView
         android:id="@+id/airlineSearchView"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_width="400dp"
+        android:layout_height="61dp"
         android:layout_margin="4dp"
-
         android:background="@drawable/airline_search_view_bg"
+
         app:iconifiedByDefault="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.004"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.912"
+        app:layout_constraintVertical_bias="0.976"
         app:queryHint="Search For Airline Here" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/airlineRecyclerView"
-        android:layout_width="390dp"
-        android:layout_height="579dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.085" />
 </androidx.constraintlayout.widget.ConstraintLayout>

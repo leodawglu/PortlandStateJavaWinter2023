@@ -33,7 +33,9 @@ public class Flight_RecyclerViewAdapter extends RecyclerView.Adapter<Flight_Recy
         //based on the position of the recycler view
         holder.flightNumberView.setText(flightModels.get(position).getFlightNumber());
         holder.sourceView.setText(flightModels.get(position).getSource());
+        holder.sourceStringView.setText(flightModels.get(position).getSourceString());
         holder.destinationView.setText(flightModels.get(position).getDestination());
+        holder.destinationStringView.setText(flightModels.get(position).getDestinationString());
         holder.departureTimeView.setText(flightModels.get(position).getDepartureTime());
         holder.departureDateView.setText(flightModels.get(position).getDepartureDate());
         holder.arrivalTimeView.setText(flightModels.get(position).getArrivalTime());
@@ -54,7 +56,10 @@ public class Flight_RecyclerViewAdapter extends RecyclerView.Adapter<Flight_Recy
     public static class MyViewHolder extends RecyclerView.ViewHolder{
         TextView flightNumberView;
         TextView sourceView;
+        TextView sourceStringView;
         TextView destinationView;
+        TextView destinationStringView;
+
         TextView departureTimeView;
         TextView departureDateView;
         TextView arrivalTimeView;
@@ -65,7 +70,9 @@ public class Flight_RecyclerViewAdapter extends RecyclerView.Adapter<Flight_Recy
             super(itemView);
             flightNumberView = itemView.findViewById(R.id.flightNumber);
             sourceView = itemView.findViewById(R.id.source);
+            sourceStringView = itemView.findViewById(R.id.sourceString);
             destinationView = itemView.findViewById(R.id.destination);
+            destinationStringView = itemView.findViewById(R.id.destinationString);
             departureTimeView = itemView.findViewById(R.id.departureTime);
             departureDateView = itemView.findViewById(R.id.departureDate);
             arrivalTimeView = itemView.findViewById(R.id.arrivalTime);

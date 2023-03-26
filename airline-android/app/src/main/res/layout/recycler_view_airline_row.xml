@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    >
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -22,7 +23,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="58dp">
+            android:layout_height="match_parent"
+            android:windowSoftInputMode="adjustResize">
 
             <TextView
                 android:id="@+id/airlineName"
@@ -30,8 +32,8 @@
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textColor="@color/tan"
-                android:textStyle="bold"
                 android:textSize="36sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

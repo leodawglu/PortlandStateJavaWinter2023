@@ -84,15 +84,24 @@ public class ListAllFlightsActivity extends AppCompatActivity {
         }
         if(filteredList.isEmpty()){
             Toast.makeText(this, "No flights found", Toast.LENGTH_SHORT).show();
-        }else{
-            adapter.setFilteredList(filteredList);
         }
+        adapter.setFilteredList(filteredList);
+
     }
 
 
     private void setUpFlightModels(){
         if(flights==null || flights.size()==0){
-            flightModels.add(new FlightModel("No Flights In System", "",""
+            /*
+            ImageView imageView = findViewById(R.id.arrowView);
+            Drawable drawable = imageView.getDrawable();
+            if (drawable != null) {
+                drawable.setColorFilter(null);
+            }*/
+            /*
+            TextView flightNumber = findViewById(R.id.flightNumberHeader);
+            flightNumber.setText("");*/
+            flightModels.add(new FlightModel("No Flights\nIn System", "",""
             ,"","","","",
                     ""));
             return;

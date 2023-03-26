@@ -26,6 +26,7 @@
         android:textSize="34sp"
         android:gravity="center"
         android:textStyle="bold|normal"
+        android:windowSoftInputMode="adjustResize"
         app:layout_constraintBottom_toTopOf="@+id/flightsRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +37,6 @@
         android:layout_width="197dp"
         android:layout_height="61dp"
         android:layout_margin="4dp"
-
         android:background="@drawable/airline_search_view_bg"
         app:iconifiedByDefault="false"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -45,7 +45,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.877"
-        app:queryHint="By source" />
+        app:queryHint="Departure IATA"
+
+        />
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/destinationSearchView"
@@ -61,5 +63,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.877"
-        app:queryHint="By destination" />
+        app:queryHint="Arrival IATA" />
 </androidx.constraintlayout.widget.ConstraintLayout>

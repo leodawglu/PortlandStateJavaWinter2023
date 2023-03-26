@@ -2,6 +2,7 @@ package edu.pdx.cs410J.leolu;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -185,34 +186,50 @@ public class CreateFlightActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(editAirlineName.getText().toString())) {
             editAirlineName.setError("Please enter an Airline Name");
             notEmpty = false;
+        }else {
+            editAirlineName.setError(null);
         }
         if (TextUtils.isEmpty(editFlightNumber.getText().toString())) {
             editFlightNumber.setError("Please enter a Flight Number");
             notEmpty = false;
+        }else {
+            editFlightNumber.setError(null);
         }
         if (TextUtils.isEmpty(editDepCode.getText().toString())) {
             editDepCode.setError("Please enter an IATA Airport Code");
             notEmpty = false;
+        }else {
+            editDepCode.setError(null);
         }
         if (TextUtils.isEmpty(editDepDate.getText().toString())) {
             editDepDate.setError("Please select a date");
             notEmpty = false;
+        }else {
+            editDepDate.setError(null);
         }
         if (TextUtils.isEmpty(editDepTime.getText().toString())) {
             editDepTime.setError("Please select a time");
             notEmpty = false;
+        }else {
+            editDepTime.setError(null);
         }
         if (TextUtils.isEmpty(editArrCode.getText().toString())) {
             editArrCode.setError("Please enter an IATA Airport Code");
             notEmpty = false;
+        }else {
+            editArrCode.setError(null);
         }
         if (TextUtils.isEmpty(editArrDate.getText().toString())) {
             editArrDate.setError("Please select a date");
             notEmpty = false;
+        } else {
+            editArrDate.setError(null);
         }
         if (TextUtils.isEmpty(editArrTime.getText().toString())) {
             editArrTime.setError("Please select a time");
             notEmpty = false;
+        } else {
+            editArrTime.setError(null);
         }
         return notEmpty;
     }
@@ -243,7 +260,7 @@ public class CreateFlightActivity extends AppCompatActivity {
             editDepTime.setError("Departure Date & Time cannot be after Arrival");
             editArrDate.setError("Arrival Date & Time cannot be before Departure");
             editArrTime.setError("Arrival Date & Time cannot be before Departure");
-            Toast.makeText(this,"Departure Date & Time cannot occur after Arrival",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Departure Date & Time cannot occur after Arrival Date & Time",Toast.LENGTH_SHORT).show();
         }
         if(!good)return;
         Flight fl = new Flight(
@@ -270,5 +287,25 @@ public class CreateFlightActivity extends AppCompatActivity {
         airline.addFlight(fl);
         newAirlineMap.put(airlineName.toLowerCase(),airline);
         Toast.makeText(this,"New Flight Created",Toast.LENGTH_SHORT).show();
+        goToFlightCreatedSuccess(airlineName, fl);
+    }
+
+    private void goToFlightCreatedSuccess(String airlineName, Flight newFlight){
+        int mins = newFlight.getFlightDuration();
+        int hrs = mins/60;
+        mins %= 60;
+        Intent intent = new Intent(this, CreateAirlineActivity.class);
+        intent.putExtra("Airline",airlineName);
+        intent.putExtra("FlightNumber",newFlight.getNumber());
+        intent.putExtra("Source",newFlight.getSource());
+        intent.putExtra("Destination",newFlight.getDestination());
+        intent.putExtra("DepartureTime",timeFormat.format(depCal.getTime()));
+        intent.putExtra("DepartureDate",dateFormat.format(depCal.getTime()));
+        intent.putExtra("ArrivalTime",timeFormat.format(arrCal.getTime()));
+        intent.putExtra("ArrivalDate",dateFormat.format(arrCal.getTime()));
+        intent.putExtra("Duration",hrs+"HR"+" "+mins+"MIN");
+        intent.putExtra("SourceString",AirportNames.getNamesMap().get(newFlight.getSource().toUpperCase()).replace(", ", "\n"));
+        intent.putExtra("DestinationString",AirportNames.getNamesMap().get(newFlight.getDestination().toUpperCase()).replace(", ", "\n"));
+        startActivity(intent);
     }
 }

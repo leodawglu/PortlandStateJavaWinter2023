@@ -1,7 +1,10 @@
 package edu.pdx.cs410J.leolu;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +50,18 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
     private void initializeSearchView() {
         searchView = findViewById(R.id.airlineSearchView);
         searchView.clearFocus();
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    searchView.setIconified(false);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -68,9 +85,10 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
         }
         if(filteredList.isEmpty()){
             Toast.makeText(this, "No airline found with this name", Toast.LENGTH_SHORT).show();
-        }else{
-            adapter.setFilteredList(filteredList);
         }
+        Collections.sort(filteredList,nameComparator);
+        adapter.setFilteredList(filteredList);
+
     }
 
     private void setUpAirlineModels(){
@@ -81,8 +99,14 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
         for(Map.Entry<String, Airline> entry : existingAirlineMap.entrySet()){
             airlineModels.add(new AirlineModel(entry.getValue().getName()));
         }
-
+        Collections.sort(airlineModels,nameComparator);
     }
+    Comparator<AirlineModel> nameComparator = new Comparator<AirlineModel>() {
+        @Override
+        public int compare(AirlineModel o1, AirlineModel o2) {
+            return o1.getAirlineName().compareTo(o2.getAirlineName());
+        }
+    };
 
     public boolean openAirlineFiles(){
         // Get a reference to the app's internal storage directory

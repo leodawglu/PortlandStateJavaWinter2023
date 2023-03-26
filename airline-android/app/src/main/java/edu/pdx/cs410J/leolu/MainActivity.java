@@ -34,11 +34,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this,"My first message", Toast.LENGTH_SHORT).show();
     }
 
-    private void retrieveAllAirlinesFromXML(){
-        /** TO DO
-         * */
-    }
-
     public void goToCreateAirlineActivity(View view) throws IOException {
         Intent intent = new Intent(this, CreateAirlineActivity.class);
         startActivity(intent);
@@ -51,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToListAllAirlinesActivity(View view) throws IOException {
         Intent intent = new Intent(this, ListAllAirlinesActivity.class);
+        startActivity(intent);
+    }
+
+    public void goToHelp(View view) throws IOException {
+        Intent intent = new Intent(this, HelpActivity.class);
         startActivity(intent);
     }
 

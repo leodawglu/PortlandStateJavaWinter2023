@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:background="@color/tan"
+    >
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="361dp"
+        android:layout_height="244dp"
+        android:background="@color/blueBlack"
+        android:text="@string/guide_to_view_airlines_n_1_create_airlines_before_using_view_airlines_function_n_2_on_the_page_tap_the_airline_name_to_see_the_airline_s_flights_see_5_n_3_a_search_bar_on_the_bottom_can_be_used_to_filter_by_airline_name_n_4_scroll_down_to_view_more_available_airlines_n_5_on_the_airline_s_flight_list_scroll_down_to_view_more_available_flights_n_6_two_search_bars_are_on_the_bottom_the_left_for_departure_iata_code_the_right_for_arrival_iata_code_n"
+        android:textColor="@color/tan"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.073" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="361dp"
+        android:layout_height="190dp"
+        android:background="@color/blueBlack"
+        android:text="@string/guide_to_create_flight_n_1_type_in_the_airline_name_any_airline_name_not_in_system_will_be_created_n_2_flight_number_is_restricted_to_4_numerical_digits_n_3_departure_and_arrival_airport_iata_codes_are_strictly_3_characters_and_must_be_a_valid_iata_code_n_4_departure_date_time_and_arrival_date_time_are_in_the_same_timezone_n_5_departure_date_time_must_not_come_after_arrival_date_time_n"
+        android:textColor="@color/tan"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.77" />
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="359dp"
+        android:layout_height="92dp"
+        android:background="@color/blueBlack"
+        android:text="@string/guide_to_create_airline_n_1_simply_type_in_the_name_of_the_airline_n_2_if_the_airline_name_already_exists_a_new_airline_will_not_be_created"
+        android:textColor="@color/tan"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.472" />
+
+
+    <Button
+        android:id="@+id/readMeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="goToReadMe"
+        android:text="@string/view_readme"
+        android:textColor="@color/white"
+        android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.909" />
+</androidx.constraintlayout.widget.ConstraintLayout>
