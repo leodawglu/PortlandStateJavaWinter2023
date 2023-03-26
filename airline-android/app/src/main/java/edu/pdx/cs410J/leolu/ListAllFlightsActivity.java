@@ -1,8 +1,12 @@
 package edu.pdx.cs410J.leolu;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,23 +27,68 @@ public class ListAllFlightsActivity extends AppCompatActivity {
     private List<Flight> flights = new ArrayList<>();
 
     ArrayList<FlightModel> flightModels = new ArrayList<>();
+    SearchView sourceSearchView;
+    SearchView destinationSearchView;
+    private Flight_RecyclerViewAdapter adapter;
+    private String lastSRC="", lastDEST="";
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recycler_view_flights);
 
         String airlineName = getIntent().getStringExtra("Airline");
+        TextView airlineNameHolder = findViewById(R.id.airlineNameHolder);
+        airlineNameHolder.setText(airlineName);
         populateAirlineList();
         flights = (List<Flight>) existingAirlineMap.get(airlineName.toLowerCase()).getFlights();
 
         RecyclerView recyclerView = findViewById(R.id.flightsRecyclerView);
         setUpFlightModels();
 
-        Flight_RecyclerViewAdapter adapter = new Flight_RecyclerViewAdapter(this,
+        adapter = new Flight_RecyclerViewAdapter(this,
                 flightModels);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        initializeSearchView(sourceSearchView,findViewById(R.id.sourceSearchView), "src");
+        initializeSearchView(destinationSearchView,findViewById(R.id.destinationSearchView),"dest");
     }
+
+    private void initializeSearchView(SearchView searchView, View viewById, String type) {
+        searchView = (SearchView) viewById;
+        searchView.clearFocus();
+        String travelDirection = type;
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(travelDirection.equals("src"))lastSRC=newText;
+                if(travelDirection.equals("dest"))lastDEST=newText;
+                filterList();
+                return true;
+            }
+        });
+    }
+
+    private void filterList() {
+        ArrayList<FlightModel> filteredList = new ArrayList<>();
+        for(FlightModel flight: flightModels){
+            String src = flight.getSource().toLowerCase();
+            String dest = flight.getDestination().toLowerCase();
+            if(src.contains(lastSRC.toLowerCase()) && dest.contains(lastDEST.toLowerCase())){
+                filteredList.add(flight);
+            }
+        }
+        if(filteredList.isEmpty()){
+            Toast.makeText(this, "No flights found", Toast.LENGTH_SHORT).show();
+        }else{
+            adapter.setFilteredList(filteredList);
+        }
+    }
+
 
     private void setUpFlightModels(){
         if(flights==null || flights.size()==0){

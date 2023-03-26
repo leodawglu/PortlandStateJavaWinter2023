@@ -31,6 +31,18 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recycler_view_airlines);
         populateAirlineList();
+        initializeSearchView();
+
+        RecyclerView recyclerView = findViewById(R.id.airlineRecyclerView);
+        setUpAirlineModels();
+
+        adapter = new Airline_RecyclerViewAdapter(this,
+                airlineModels, this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void initializeSearchView() {
         searchView = findViewById(R.id.airlineSearchView);
         searchView.clearFocus();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -45,14 +57,6 @@ public class ListAllAirlinesActivity extends AppCompatActivity implements Airlin
                 return true;
             }
         });
-
-        RecyclerView recyclerView = findViewById(R.id.airlineRecyclerView);
-        setUpAirlineModels();
-
-        adapter = new Airline_RecyclerViewAdapter(this,
-                airlineModels, this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void filterList(String queryText) {

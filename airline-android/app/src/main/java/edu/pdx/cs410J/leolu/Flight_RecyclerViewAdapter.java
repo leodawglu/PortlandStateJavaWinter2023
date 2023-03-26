@@ -41,6 +41,10 @@ public class Flight_RecyclerViewAdapter extends RecyclerView.Adapter<Flight_Recy
         holder.durationView.setText(flightModels.get(position).getDuration());
     }
 
+    public void setFilteredList(ArrayList<FlightModel> filteredList){
+        this.flightModels = filteredList;
+        notifyDataSetChanged();
+    }
     @Override
     public int getItemCount() {
         //just how many items to list as rows
