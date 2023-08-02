@@ -234,45 +234,41 @@ public class CreateFlightActivity extends AppCompatActivity {
         return notEmpty;
     }
 
-    /**
-     * @param input - airport code String to be checked if real
-     * @return boolean true when airport code is from a real airport
-     * Utilizes {@code AirportNames.getNamesMap()}
-     * */
-    private boolean isValidIATACode(String input){
-        return AirportNames.getNamesMap().containsKey(input);
-    }
-
     public void createFlight(View view){
-        boolean good = true;
         if(!allInputsNotEmpty(view))return;
-        if(!isValidIATACode(editDepCode.getText().toString().toUpperCase())) {
-            good = false;
+        if(!Helper.isRealAirportCode(editDepCode.getText().toString().toUpperCase())) {
             editDepCode.setError("Please enter a Valid IATA Code");
+            return;
         }
-        if(!isValidIATACode(editArrCode.getText().toString().toUpperCase())) {
-            good = false;
+        if(!Helper.isRealAirportCode(editArrCode.getText().toString().toUpperCase())) {
             editArrCode.setError("Please enter a Valid IATA Code");
+            return;
         }
-        if(arrCal.getTimeInMillis()<depCal.getTimeInMillis()){
-            good = false;
-            editDepDate.setError("Departure Date & Time cannot be after Arrival");
-            editDepTime.setError("Departure Date & Time cannot be after Arrival");
-            editArrDate.setError("Arrival Date & Time cannot be before Departure");
-            editArrTime.setError("Arrival Date & Time cannot be before Departure");
-            Toast.makeText(this,"Departure Date & Time cannot occur after Arrival Date & Time",Toast.LENGTH_SHORT).show();
+        if(!Helper.departureBeforeArrival(depCal.getTimeInMillis(), arrCal.getTimeInMillis())){
+            editDepDate.setError("Departure Date & Time must be before Arrival");
+            editDepTime.setError("Departure Date & Time must be before Arrival");
+            editArrDate.setError("Arrival Date & Time must be after Departure");
+            editArrTime.setError("Arrival Date & Time must be after Departure");
+            Toast.makeText(this,"Departure Date & Time must be before Arrival Date & Time",Toast.LENGTH_SHORT).show();
+            return;
         }
-        if(!good)return;
-        Flight fl = new Flight(
-                editFlightNumber.getText().toString(),
-                editDepCode.getText().toString(),
-                dateFormat.format(depCal.getTime()),
-                timeFormat.format(depCal.getTime()),
-                editArrCode.getText().toString(),
-                dateFormat.format(arrCal.getTime()),
-                timeFormat.format(arrCal.getTime()),
-                true
-        );
+        Flight fl;
+        try {
+            fl = new Flight(
+                    editFlightNumber.getText().toString(),
+                    editDepCode.getText().toString(),
+                    dateFormat.format(depCal.getTime()),
+                    timeFormat.format(depCal.getTime()),
+                    editArrCode.getText().toString(),
+                    dateFormat.format(arrCal.getTime()),
+                    timeFormat.format(arrCal.getTime()),
+                    true
+            );
+        } catch (Exception e) {
+            Toast.makeText(this,e.toString(),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String airlineName = editAirlineName.getText().toString().trim();
         Airline airline;
         if(newAirlineMap.containsKey(airlineName.toLowerCase())){

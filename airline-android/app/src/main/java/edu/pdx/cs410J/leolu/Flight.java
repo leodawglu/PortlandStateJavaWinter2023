@@ -32,7 +32,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
   private String depTime;
   private String arrDate;
   private String arrTime;
-  private String error = "";
 
   private Date departureDate;
   private Date arrivalDate;
@@ -66,7 +65,7 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
     setFlightNumber(fN);
     setAirportCode(dep,"Departure");
     setAirportCode(arr, "Arrival");
-    if(error.isEmpty())setFlightDuration();
+    setFlightDuration();
   }
   /**
    * Constructs a new instance of <code>Flight</code>
@@ -90,7 +89,7 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
     setFlightNumber(fN);
     setAirportCode(dep,"Departure");
     setAirportCode(arr, "Arrival");
-    if(error.isEmpty())setFlightDuration();
+    setFlightDuration();
   }
 
   /**
@@ -110,25 +109,19 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
    * @throws IllegalArgumentException if int is less than or equal to 0
    * */
   public void setFlightNumber(String input){
-    try{
-      if(input==null||input.length()==0)
-        throw new NullPointerException("Flight Number cannot be null.");
+    if(input==null||input.length()==0)
+      throw new NullPointerException("Flight Number cannot be null.");
 
-      int temp = Integer.parseInt(input);//Throws NumberFormatException if not digits
-
-      if(temp<=0)
-        throw new IllegalArgumentException("Flight Number must be greater than zero: ");
-      this.flightNumber = temp;
-    }catch(NullPointerException e){
-      error = e.getMessage();
-      System.out.println(error);
-    }catch(NumberFormatException e){
-      error = "Flight Number must be a positive integer: " +input;
-      System.out.println(error);
-    }catch(IllegalArgumentException e){
-      error = e.getMessage() + input;
-      System.out.println(error);
+    int temp;
+    try {
+      temp = Integer.parseInt(input);//Throws NumberFormatException if not digits
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Flight Number must be a positive integer: " + input);
     }
+
+    if(temp<=0)
+      throw new IllegalArgumentException("Flight Number must be greater than zero" + input);
+    this.flightNumber = temp;
   }
 
   /**
@@ -141,24 +134,16 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
    * @throws IllegalArgumentException if input is not a 3-letter alphabetical code
    * */
   public void setAirportCode(String input, String type){
-    try{
-      if(input==null||input.length()==0)
-        throw new NullPointerException(" airport code cannot be null.");
-      input = input.toUpperCase();//case insensitive
-      if(input.length()!=3||!isAirportCodeAlphabetic(input))
-        throw new IllegalArgumentException(" airport code must be a 3-letter alphabetical code: ");
-      if(!isRealAirportCode(input)){
-        throw new IllegalArgumentException(" airport code is not a real airport code: ");
-      }
-      if(type.equals("Departure")) this.dep=input.toUpperCase();
-      if(type.equals("Arrival")) this.arr=input.toUpperCase();
-    }catch(NullPointerException e){
-      error = type + e.getMessage();
-      System.out.println(error);
-    }catch(IllegalArgumentException e){
-      error = type + e.getMessage() + input;
-      System.out.println(error);
+    if(input==null||input.length()==0)
+      throw new NullPointerException(type + " airport code cannot be null.");
+    input = input.toUpperCase();//case insensitive
+    if(input.length()!=3||!isAirportCodeAlphabetic(input))
+      throw new IllegalArgumentException(type + " airport code must be a 3-letter alphabetical code: " + input);
+    if(!Helper.isRealAirportCode(input)){
+      throw new IllegalArgumentException(type + " airport code is not a real airport code: " + input);
     }
+    if(type.equals("Departure")) this.dep=input.toUpperCase();
+    if(type.equals("Arrival")) this.arr=input.toUpperCase();
   }
   /**
    * @param input - airport code String from Constructor
@@ -167,15 +152,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
   private boolean isAirportCodeAlphabetic(String input)
   {
     return input.matches("^[a-zA-Z]*$");
-  }
-
-  /**
-   * @param input - airport code String to be checked if real
-   * @return boolean true when airport code is from a real airport
-   * Utilizes {@code AirportNames.getNamesMap()}
-   * */
-  private boolean isRealAirportCode(String input){
-    return AirportNames.getNamesMap().containsKey(input);
   }
 
   /**
@@ -215,48 +191,41 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
    * @param time String args from user input
    * */
   public void setDateTime(String date, String time, String type) {
+    if (date == null || date.length() == 0)
+      throw new NullPointerException(" date cannot be null.");
+    if (time == null || time.length() == 0)
+      throw new NullPointerException(" time cannot be null.");
+
+    if (!isValidDate(date))
+      throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): " + date);
+    time = time.toUpperCase();
+    if (twelveHrFormat) {
+      if (!time.endsWith("AM") && !time.endsWith("PM"))
+        throw new IllegalArgumentException(" time incorrect or missing meridiem AM or PM only!");
+      if (!isValid12HrMeridiem(time))
+        throw new IllegalArgumentException(" time format incorrect (12hr - hh:mm AM/PM): " + time);
+    } else {
+      if (!isValidTime(time))
+        throw new IllegalArgumentException(" time format incorrect (hh:mm): " + time);
+    }
+
+    String dateTime = date + " " + time;
+    Date d;
+
     try {
-      if (date == null || date.length() == 0)
-        throw new NullPointerException(" date cannot be null.");
-      if (time == null || time.length() == 0)
-        throw new NullPointerException(" time cannot be null.");
-
-      if (!isValidDate(date))
-        throw new IllegalArgumentException(" date format incorrect (mm/dd/yyyy): " + date);
-      time = time.toUpperCase();
-      if (twelveHrFormat) {
-        if (!time.endsWith("AM") && !time.endsWith("PM"))
-          throw new IllegalArgumentException(" time incorrect or missing meridiem AM or PM only!");
-        if (!isValid12HrMeridiem(time))
-          throw new IllegalArgumentException(" time format incorrect (12hr - hh:mm AM/PM): " + time);
-      } else {
-        if (!isValidTime(time))
-          throw new IllegalArgumentException(" time format incorrect (hh:mm): " + time);
-      }
-      if (date == null || date.length() == 0 || time == null || time.length() == 0) return;
-
-      String dateTime = date + " " + time;
-      Date d;
-      if (twelveHrFormat) d = formatter.parse(dateTime);
-      else d = formatter24.parse(dateTime);
-
-      if (type.equals("Departure")) {
-        this.departureDate = d;
-        this.depDate = dateFormat.format(d);
-      }
-      if (type.equals("Arrival")) {
-        this.arrivalDate = d;
-        this.arrDate = dateFormat.format(d);
-      }
-    } catch (NullPointerException e) {
-      error = type + e.getMessage();
-      System.out.println(error);
+        if (twelveHrFormat) d = formatter.parse(dateTime);
+        else d = formatter24.parse(dateTime);
     } catch (ParseException e) {
-      error = "Failed to parse " + type + " date " + date + " and time " + time;
-      System.out.println(error);
-    } catch (IllegalArgumentException e) {
-      error = type + e.getMessage();
-      System.out.println(error);
+      throw new IllegalArgumentException("Failed to parse " + type + " date " + date + " and time " + time);
+    }
+
+    if (type.equals("Departure")) {
+      this.departureDate = d;
+      this.depDate = dateFormat.format(d);
+    }
+    if (type.equals("Arrival")) {
+      this.arrivalDate = d;
+      this.arrDate = dateFormat.format(d);
     }
   }
 
@@ -349,10 +318,6 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
     return arrivalDate;
   }
 
-  public String getError(){
-    return error;
-  }
-
   /**
    * Compare alphabetically by departure airport code
    * then
@@ -367,27 +332,16 @@ public class Flight extends AbstractFlight implements Comparable<Flight>, Serial
     return 0;
   }
 
-  /**
-   * @return  boolean True if departure time comes before arrival time
-   * */
-  public boolean departureBeforeArrival(){
-    return this.getDeparture().getTime()<this.getArrival().getTime();
-  }
-
-  /**
+  /**d
    * Sets flight duration in minutes
    * */
   public void setFlightDuration(){
-    try{
-      if(!departureBeforeArrival()) throw new IllegalArgumentException();
-      flightDuration = (int)((getArrival().getTime()-getDeparture().getTime())/(1000*60));
-    }catch(IllegalArgumentException e){
-      error = "Arrival date & time " + formatter.format(this.getArrival()) +
-              " cannot be earlier than Departure date & time " + formatter.format(this.getDeparture());
-      System.out.println(error);
-    }catch(NullPointerException e){
-
-    }
+    if(!Helper.departureBeforeArrival(this.getDeparture().getTime(), this.getArrival().getTime()))
+      throw new IllegalArgumentException(
+            "Arrival date & time " + formatter.format(this.getArrival()) +
+            " cannot be earlier than Departure date & time " + formatter.format(this.getDeparture())
+      );
+    flightDuration = (int)((getArrival().getTime()-getDeparture().getTime())/(1000*60));
   }
 
   /**
