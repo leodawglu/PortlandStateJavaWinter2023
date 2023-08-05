@@ -34,7 +34,6 @@ public class XmlParser implements AirlineParser<Airline> {
     final String DTD = "";
     private String filepath ="";
     private File airlineXML;
-    private StringBuilder err = new StringBuilder();
     private Document xml;
 
     /**
@@ -66,7 +65,6 @@ public class XmlParser implements AirlineParser<Airline> {
             //xml = builder.parse(new File(filepath));
             xml = builder.parse(airlineXML);
         } catch (SAXException | IOException | ParserException e) {
-            err.append(e.getMessage());
             throw new ParserException("Airline XML file is null",e);
         }
 
@@ -75,14 +73,17 @@ public class XmlParser implements AirlineParser<Airline> {
         this.airline = new Airline(airlineName);
 
         NodeList innerFlights = root.getElementsByTagName("flight");
+        Flight fl;
         for(int i=0; i<innerFlights.getLength(); i++){
-            Flight fl = buildFlight(innerFlights.item(i));
-            if(fl.getError().length()!=0){
-                err.append("Flight information for the number ");
-                err.append(i+1);
-                err.append(" of XML file does not conform to the DTD, please review and correct the file.");
-                System.out.println(err);
-                return null;
+            try {
+                fl = buildFlight(innerFlights.item(i));
+            } catch (Exception e) {
+                // User must of modified the system file directly, so I think it's reasonable to
+                // ignore erroneous entries.
+                System.out.println("Flight information for the number " + i +
+                        " of XML file does not conform to the DTD");
+                System.out.println(e);
+                continue;
             }
             this.airline.addFlight(fl);
         }
@@ -121,8 +122,7 @@ public class XmlParser implements AirlineParser<Airline> {
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            err.append("DocumentBuilderFactory could not produce a builder.");
-            System.out.println(err);
+            System.out.println("DocumentBuilderFactory could not produce a builder.");
             throw new RuntimeException(e);
         }
         return builder;
@@ -192,12 +192,5 @@ public class XmlParser implements AirlineParser<Airline> {
         String[] arrive = datetime(flElement, "arrive");
 
         return new Flight(number,src,depart[0],depart[1],dest,arrive[0],arrive[1],true);
-    }
-
-    /**
-     * @return String of stored error message
-     * */
-    public String getErrorMsg(){
-        return err.toString();
     }
 }
