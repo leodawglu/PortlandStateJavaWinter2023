@@ -53,31 +53,9 @@ public class XmlDumper implements AirlineDumper<Airline> {
         }
         this.airways = airways;
         try {
-            AirlineXmlHelper helper = new AirlineXmlHelper();
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setValidating(false);
-            DocumentBuilder builder =
-                    factory.newDocumentBuilder();
-            builder.setErrorHandler(helper);
-            builder.setEntityResolver(helper);
+            Document doc = getAirlineDocument();
 
-            Document doc = builder.newDocument();
-            Element airline = doc.createElement("airline");
-            Element name = doc.createElement("name");
-            name.setTextContent(this.airways.getName());
-            airline.appendChild(name);
-
-            for(Flight fl:this.airways.getFlights()){
-                airline.appendChild(createFlightElements(doc,fl));
-            }
-            doc.appendChild(airline);
-
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer t = tf.newTransformer();
-            t.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd");
-            t.setOutputProperty(OutputKeys.INDENT, "yes");
-            t.setOutputProperty(OutputKeys.METHOD, "xml");
-            t.setOutputProperty(OutputKeys.ENCODING, "us-ascii");
+            Transformer t = getTransformer();
 
             DOMSource source = new DOMSource(doc);
 
@@ -104,6 +82,63 @@ public class XmlDumper implements AirlineDumper<Airline> {
     }
 
     /**
+     * Generates an XML Document representing an airline and its flights.
+     *
+     * @return A Document containing the XML representation of the airline.
+     * @throws ParserConfigurationException If an error occurs during the configuration of the DocumentBuilder.
+     */
+    private Document getAirlineDocument() throws ParserConfigurationException {
+        AirlineXmlHelper helper = new AirlineXmlHelper();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        builder.setErrorHandler(helper);
+        builder.setEntityResolver(helper);
+        Document doc = builder.newDocument();
+
+        // Create the root "airline" element.
+        Element airline = doc.createElement("airline");
+
+        // Create and append the "name" element.
+        Element name = doc.createElement("name");
+        name.setTextContent(this.airways.getName());
+        airline.appendChild(name);
+
+        // Append flight elements for each flight in the airline.
+        for (Flight fl : this.airways.getFlights()) {
+            airline.appendChild(createFlightElements(doc, fl));
+        }
+
+        // Append the root "airline" element to the Document.
+        doc.appendChild(airline);
+
+        return doc;
+    }
+
+
+    /**
+     * Retrieves a configured Transformer instance for XML transformation.
+     *
+     * @return A configured Transformer instance.
+     * @throws TransformerConfigurationException If an error occurs during the configuration of the Transformer.
+     */
+    private static Transformer getTransformer() throws TransformerConfigurationException {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
+
+        // Set the DOCTYPE system property for the XML output.
+        t.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.cs.pdx.edu/~whitlock/dtds/airline.dtd");
+
+        // Configure output properties for formatting and encoding.
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.setOutputProperty(OutputKeys.METHOD, "xml");
+        t.setOutputProperty(OutputKeys.ENCODING, "us-ascii");
+
+        return t;
+    }
+
+
+    /**
      * @param doc Accepts document object created by Document Builder
      * @param fl Accepts a flight object
      * createFlight method creates the XML elements according to details within a flight object
@@ -115,21 +150,34 @@ public class XmlDumper implements AirlineDumper<Airline> {
         number.setTextContent(Integer.toString(fl.getNumber()));
         flight.appendChild(number);
         /*Departure*/
-        Element src = doc.createElement("src");
-        src.setTextContent(fl.getSource());
-        flight.appendChild(src);
-        Element depart = createDatetimeElements("depart",doc, fl);
-        flight.appendChild(depart);
-
+        setFlightElementDetails(doc, fl, flight, "src", "depart");
         /*Arrival*/
-        Element dest = doc.createElement("dest");
-        dest.setTextContent(fl.getDestination());
-        flight.appendChild(dest);
-        Element arrive = createDatetimeElements("arrive",doc, fl);
-        flight.appendChild(arrive);
+        setFlightElementDetails(doc, fl, flight, "dest", "arrive");
 
         return flight;
     }
+
+    /**
+     * Sets the details for a specific airport and flight datetime information in the flight element.
+     *
+     * @param doc The XML document.
+     * @param fl The Flight object containing flight information.
+     * @param flight The parent flight element to which the details will be added.
+     * @param srcOrDest The type of airport details to set ("src" for source, "dest" for destination).
+     * @param departOrArrive The type of flight datetime information to set ("depart" or "arrive").
+     */
+    private void setFlightElementDetails(Document doc, Flight fl, Element flight, String srcOrDest, String departOrArrive) {
+        Element airportDetails = doc.createElement(srcOrDest);
+        if (srcOrDest.equals("dest")) {
+            airportDetails.setTextContent(fl.getDestination());
+        } else {
+            airportDetails.setTextContent(fl.getSource());
+        }
+        flight.appendChild(airportDetails);
+        Element flightDateTimeInformation = createDatetimeElements(departOrArrive, doc, fl);
+        flight.appendChild(flightDateTimeInformation);
+    }
+
 
     /**
      * @param fl Accepts flight object
