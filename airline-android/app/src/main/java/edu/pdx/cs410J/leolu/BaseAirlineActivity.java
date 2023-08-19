@@ -15,6 +15,12 @@ public class BaseAirlineActivity extends AppCompatActivity {
   protected Map<String,Airline> existingAirlineMap;
   protected Map<String,Airline> newAirlineMap;
 
+  /**
+   * Opens airline files by creating a directory for airlines' data within the app's internal storage.
+   * If the directory already exists and contains files, it indicates that the airlines data is not empty.
+   *
+   * @return {@code true} if the airlines directory is empty, {@code false} otherwise.
+   */
   private boolean openAirlineFiles(){
     // Get a reference to the app's internal storage directory
     boolean isEmpty = false;
@@ -32,6 +38,9 @@ public class BaseAirlineActivity extends AppCompatActivity {
     return isEmpty;
   }
 
+  /**
+   * Populates the existing airlines with the airlines' data within the app's internal storage
+   */
   protected void populateAirlineList(){
     if(!openAirlineFiles()){
       return; //some message to SHOW EMPTY on VIEW
@@ -53,6 +62,9 @@ public class BaseAirlineActivity extends AppCompatActivity {
     }
   }
 
+  /**
+   * Saves the airline data to the app's internal storage for persistent storage
+   */
   protected void saveAirlineData() {
     XmlDumper dumper;
 
