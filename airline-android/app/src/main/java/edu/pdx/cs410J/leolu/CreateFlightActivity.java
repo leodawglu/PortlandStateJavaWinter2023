@@ -11,32 +11,22 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.File;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
 import edu.pdx.cs410J.AirportNames;
-import edu.pdx.cs410J.ParserException;
 
-public class CreateFlightActivity extends AppCompatActivity {
+public class CreateFlightActivity extends BaseAirlineActivity {
     //TextView textView;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
     EditText editAirlineName=null, editFlightNumber=null, editDepCode=null,
             editDepDate=null, editDepTime=null, editArrCode=null,
             editArrDate=null, editArrTime=null;
-    private Map<String,Airline> existingAirlineMap;
-    private Map<String,Airline> newAirlineMap;
 
     private final Calendar depCal = Calendar.getInstance();
     private final Calendar arrCal = Calendar.getInstance();
-    private File appDir;
-    private File airlinesDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -123,61 +113,10 @@ public class CreateFlightActivity extends AppCompatActivity {
         saveAirlineData();
     }
 
-    private void saveAirlineData() {
-        XmlDumper dumper;
-
-        for(Map.Entry<String, Airline> airline : newAirlineMap.entrySet()){
-            String airlineName = airline.getKey().trim().replaceAll("[^a-zA-Z]+", "_");
-            File airlineFile = new File(airlinesDir, airlineName +".xml");
-            dumper = new XmlDumper(airlineFile);
-            dumper.dump(airline.getValue());
-            if(existingAirlineMap!=null)existingAirlineMap.put(airline.getKey(),airline.getValue());
-        }
-        newAirlineMap = new HashMap<>();
-    }
-
     @Override
     protected void onStop() {
         super.onStop();
         saveAirlineData();
-    }
-
-    public boolean openAirlineFiles(){
-        // Get a reference to the app's internal storage directory
-        boolean isEmpty = false;
-        this.appDir = getFilesDir();
-
-// Create a directory called "airlines" if it doesn't already exist
-        this.airlinesDir = new File(appDir, "airlines");
-        if (!airlinesDir.exists()) {
-            airlinesDir.mkdir();
-        }
-        if (airlinesDir.listFiles().length != 0) {
-            // The airlines directory is not empty
-            isEmpty = true;
-        }
-        return isEmpty;
-    }
-
-    private void populateAirlineList(){
-        if(!openAirlineFiles()){
-            return; //some message to SHOW EMPTY on VIEW
-        }
-        File[] airlineFiles = airlinesDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".xml");
-            }
-        });
-        existingAirlineMap = new HashMap<>();
-        for(int i=0; i < airlineFiles.length; i++){
-            try {
-                Airline curr = new XmlParser(airlineFiles[i]).parse();
-                existingAirlineMap.put(curr.getName().toLowerCase(),curr);
-                System.out.println(curr.getName() +" : " +curr.toString());
-            } catch (ParserException e) {
-                System.err.println("XML file is null: " + airlineFiles[i].getName());
-            }
-        }
     }
 
     public boolean allInputsNotEmpty(View view){
