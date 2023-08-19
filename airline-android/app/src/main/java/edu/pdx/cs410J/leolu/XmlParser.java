@@ -54,7 +54,6 @@ public class XmlParser implements AirlineParser<Airline> {
      * */
     public Airline parse() throws ParserException{
         try {
-            //if(filepath.isEmpty()) throw new ParserException("File path is empty");
             if(airlineXML==null) throw new ParserException("Airline XML is null");
             AirlineXmlHelper helper = new AirlineXmlHelper();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -62,24 +61,36 @@ public class XmlParser implements AirlineParser<Airline> {
             DocumentBuilder builder = buildDoc(factory);
             builder.setErrorHandler(helper);
             builder.setEntityResolver(helper);
-            //xml = builder.parse(new File(filepath));
             xml = builder.parse(airlineXML);
         } catch (SAXException | IOException | ParserException e) {
             throw new ParserException("Airline XML file is null",e);
         }
 
+        getAirlineAndFlightsInfoFromXML();
+
+        return airline;
+    }
+
+    /**
+     * Extracts airline and flight information from the XML document.
+     * Populates the Airline object with extracted data.
+     */
+    private void getAirlineAndFlightsInfoFromXML() {
         Element root = xml.getDocumentElement();
+
+        // Extract and set the airline name.
         String airlineName = root.getElementsByTagName("name").item(0).getTextContent();
         this.airline = new Airline(airlineName);
 
+        // Extract flight elements and build Flight objects.
         NodeList innerFlights = root.getElementsByTagName("flight");
         Flight fl;
-        for(int i=0; i<innerFlights.getLength(); i++){
+        for (int i = 0; i < innerFlights.getLength(); i++) {
             try {
                 fl = buildFlight(innerFlights.item(i));
             } catch (Exception e) {
-                // User must of modified the system file directly, so I think it's reasonable to
-                // ignore erroneous entries.
+                // User must have modified the system file directly, so it's reasonable to
+                // ignore erroneous entries and continue processing other flights.
                 System.out.println("Flight information for the number " + i +
                         " of XML file does not conform to the DTD");
                 System.out.println(e);
@@ -87,30 +98,8 @@ public class XmlParser implements AirlineParser<Airline> {
             }
             this.airline.addFlight(fl);
         }
-
-        return airline;
     }
-/*
-    public List<Airline> parseXMLAirlineList(){
-        List<Airline> listOfAirlines = new ArrayList<>();
 
-        try {
-            if(filepath.isEmpty()) throw new ParserException("File path is empty");
-            AirlineXmlHelper helper = new AirlineXmlHelper();
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setValidating(true);
-            DocumentBuilder builder = buildDoc(factory);
-            builder.setErrorHandler(helper);
-            builder.setEntityResolver(helper);
-            xml = builder.parse(new File(filepath));
-        } catch (SAXException | IOException | ParserException e) {
-            err.append(e.getMessage());
-            //throw new ParserException("Please enter a valid XML file path.",e);
-        }
-
-        return null;
-    }
-*/
     /**
      * buildDoc method
      * @param factory DocumentBuilderFactor
