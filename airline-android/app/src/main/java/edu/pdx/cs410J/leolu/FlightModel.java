@@ -23,26 +23,44 @@ public class FlightModel {
     String arrivalTime;
     String duration;
 
+    /**
+     * Constructs a FlightModel instance with provided flight information.
+     *
+     * @param flightNumber The flight number.
+     * @param source The source airport code.
+     * @param destination The destination airport code.
+     * @param departureDate The departure date.
+     * @param departureTime The departure time.
+     * @param arrivalDate The arrival date.
+     * @param arrivalTime The arrival time.
+     * @param duration The flight duration.
+     */
     public FlightModel(String flightNumber, String source, String destination, String departureDate,
                        String departureTime, String arrivalDate, String arrivalTime, String duration) {
         this.flightNumber = flightNumber;
         this.source = source;
-        if(source!=null && source.length()!=0){
-            this.sourceString = AirportNames.getNamesMap().get(source.toUpperCase()).replace(", ", "\n");
-        }else{
-            this.sourceString="";
-        }
+        this.sourceString = getFormattedAirportString(source);
         this.destination = destination;
-        if(destination!=null && destination.length()!=0){
-            this.destinationString = AirportNames.getNamesMap().get(destination.toUpperCase()).replace(", ", "\n");
-        }else{
-            this.destinationString="";
-        }
+        this.destinationString = getFormattedAirportString(destination);
         this.departureDate = departureDate;
         this.departureTime = departureTime;
         this.arrivalDate = arrivalDate;
         this.arrivalTime = arrivalTime;
         this.duration = duration;
+    }
+
+    /**
+     * Formats an airport code into a display string with line breaks.
+     *
+     * @param airportCode The airport code to format.
+     * @return The formatted airport string.
+     */
+    private String getFormattedAirportString(String airportCode) {
+        if (airportCode != null && !airportCode.isEmpty()) {
+            return AirportNames.getNamesMap().get(airportCode.toUpperCase()).replace(", ", "\n");
+        } else {
+            return "";
+        }
     }
 
     public String getFlightNumber() {

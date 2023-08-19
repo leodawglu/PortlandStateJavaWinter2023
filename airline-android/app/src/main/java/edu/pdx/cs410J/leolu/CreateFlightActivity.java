@@ -38,6 +38,12 @@ public class CreateFlightActivity extends AppCompatActivity {
     private File appDir;
     private File airlinesDir;
 
+    /**
+     * Called when the activity is starting. Initializes UI components, sets up listeners,
+     * and prepares the necessary data for creating a flight.
+     *
+     * @param savedInstanceState The saved instance state of the activity.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -59,14 +65,27 @@ public class CreateFlightActivity extends AppCompatActivity {
         populateAirlineList();
 
     }
+
+    /**
+     * Opens a DatePickerDialog to allow the user to select a departure date and updates the UI accordingly.
+     */
     public void departureSelectDate(){
         selectDate(editDepDate, depCal);
     }
 
+    /**
+     * Opens a DatePickerDialog to allow the user to select an arrival date and updates the UI accordingly.
+     */
     public void arrivalSelectDate(){
         selectDate(editArrDate, arrCal);
     }
 
+    /**
+     * Opens a DatePickerDialog for selecting a date and updates the UI with the selected date.
+     *
+     * @param editText The EditText field that will display the selected date.
+     * @param depOrArrCalendar The Calendar object associated with the selected date.
+     */
     private void selectDate(EditText editText, Calendar depOrArrCalendar){
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -74,7 +93,6 @@ public class CreateFlightActivity extends AppCompatActivity {
                 depOrArrCalendar.set(Calendar.YEAR,year);
                 depOrArrCalendar.set(Calendar.MONTH,month);
                 depOrArrCalendar.set(Calendar.DAY_OF_MONTH,day);
-                //editText.setText(updateDate(editText));
                 updateDateInputLabel(editText,depOrArrCalendar);
             }
         };
@@ -89,10 +107,22 @@ public class CreateFlightActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Updates the label of an EditText field with the selected date.
+     *
+     * @param editText The EditText field to update with the selected date.
+     * @param calendar The Calendar object containing the selected date.
+     */
     private void updateDateInputLabel(EditText editText, Calendar calendar){
         editText.setText(dateFormat.format(calendar.getTime()));
     }
 
+    /**
+     * Opens a TimePickerDialog to allow the user to select a time and updates the UI accordingly.
+     *
+     * @param editTime The EditText field that will display the selected time.
+     * @param calendar The Calendar object associated with the selected time.
+     */
     private void selectTime(EditText editTime, Calendar calendar){
         int hr = calendar.get(Calendar.HOUR_OF_DAY);
         int min = calendar.get(Calendar.MINUTE);
@@ -110,6 +140,13 @@ public class CreateFlightActivity extends AppCompatActivity {
         tpd.show();
     }
 
+    /**
+     * Checks whether an airline with the given name exists in either the existing airline map
+     * or the new airline map.
+     *
+     * @param newAirlineName The name of the airline to check.
+     * @return True if an airline with the given name exists, false otherwise.
+     */
     private boolean airlineExists(String newAirlineName){
         if((existingAirlineMap!=null && existingAirlineMap.containsKey(newAirlineName.toLowerCase())) ||
                 newAirlineMap.containsKey(newAirlineName.toLowerCase()))
@@ -117,12 +154,18 @@ public class CreateFlightActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Called when the activity is being paused. Saves the airline data to XML files.
+     */
     @Override
     protected void onPause() {
         super.onPause();
         saveAirlineData();
     }
 
+    /**
+     * Saves the airline data to XML files.
+     */
     private void saveAirlineData() {
         XmlDumper dumper;
 
@@ -136,6 +179,9 @@ public class CreateFlightActivity extends AppCompatActivity {
         newAirlineMap = new HashMap<>();
     }
 
+    /**
+     * Called when the activity is being stopped. Saves the airline data to XML files.
+     */
     @Override
     protected void onStop() {
         super.onStop();
@@ -180,78 +226,124 @@ public class CreateFlightActivity extends AppCompatActivity {
         }
     }
 
-    public boolean allInputsNotEmpty(View view){
-        boolean notEmpty = true;
+    /**
+     * Checks if all input fields are not empty and valid.
+     *
+     * @param view The View associated with the input fields.
+     * @return True if all input fields are not empty and valid, false otherwise.
+     */
+    public boolean allInputsNotEmpty(View view) {
+        boolean allInputsValid = true;
 
-        if (TextUtils.isEmpty(editAirlineName.getText().toString())) {
-            editAirlineName.setError("Please enter an Airline Name");
-            notEmpty = false;
-        }else {
-            editAirlineName.setError(null);
-        }
-        if (TextUtils.isEmpty(editFlightNumber.getText().toString())) {
-            editFlightNumber.setError("Please enter a Flight Number");
-            notEmpty = false;
-        }else {
-            editFlightNumber.setError(null);
-        }
-        if (TextUtils.isEmpty(editDepCode.getText().toString())) {
-            editDepCode.setError("Please enter an IATA Airport Code");
-            notEmpty = false;
-        }else {
-            editDepCode.setError(null);
-        }
-        if (TextUtils.isEmpty(editDepDate.getText().toString())) {
-            editDepDate.setError("Please select a date");
-            notEmpty = false;
-        }else {
-            editDepDate.setError(null);
-        }
-        if (TextUtils.isEmpty(editDepTime.getText().toString())) {
-            editDepTime.setError("Please select a time");
-            notEmpty = false;
-        }else {
-            editDepTime.setError(null);
-        }
-        if (TextUtils.isEmpty(editArrCode.getText().toString())) {
-            editArrCode.setError("Please enter an IATA Airport Code");
-            notEmpty = false;
-        }else {
-            editArrCode.setError(null);
-        }
-        if (TextUtils.isEmpty(editArrDate.getText().toString())) {
-            editArrDate.setError("Please select a date");
-            notEmpty = false;
-        } else {
-            editArrDate.setError(null);
-        }
-        if (TextUtils.isEmpty(editArrTime.getText().toString())) {
-            editArrTime.setError("Please select a time");
-            notEmpty = false;
-        } else {
-            editArrTime.setError(null);
-        }
-        return notEmpty;
+        allInputsValid &= validateInputNotEmpty(editAirlineName, "Please enter an Airline Name");
+        allInputsValid &= validateInputNotEmpty(editFlightNumber, "Please enter a Flight Number");
+        allInputsValid &= validateInputNotEmpty(editDepCode, "Please enter an IATA Airport Code");
+        allInputsValid &= validateInputNotEmpty(editDepDate, "Please select a date");
+        allInputsValid &= validateInputNotEmpty(editDepTime, "Please select a time");
+        allInputsValid &= validateInputNotEmpty(editArrCode, "Please enter an IATA Airport Code");
+        allInputsValid &= validateInputNotEmpty(editArrDate, "Please select a date");
+        allInputsValid &= validateInputNotEmpty(editArrTime, "Please select a time");
+
+        return allInputsValid;
     }
 
+    /**
+     * Validates an input field to ensure it is not empty and sets an error message if needed.
+     *
+     * @param editText The EditText field to validate.
+     * @param errorMessage The error message to set if the input is empty.
+     * @return True if the input field is not empty, false otherwise.
+     */
+    private boolean validateInputNotEmpty(EditText editText, String errorMessage) {
+        String inputValue = editText.getText().toString();
+        if (TextUtils.isEmpty(inputValue)) {
+            editText.setError(errorMessage);
+            return false;
+        } else {
+            editText.setError(null);
+            return true;
+        }
+    }
+
+    /**
+     * Handles the creation of a new flight based on user inputs, performs validations, and updates the UI accordingly.
+     *
+     * @param view The View associated with the method call.
+     */
     public void createFlight(View view){
         if(!allInputsNotEmpty(view))return;
-        if(!Helper.isRealAirportCode(editDepCode.getText().toString().toUpperCase())) {
-            editDepCode.setError("Please enter a Valid IATA Code");
-            return;
-        }
-        if(!Helper.isRealAirportCode(editArrCode.getText().toString().toUpperCase())) {
-            editArrCode.setError("Please enter a Valid IATA Code");
-            return;
-        }
+        if (!isValidAirportCode(editDepCode)) return;
+        if (!isValidAirportCode(editArrCode)) return;
+        if (!isDepartureTimeIsBeforeArrivalTime()) return;
+
+        Flight fl = getFlight();
+        if (fl == null) return;
+
+        String airlineName = editAirlineName.getText().toString().trim();
+        Airline airline = getAirline(airlineName);
+
+        airline.addFlight(fl);
+        newAirlineMap.put(airlineName.toLowerCase(),airline);
+        Toast.makeText(this,"New Flight Created",Toast.LENGTH_SHORT).show();
+        goToFlightCreatedSuccess(airlineName, fl);
+    }
+
+    /**
+     * Checks if departure time is before arrival time and displays error messages if not.
+     *
+     * @return True if departure time is before arrival time, false otherwise.
+     */
+    private boolean isDepartureTimeIsBeforeArrivalTime() {
         if(!Helper.departureBeforeArrival(depCal.getTimeInMillis(), arrCal.getTimeInMillis())){
             editDepDate.setError("Departure Date & Time must be before Arrival");
             editDepTime.setError("Departure Date & Time must be before Arrival");
             editArrDate.setError("Arrival Date & Time must be after Departure");
             editArrTime.setError("Arrival Date & Time must be after Departure");
             Toast.makeText(this,"Departure Date & Time must be before Arrival Date & Time",Toast.LENGTH_SHORT).show();
-            return;
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * Validates an airport code input field and displays an error message if invalid.
+     *
+     * @param editText The EditText field containing the airport code.
+     * @return True if the airport code is valid, false otherwise.
+     */
+    private boolean isValidAirportCode(EditText editText) {
+        String airportCode = editText.getText().toString().toUpperCase();
+        if (!Helper.isRealAirportCode(airportCode)) {
+            editText.setError("Please enter a Valid IATA Code");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Retrieves an Airline instance based on the provided airline name.
+     *
+     * @param airlineName The name of the airline.
+     * @return An Airline instance associated with the provided name.
+     */
+    private Airline getAirline(String airlineName) {
+        Airline airline;
+        if(newAirlineMap.containsKey(airlineName.toLowerCase())){
+            airline = newAirlineMap.get(airlineName.toLowerCase());
+        }else if(existingAirlineMap.containsKey(airlineName.toLowerCase())){
+            airline = existingAirlineMap.get(airlineName.toLowerCase());
+        }else{
+            airline = new Airline(airlineName);
+        }
+        return airline;
+    }
+
+    /**
+     * Constructs a Flight instance based on user input and handles potential exceptions.
+     *
+     * @return The constructed Flight instance, or null if an exception occurs.
+     */
+    private Flight getFlight() {
         Flight fl;
         try {
             fl = new Flight(
@@ -266,26 +358,17 @@ public class CreateFlightActivity extends AppCompatActivity {
             );
         } catch (Exception e) {
             Toast.makeText(this,e.toString(),Toast.LENGTH_SHORT).show();
-            return;
+            return null;
         }
-
-        String airlineName = editAirlineName.getText().toString().trim();
-        Airline airline;
-        if(newAirlineMap.containsKey(airlineName.toLowerCase())){
-            airline = newAirlineMap.get(airlineName.toLowerCase());
-        }
-        else if(existingAirlineMap.containsKey(airlineName.toLowerCase())){
-            airline = existingAirlineMap.get(airlineName.toLowerCase());
-        }else{
-            airline = new Airline(airlineName);
-        }
-
-        airline.addFlight(fl);
-        newAirlineMap.put(airlineName.toLowerCase(),airline);
-        Toast.makeText(this,"New Flight Created",Toast.LENGTH_SHORT).show();
-        goToFlightCreatedSuccess(airlineName, fl);
+        return fl;
     }
 
+    /**
+     * Navigates to the FlightCreatedActivity to display information about the newly created flight.
+     *
+     * @param airlineName The name of the airline associated with the new flight.
+     * @param newFlight The newly created Flight instance.
+     */
     private void goToFlightCreatedSuccess(String airlineName, Flight newFlight){
         int mins = newFlight.getFlightDuration();
         int hrs = mins/60;
