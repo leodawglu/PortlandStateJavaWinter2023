@@ -57,16 +57,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        saveAirlineData();
-    }
-
-    private void saveAirlineData() {
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        saveAirlineData();
     }
     
     public boolean openAirlineFiles(){
@@ -97,11 +92,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         existingAirlines = new ArrayList<>();
-        for(int i=0; i < airlineFiles.length; i++){
+        for (File airlineFile : airlineFiles) {
             try {
-                existingAirlines.add(new XmlParser(airlineFiles[i]).parse());
+                existingAirlines.add(new XmlParser(airlineFile).parse());
             } catch (ParserException e) {
-                System.err.println("XML file is null: " + airlineFiles[i].getName());
+                System.err.println("XML file is null: " + airlineFile.getName());
             }
         }
     }

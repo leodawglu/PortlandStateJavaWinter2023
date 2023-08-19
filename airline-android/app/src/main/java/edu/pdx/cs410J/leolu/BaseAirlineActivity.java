@@ -42,13 +42,13 @@ public class BaseAirlineActivity extends AppCompatActivity {
       }
     });
     existingAirlineMap = new HashMap<>();
-    for(int i=0; i < airlineFiles.length; i++){
+    for (File airlineFile : airlineFiles) {
       try {
-        Airline curr = new XmlParser(airlineFiles[i]).parse();
-        existingAirlineMap.put(curr.getName().toLowerCase(),curr);
-        System.out.println(curr.getName() +" : " +curr.toString());
+        Airline curr = new XmlParser(airlineFile).parse();
+        existingAirlineMap.put(curr.getName().toLowerCase(), curr);
+        System.out.println(curr.getName() + " : " + curr.toString());
       } catch (ParserException e) {
-        System.err.println("XML file is null: " + airlineFiles[i].getName());
+        System.err.println("XML file is null: " + airlineFile.getName());
       }
     }
   }
