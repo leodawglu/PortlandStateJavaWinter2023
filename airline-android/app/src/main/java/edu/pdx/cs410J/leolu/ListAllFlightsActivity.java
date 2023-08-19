@@ -5,25 +5,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import edu.pdx.cs410J.ParserException;
-
-public class ListAllFlightsActivity extends AppCompatActivity {
-
-    private File appDir;
-    private File airlinesDir;
-    private Map<String,Airline> existingAirlineMap;
+public class ListAllFlightsActivity extends BaseAirlineActivity {
     private List<Flight> flights = new ArrayList<>();
 
     ArrayList<FlightModel> flightModels = new ArrayList<>();
@@ -129,43 +118,5 @@ public class ListAllFlightsActivity extends AppCompatActivity {
             ));
         }
 
-    }
-
-    public boolean openAirlineFiles(){
-        // Get a reference to the app's internal storage directory
-        boolean isEmpty = false;
-        this.appDir = getFilesDir();
-
-// Create a directory called "airlines" if it doesn't already exist
-        this.airlinesDir = new File(appDir, "airlines");
-        if (!airlinesDir.exists()) {
-            airlinesDir.mkdir();
-        }
-        if (airlinesDir.listFiles().length != 0) {
-            // The airlines directory is not empty
-            isEmpty = true;
-        }
-        return isEmpty;
-    }
-
-    private void populateAirlineList(){
-        if(!openAirlineFiles()){
-            return; //some message to SHOW EMPTY on VIEW
-        }
-        File[] airlineFiles = airlinesDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".xml");
-            }
-        });
-        existingAirlineMap = new HashMap<>();
-        for(int i=0; i < airlineFiles.length; i++){
-            try {
-                Airline curr = new XmlParser(airlineFiles[i]).parse();
-                existingAirlineMap.put(curr.getName().toLowerCase(),curr);
-                System.out.println(curr.getName() +" : " +curr.toString());
-            } catch (ParserException e) {
-                System.err.println("XML file is null: " + airlineFiles[i].getName());
-            }
-        }
     }
 }
